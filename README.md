@@ -58,6 +58,13 @@ You can use the BottomSheet component in any SvelteKit project.
 | `snapPoints` | `number[]`            | `[]`      | An array of percentage values where the bottom sheet should snap to when dragged.    |
 | `settings`   | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                                        |
 
+### Events
+
+| Event       | Description                         |
+| ----------- | ----------------------------------- |
+| `onopen()`  | Fires when the Bottom Sheet opens.  |
+| `onclose()` | Fires when the Bottom Sheet closes. |
+
 ### Methods
 
 | Method         | Description                                         |
