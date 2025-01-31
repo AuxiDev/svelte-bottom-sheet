@@ -34,16 +34,16 @@ You can use the BottomSheet component in any SvelteKit project.
 3. **Import the component**
 
    ```javascript
-   <script lang="ts">
-        import BottomSheet from '$lib/BottomSheet.svelte';
-        let isOpen = false;
-   </script>
+    <script lang="ts">
+   	    import BottomSheet from 'svelte-bottom-sheet';
+        let isOpen = $state(false);
+    </script>
 
-    <button on:click={() => (isOpen = true)}>Open Bottom Sheet</button>
+    <button onclick={() => (isOpen = true)}>Open Bottom Sheet</button>
 
     <BottomSheet bind:isOpen={isOpen} maxHeight="70%">
-    <h3>Content inside the bottom sheet</h3>
-    <p>Here you can put any content you need.</p>
+        <h3>Content inside the bottom sheet</h3>
+        <p>Here you can put any content you need.</p>
     </BottomSheet>
    ```
 
@@ -76,24 +76,6 @@ You can use the BottomSheet component in any SvelteKit project.
 | Setting                   | Description                                                                                                |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `disableScrollingOutside` | Prevents the body (everything outside from the Bottom Sheet) from scrolling when the bottom sheet is open. |
-
-## Usage Example
-
-Here's a simple example of how to use the BottomSheet component in your SvelteKit project:
-
-```javascript
-<script lang="ts">
-    import BottomSheet from 'svelte-bottom-sheet';
-    let isOpen = $state(false);
-</script>
-
-<button onclick={() => (isOpen = true)}>Open Bottom Sheet</button>
-
-<BottomSheet bind:isOpen={isOpen} maxHeight="70%">
-    <h3>Content inside the bottom sheet</h3>
-    <p>Here you can put any content you need.</p>
-</BottomSheet>
-```
 
 ## Contributing
 
