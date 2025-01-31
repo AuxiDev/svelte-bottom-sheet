@@ -312,10 +312,6 @@
 		background-color: #ff1c8e;
 		color: white;
 	}
-	.events button {
-		background-color: #ff1c8e;
-		color: white;
-	}
 
 	button:hover {
 		transform: translateY(-2px);
