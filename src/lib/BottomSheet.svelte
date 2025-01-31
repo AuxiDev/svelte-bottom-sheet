@@ -197,7 +197,6 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 			onmousedown={mouseDownEvent}
 			onmousemove={mouseMoveEvent}
 			onmouseup={moveEnd}
-			onmouseleave={moveEnd}
 			transition:slide={{ duration: 500, easing: cubicOut }}
 		>
 			<div class="bottom-sheet-handle"></div>
