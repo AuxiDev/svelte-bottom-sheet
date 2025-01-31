@@ -18,7 +18,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	import { onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
-	import type { BottomSheetSettings } from './types.js';
+	import type { BottomSheetSettings } from '$lib/types.js';
 
 	let {
 		isOpen = $bindable(false),
@@ -186,7 +186,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
 		<div
 			bind:this={sheetElement}
-			class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
+			class="bottom-sheet"
 			style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
 				? ''
 				: 'transform 0.3s ease-in-out'};"
@@ -197,7 +197,6 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 			onmousedown={mouseDownEvent}
 			onmousemove={mouseMoveEvent}
 			onmouseup={moveEnd}
-			onmouseleave={moveEnd}
 			transition:slide={{ duration: 500, easing: cubicOut }}
 		>
 			<div class="bottom-sheet-handle"></div>
@@ -213,11 +212,6 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 {/if}
 
 <style>
-	.prevent-select {
-		-webkit-user-select: none;
-		-ms-user-select: none;
-		user-select: none;
-	}
 	.bottom-sheet-overlay {
 		position: fixed;
 		top: 0;

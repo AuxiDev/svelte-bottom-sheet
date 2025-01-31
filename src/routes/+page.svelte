@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BottomSheet from '$lib/BottomSheet.svelte';
+	import BottomSheet from '$lib/BottomSheet/index.js';
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 
@@ -45,7 +45,7 @@
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet bind:isOpen={isBasicSheetOpen} maxHeight="70%">
-			<div class="sheet-content">
+			<BottomSheet.Content>
 				<h3>Basic Bottom Sheet</h3>
 				<p>
 					This sheet allows for basic interactions. It slides up smoothly, and you can either drag
@@ -56,7 +56,7 @@
 					<li>Smooth transitions that feel natural and seamless</li>
 					<li>Perfect for displaying quick information or performing simple actions</li>
 				</ul>
-			</div>
+			</BottomSheet.Content>
 		</BottomSheet>
 	</section>
 
@@ -162,9 +162,9 @@
 	}
 
 	.wave {
-		position: absolute;
-		width: 120%;
+		position: fixed;
 		height: 30vh;
+		width: 100%;
 		background: radial-gradient(circle at top left, rgba(255, 105, 180, 0.2) 0%, transparent 60%);
 		filter: blur(80px);
 		z-index: -1;
