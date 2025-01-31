@@ -186,7 +186,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
 		<div
 			bind:this={sheetElement}
-			class="bottom-sheet"
+			class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
 			style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
 				? ''
 				: 'transform 0.3s ease-in-out'};"
@@ -213,6 +213,11 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 {/if}
 
 <style>
+	.prevent-select {
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
 	.bottom-sheet-overlay {
 		position: fixed;
 		top: 0;
