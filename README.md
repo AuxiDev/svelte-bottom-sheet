@@ -45,9 +45,16 @@ You can use the BottomSheet component in any SvelteKit project.
 
     <button onclick={() => (isOpen = true)}>Open Bottom Sheet</button>
 
-    <BottomSheet bind:isOpen={isOpen} maxHeight="70%">
-        <h3>Content inside the bottom sheet</h3>
-        <p>Here you can put any content you need.</p>
+    <BottomSheet bind:isOpen={isOpen} settings={{maxHeight: '70%'}}>
+      <BottomSheet.Overlay>
+         <BottomSheet.Sheet>
+            <BottomSheet.Content>
+               <h3>Content inside the bottom sheet</h3>
+               <p>Here you can put any content you need.</p>
+            </BottomSheet.Content>
+         </BottomSheet.Sheet>
+      </BottomSheet.Overlay>
+
     </BottomSheet>
    ```
 
@@ -55,12 +62,20 @@ You can use the BottomSheet component in any SvelteKit project.
 
 ### Properties
 
-| Property     | Type                  | Default   | Description                                                                          |
-| ------------ | --------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `isOpen`     | `boolean`             | `false`   | Determines whether the bottom sheet is visible.                                      |
-| `maxHeight`  | `string`              | `'70%'`   | Defines the maximum height of the bottom sheet as a percentage of the screen height. |
-| `snapPoints` | `number[]`            | `[]`      | An array of percentage values where the bottom sheet should snap to when dragged.    |
-| `settings`   | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                                        |
+| Property   | Type                  | Default   | Description                                                            |
+| ---------- | --------------------- | --------- | ---------------------------------------------------------------------- |
+| `isOpen`   | `boolean`             | `false`   | Determines whether the bottom sheet is visible. BINDABLE (bind:isOpen) |
+| `settings` | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                          |
+
+### BottomSheetSettings Type
+
+#### Properties
+
+| Name                      | Type       | Description                                                                                                                                                                   | Default Value |
+| ------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `disableScrollingOutside` | `boolean`  | Determines whether scrolling outside the bottom sheet is disabled. When set to `true`, any interaction outside the bottom sheet will be blocked.                              | `true`        |
+| `maxHeight`               | `string`   | Sets the maximum height of the bottom sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
+| `snapPoints`              | `number[]` | An array of snap points for the bottom sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
 
 ### Events
 
@@ -69,24 +84,77 @@ You can use the BottomSheet component in any SvelteKit project.
 | `onopen()`  | Fires when the Bottom Sheet opens.  |
 | `onclose()` | Fires when the Bottom Sheet closes. |
 
-### Methods
+## BottomSheet Component Usage
 
-| Method         | Description                                         |
-| -------------- | --------------------------------------------------- |
-| `opensheet()`  | Opens the bottom sheet (sets `isOpen` to `true`).   |
-| `closesheet()` | Closes the bottom sheet (sets `isOpen` to `false`). |
+There is a lot of stuff you can use inside `BottomSheet` which will be explained after the example usage.
 
-### Types
+### Example Usage
 
-| Name                  | Format                                 | Default                             |
-| --------------------- | -------------------------------------- | ----------------------------------- |
-| `BottomSheetSettings` | `{ disableScrollingOutside: boolean }` | `{ disableScrollingOutside: true }` |
+```javascript
 
-### Settings
+<script lang="ts">
+   let isSheetOpen = $state(false);
+<script>
 
-| Setting                   | Description                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `disableScrollingOutside` | Prevents the body (everything outside from the Bottom Sheet) from scrolling when the bottom sheet is open. |
+<BottomSheet bind:isOpen={isSheetOpen}>
+	<BottomSheet.Trigger>
+		<p>Click to open the sheet.</p>
+	</BottomSheet.Trigger>
+	<BottomSheet.Overlay>
+		<BottomSheet.Sheet>
+			<BottomSheet.Content>
+				<h3>Bottom Sheet Title</h3>
+				<p>Text</p>
+			</BottomSheet.Content>
+		</BottomSheet.Sheet>
+	</BottomSheet.Overlay>
+</BottomSheet>
+```
+
+### Key Features
+
+1. **Binding the `isOpen` Property:**  
+   The `isOpen` property is bound to a variable (here, `isEventsSheetOpen`) to track whether the bottom sheet is open or closed. You can control the sheet’s state programmatically by modifying the bound variable.
+
+   Example:
+
+   ```javascript
+   let isEventsSheetOpen = $state(false);
+   ```
+
+2. **Trigger Area:**  
+   The `BottomSheet.Trigger` component defines the area that opens / closes the bottom sheet when clicked. You can style it and use any content inside the trigger.
+
+   Example:
+
+   ```javascript
+   <BottomSheet.Trigger>Trigger</BottomSheet.Trigger>
+   ```
+
+3. **Handling Open/Close Events:**  
+   You can listen to `onopen` and `onclose` events to trigger custom logic when the sheet is opened or closed. This is useful for tracking interactions or performing other actions.
+
+   Example:
+
+   ```javascript
+   <BottomSheet
+   	onopen={() => logEvent('Bottom Sheet opened.')}
+   	onclose={() => logEvent('Bottom Sheet closed.')}
+   >
+   	...
+   </BottomSheet>
+   ```
+
+4. **Overlay & Content:**
+   If you want to add a Overlay, you can do that by wrapping the `BottomSheet.Sheet` with `BottomSheet.Overlay`. You can style the overlay using the `style` property.
+
+   You can use `BottomSheet.Content` inside `BottomSheet.Sheet` to display content. It's optional, but you are able to style it.
+
+5. **Customizing the Sheet:**  
+   The content inside the `BottomSheet.Sheet` component is fully customizable. You can add everything (really everything).
+
+6. **Notes on Trigger and `isOpen`:**  
+   You can both use the `Trigger Area` and the `isOpen State` for opening and closing the sheet. Depends on your preferences.
 
 ## Contributing
 
@@ -94,4 +162,4 @@ Contributions are welcome! If you have any ideas, suggestions, or bug reports, p
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/AuxiDev/svelte-bottom-sheet/blob/master/LICENSE.txt) file for more details.

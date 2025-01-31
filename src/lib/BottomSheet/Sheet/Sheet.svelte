@@ -15,28 +15,22 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
-	import type { BottomSheetSettings } from './types.js';
+	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
+	import { get } from 'svelte/store';
+
+	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
 
 	let {
-		isOpen = $bindable(false),
-		maxHeight = '70%',
-		snapPoints = [],
-		settings = { disableScrollingOutside: true },
-		children,
-		onopen,
-		onclose
+		children
 	}: {
-		isOpen?: boolean;
-		maxHeight?: string;
-		snapPoints?: number[];
-		settings?: BottomSheetSettings;
 		children?: any;
-		onopen?: () => void;
-		onclose?: () => void;
 	} = $props();
+
+	let maxHeight = getSettings().maxHeight ?? '70%';
+	let snapPoints: number[] = getSettings().snapPoints ?? [];
 
 	// svelte-ignore non_reactive_update
 	let sheetElement: HTMLDivElement;
@@ -105,7 +99,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (snapPoints.length === 1) {
 			if (currentHeight > (sheetElement?.offsetHeight ?? 0) / 5) {
-				isOpen = false;
+				closeSheet();
 				currentHeight = 0;
 			} else {
 				currentHeight = 0;
@@ -117,7 +111,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		const lowestSnapPointPx = snappointToPxValue(Math.min(...snapPoints));
 		if (currentHeight > lowestSnapPointPx) {
 			currentHeight = 0;
-			isOpen = false;
+			closeSheet();
 			resetStatesAfterMove();
 			return;
 		}
@@ -166,69 +160,63 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	};
 
 	$effect(() => {
-		if (isOpen) {
-			onopen?.();
-			if (settings?.disableScrollingOutside) {
+		if (get(isSheetVisible)) {
+			if (getSettings().disableScrollingOutside) {
 				document.body.style.overflowY = 'hidden';
 			}
 		} else {
-			onclose?.();
-			if (settings?.disableScrollingOutside) {
+			if (getSettings().disableScrollingOutside) {
 				document.body.style.overflowY = 'auto';
 			}
 		}
 	});
 </script>
 
-{#if isOpen}
+{#if $isSheetVisible}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
+
+	<div
+		bind:this={sheetElement}
+		class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
+		style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
+			? ''
+			: 'transform 0.3s ease-in-out'};"
+		role="dialog"
+		ontouchstart={touchStartEvent}
+		ontouchmove={touchMoveEvent}
+		ontouchend={moveEnd}
+		onmousedown={mouseDownEvent}
+		onmousemove={mouseMoveEvent}
+		onmouseup={moveEnd}
+		transition:slide={{ duration: 500, easing: cubicOut }}
+	>
+		<div class="bottom-sheet-handle"></div>
 		<div
-			bind:this={sheetElement}
-			class="bottom-sheet"
-			style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
-				? ''
-				: 'transform 0.3s ease-in-out'};"
-			role="dialog"
-			ontouchstart={touchStartEvent}
-			ontouchmove={touchMoveEvent}
-			ontouchend={moveEnd}
-			onmousedown={mouseDownEvent}
-			onmousemove={mouseMoveEvent}
-			onmouseup={moveEnd}
-			transition:slide={{ duration: 500, easing: cubicOut }}
+			bind:this={sheetContent}
+			class="bottom-sheet-content"
+			style="overflow-y: {isMovingSheet ? 'hidden' : 'auto'};"
 		>
-			<div class="bottom-sheet-handle"></div>
-			<div
-				bind:this={sheetContent}
-				class="bottom-sheet-content"
-				style="overflow-y: {isMovingSheet ? 'hidden' : 'auto'};"
-			>
-				{@render children?.()}
-			</div>
+			{@render children?.()}
 		</div>
 	</div>
 {/if}
 
 <style>
-	.bottom-sheet-overlay {
+	.prevent-select {
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	.bottom-sheet {
+		background-color: #fff;
 		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
 		justify-content: center;
-		align-items: flex-end;
-		z-index: 1;
-		overflow: hidden;
-	}
-
-	.bottom-sheet {
-		background-color: #fff;
-		position: absolute;
+		align-self: flex-end;
 		width: 100%;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow: hidden;

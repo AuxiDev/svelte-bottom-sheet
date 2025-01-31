@@ -1,5 +1,6 @@
 <script lang="ts">
-	import BottomSheet from '$lib/BottomSheet.svelte';
+	import BottomSheet from '$lib/BottomSheet/index.js';
+	import Sheet from '$lib/BottomSheet/Sheet/Sheet.svelte';
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 
@@ -44,19 +45,24 @@
 			overwhelming them.
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
-		<BottomSheet bind:isOpen={isBasicSheetOpen} maxHeight="70%">
-			<div class="sheet-content">
-				<h3>Basic Bottom Sheet</h3>
-				<p>
-					This sheet allows for basic interactions. It slides up smoothly, and you can either drag
-					it down to close or tap outside to dismiss. No complicated features, just the essentials.
-				</p>
-				<ul>
-					<li>No snap points, so it's free to slide anywhere!</li>
-					<li>Smooth transitions that feel natural and seamless</li>
-					<li>Perfect for displaying quick information or performing simple actions</li>
-				</ul>
-			</div>
+		<BottomSheet bind:isOpen={isBasicSheetOpen}>
+			<BottomSheet.Overlay>
+				<BottomSheet.Sheet>
+					<BottomSheet.Content>
+						<h3>Basic Bottom Sheet</h3>
+						<p>
+							This sheet allows for basic interactions. It slides up smoothly, and you can either
+							drag it down to close or tap outside to dismiss. No complicated features, just the
+							essentials.
+						</p>
+						<ul>
+							<li>No snap points, so it's free to slide anywhere!</li>
+							<li>Smooth transitions that feel natural and seamless</li>
+							<li>Perfect for displaying quick information or performing simple actions</li>
+						</ul>
+					</BottomSheet.Content>
+				</BottomSheet.Sheet>
+			</BottomSheet.Overlay>
 		</BottomSheet>
 	</section>
 
@@ -68,24 +74,29 @@
 			predictable and controlled.
 		</p>
 		<button onclick={() => (isSnapPointsSheetOpen = true)}>Open Snap Points Sheet</button>
-		<BottomSheet bind:isOpen={isSnapPointsSheetOpen} maxHeight="90%" snapPoints={[25, 50, 75]}>
-			<div class="sheet-content">
-				<h3>Bottom Sheet with Snap Points</h3>
-				<p>
-					With this sheet, you can drag it up to specific points: 25%, 50%, or 75% of the screen
-					height. These snap points provide a more structured interaction, making it easier for
-					users to engage with the content.
-				</p>
-				<div class="snap-indicator">
-					<div class="snap-line" style="top: 75%"><span>25%</span></div>
-					<div class="snap-line" style="top: 50%"><span>50%</span></div>
-					<div class="snap-line" style="top: 25%"><span>75%</span></div>
-				</div>
-				<p>
-					Drag the sheet and notice how it "snaps" to these points. It's a nice UX feature that
-					makes it clear to the user where they are in the interaction.
-				</p>
-			</div>
+		<BottomSheet
+			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75] }}
+			bind:isOpen={isSnapPointsSheetOpen}
+		>
+			<BottomSheet.Sheet>
+				<BottomSheet.Content>
+					<h3>Bottom Sheet with Snap Points</h3>
+					<p>
+						With this sheet, you can drag it up to specific points: 25%, 50%, or 75% of the screen
+						height. These snap points provide a more structured interaction, making it easier for
+						users to engage with the content.
+					</p>
+					<div class="snap-indicator">
+						<div class="snap-line" style="top: 75%"><span>25%</span></div>
+						<div class="snap-line" style="top: 50%"><span>50%</span></div>
+						<div class="snap-line" style="top: 25%"><span>75%</span></div>
+					</div>
+					<p>
+						Drag the sheet and notice how it "snaps" to these points. It's a nice UX feature that
+						makes it clear to the user where they are in the interaction.
+					</p>
+				</BottomSheet.Content>
+			</BottomSheet.Sheet>
 		</BottomSheet>
 	</section>
 
@@ -96,54 +107,60 @@
 			handle scrollable content. When the list grows too large, users can scroll to see more.
 		</p>
 		<button onclick={() => (isLongListSheetOpen = true)}>Open Scrollable Sheet</button>
-		<BottomSheet bind:isOpen={isLongListSheetOpen} maxHeight="70%">
-			<div class="sheet-content">
-				<h3>Scrollable List of Items</h3>
-				<p>
-					As the number of items increases, the sheet becomes scrollable, allowing users to easily
-					browse through the content without overcrowding the screen. This feature is ideal for
-					displaying long lists or content that doesn’t need to take up the entire screen.
-				</p>
-				<ul class="item-list">
-					{#each Array(50) as _, index}
-						<li>Item {index + 1}</li>
-					{/each}
-				</ul>
-			</div>
+		<BottomSheet bind:isOpen={isLongListSheetOpen}>
+			<BottomSheet.Sheet>
+				<BottomSheet.Content>
+					<h3>Scrollable List of Items</h3>
+					<p>
+						As the number of items increases, the sheet becomes scrollable, allowing users to easily
+						browse through the content without overcrowding the screen. This feature is ideal for
+						displaying long lists or content that doesn’t need to take up the entire screen.
+					</p>
+					<ul class="item-list">
+						{#each Array(50) as _, index}
+							<li>Item {index + 1}</li>
+						{/each}
+					</ul>
+				</BottomSheet.Content>
+			</BottomSheet.Sheet>
 		</BottomSheet>
 	</section>
 
 	<section class="showcase events">
-		<h2>Track Bottom Sheet Events</h2>
+		<h2>Track Bottom Sheet Events & Trigger Area</h2>
 		<p>
 			Keep track of every action performed on the Bottom Sheet. From when it opens to when it
 			closes, or even when it's dragged, you can listen to all of the events and keep an accurate
-			log of user interactions.
+			log of user interactions.<br /><br />The Bottom Sheet Component also provides a trigger area.
 		</p>
-		<button onclick={() => (isEventsSheetOpen = true)}>Open Event-Tracking Sheet</button>
 		<BottomSheet
 			bind:isOpen={isEventsSheetOpen}
-			maxHeight="70%"
 			onopen={() => logEvent('Bottom Sheet opened.')}
 			onclose={() => logEvent('Bottom Sheet closed.')}
 		>
-			<div class="sheet-content">
-				<h3>Bottom Sheet Event Tracking</h3>
-				<p>
-					This sheet provides a log of every interaction, including when the sheet is opened and
-					closed. You can use this feature to track how users are engaging with the sheet.
-				</p>
-				<div class="event-log">
-					<h4>Event Log:</h4>
-					{#each eventLog as event}
-						<p transition:fly={{ y: 20, duration: 300 }}>{event}</p>
-					{/each}
-				</div>
-				<p>
-					Feel free to open and close the sheet, or perform any other action to see how the log
-					updates with every event.
-				</p>
-			</div>
+			<BottomSheet.Trigger
+				style="width: 100px; height: 100px; border: 2px, black, dashed; display: flex; align-items: center; justify-content: center;"
+				>Trigger</BottomSheet.Trigger
+			>
+			<BottomSheet.Sheet>
+				<BottomSheet.Content>
+					<h3>Bottom Sheet Event Tracking</h3>
+					<p>
+						This sheet provides a log of every interaction, including when the sheet is opened and
+						closed. You can use this feature to track how users are engaging with the sheet.
+					</p>
+					<div class="event-log">
+						<h4>Event Log:</h4>
+						{#each eventLog as event}
+							<p transition:fly={{ y: 20, duration: 300 }}>{event}</p>
+						{/each}
+					</div>
+					<p>
+						Feel free to open and close the sheet, or perform any other action to see how the log
+						updates with every event.
+					</p>
+				</BottomSheet.Content>
+			</BottomSheet.Sheet>
 		</BottomSheet>
 	</section>
 </main>
@@ -162,9 +179,9 @@
 	}
 
 	.wave {
-		position: absolute;
-		width: 120%;
+		position: fixed;
 		height: 30vh;
+		width: 100%;
 		background: radial-gradient(circle at top left, rgba(255, 105, 180, 0.2) 0%, transparent 60%);
 		filter: blur(80px);
 		z-index: -1;
@@ -295,18 +312,10 @@
 		background-color: #ff1c8e;
 		color: white;
 	}
-	.events button {
-		background-color: #ff1c8e;
-		color: white;
-	}
 
 	button:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.sheet-content {
-		padding: 20px;
 	}
 
 	.snap-indicator {
