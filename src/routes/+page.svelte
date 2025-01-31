@@ -46,22 +46,23 @@
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet bind:isOpen={isBasicSheetOpen}>
-			<BottomSheet.Trigger>hi</BottomSheet.Trigger>
-			<BottomSheet.Sheet>
-				<BottomSheet.Content>
-					<h3>Basic Bottom Sheet</h3>
-					<p>
-						This sheet allows for basic interactions. It slides up smoothly, and you can either drag
-						it down to close or tap outside to dismiss. No complicated features, just the
-						essentials.
-					</p>
-					<ul>
-						<li>No snap points, so it's free to slide anywhere!</li>
-						<li>Smooth transitions that feel natural and seamless</li>
-						<li>Perfect for displaying quick information or performing simple actions</li>
-					</ul>
-				</BottomSheet.Content>
-			</BottomSheet.Sheet>
+			<BottomSheet.Overlay>
+				<BottomSheet.Sheet>
+					<BottomSheet.Content>
+						<h3>Basic Bottom Sheet</h3>
+						<p>
+							This sheet allows for basic interactions. It slides up smoothly, and you can either
+							drag it down to close or tap outside to dismiss. No complicated features, just the
+							essentials.
+						</p>
+						<ul>
+							<li>No snap points, so it's free to slide anywhere!</li>
+							<li>Smooth transitions that feel natural and seamless</li>
+							<li>Perfect for displaying quick information or performing simple actions</li>
+						</ul>
+					</BottomSheet.Content>
+				</BottomSheet.Sheet>
+			</BottomSheet.Overlay>
 		</BottomSheet>
 	</section>
 

@@ -1,1 +1,1 @@
-export { default as BottomSheet } from './BottomSheet/BottomSheet.svelte';
+export { default as BottomSheet } from './BottomSheet/index.js';

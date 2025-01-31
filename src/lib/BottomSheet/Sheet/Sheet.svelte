@@ -175,30 +175,29 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 {#if $isSheetVisible}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
+
+	<div
+		bind:this={sheetElement}
+		class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
+		style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
+			? ''
+			: 'transform 0.3s ease-in-out'};"
+		role="dialog"
+		ontouchstart={touchStartEvent}
+		ontouchmove={touchMoveEvent}
+		ontouchend={moveEnd}
+		onmousedown={mouseDownEvent}
+		onmousemove={mouseMoveEvent}
+		onmouseup={moveEnd}
+		transition:slide={{ duration: 500, easing: cubicOut }}
+	>
+		<div class="bottom-sheet-handle"></div>
 		<div
-			bind:this={sheetElement}
-			class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
-			style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
-				? ''
-				: 'transform 0.3s ease-in-out'};"
-			role="dialog"
-			ontouchstart={touchStartEvent}
-			ontouchmove={touchMoveEvent}
-			ontouchend={moveEnd}
-			onmousedown={mouseDownEvent}
-			onmousemove={mouseMoveEvent}
-			onmouseup={moveEnd}
-			transition:slide={{ duration: 500, easing: cubicOut }}
+			bind:this={sheetContent}
+			class="bottom-sheet-content"
+			style="overflow-y: {isMovingSheet ? 'hidden' : 'auto'};"
 		>
-			<div class="bottom-sheet-handle"></div>
-			<div
-				bind:this={sheetContent}
-				class="bottom-sheet-content"
-				style="overflow-y: {isMovingSheet ? 'hidden' : 'auto'};"
-			>
-				{@render children?.()}
-			</div>
+			{@render children?.()}
 		</div>
 	</div>
 {/if}
@@ -209,23 +208,15 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		-ms-user-select: none;
 		user-select: none;
 	}
-	.bottom-sheet-overlay {
+	.bottom-sheet {
+		background-color: #fff;
 		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
 		justify-content: center;
-		align-items: flex-end;
-		z-index: 1;
-		overflow: hidden;
-	}
-
-	.bottom-sheet {
-		background-color: #fff;
-		position: absolute;
+		align-self: flex-end;
 		width: 100%;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
