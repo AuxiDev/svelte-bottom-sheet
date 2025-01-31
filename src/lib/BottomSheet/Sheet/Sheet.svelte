@@ -15,27 +15,23 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
-	import type { BottomSheetSettings } from '$lib/types.js';
+	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
+
+	const { isSheetVisible, closeSheet, openSheet } = getContext<SheetContext>('sheetStateContext');
 
 	let {
-		isOpen = $bindable(false),
 		maxHeight = '70%',
 		snapPoints = [],
 		settings = { disableScrollingOutside: true },
-		children,
-		onopen,
-		onclose
+		children
 	}: {
-		isOpen?: boolean;
 		maxHeight?: string;
 		snapPoints?: number[];
 		settings?: BottomSheetSettings;
 		children?: any;
-		onopen?: () => void;
-		onclose?: () => void;
 	} = $props();
 
 	// svelte-ignore non_reactive_update
@@ -105,7 +101,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (snapPoints.length === 1) {
 			if (currentHeight > (sheetElement?.offsetHeight ?? 0) / 5) {
-				isOpen = false;
+				closeSheet();
 				currentHeight = 0;
 			} else {
 				currentHeight = 0;
@@ -117,7 +113,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		const lowestSnapPointPx = snappointToPxValue(Math.min(...snapPoints));
 		if (currentHeight > lowestSnapPointPx) {
 			currentHeight = 0;
-			isOpen = false;
+			closeSheet();
 			resetStatesAfterMove();
 			return;
 		}
@@ -166,13 +162,11 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	};
 
 	$effect(() => {
-		if (isOpen) {
-			onopen?.();
+		if (isSheetVisible) {
 			if (settings?.disableScrollingOutside) {
 				document.body.style.overflowY = 'hidden';
 			}
 		} else {
-			onclose?.();
 			if (settings?.disableScrollingOutside) {
 				document.body.style.overflowY = 'auto';
 			}
@@ -180,7 +174,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	});
 </script>
 
-{#if isOpen}
+{#if $isSheetVisible}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
