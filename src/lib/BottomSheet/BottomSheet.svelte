@@ -6,7 +6,7 @@
 	let {
 		isOpen = $bindable(false),
 		onopen,
-		settings = { disableScrollingOutside: true, maxHeight: '70%', snapPoints: [] },
+		settings = { maxHeight: '70%', snapPoints: [] },
 		onclose,
 		children
 	} = $props<{

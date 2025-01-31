@@ -1,19 +1,3 @@
-<!--
-@component ### BottomSheet Component
-
-#### Description
-The `BottomSheet` component provides a flexible bottom sheet UI that can slide up from the bottom of the screen. It supports configurable height constraints and snapping behavior.
-
-#### Properties
-
-| Property     | Type             | Default  | Description                                                                          |
-|--------------|------------------|----------|--------------------------------------------------------------------------------------|
-| `isOpen`     | `boolean`        | `false`  | Determines whether the bottom sheet is visible.                                      |
-| `maxHeight`  | `string`         | `'70%'`  | Defines the maximum height of the bottom sheet as a percentage of the screen height. |
-| `snapPoints` | `number[]`       | `[]`     | An array of percentage values where the bottom sheet should snap to when dragged.    |
-| `settings`   | `BottomSheetSettings`       | `{disableScrollingOutside:true}`     | Settings for the BottomSheet.    |
--->
-
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
@@ -158,16 +142,17 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 		isDragging = false;
 		isMovingSheet = false;
 	};
+	let visibilityUpdate = $state(false);
+
+	isSheetVisible.subscribe((state) => {
+		visibilityUpdate = state;
+	});
 
 	$effect(() => {
-		if (get(isSheetVisible)) {
-			if (getSettings().disableScrollingOutside) {
-				document.body.style.overflowY = 'hidden';
-			}
+		if (visibilityUpdate) {
+			document.body.style.overflowY = 'hidden';
 		} else {
-			if (getSettings().disableScrollingOutside) {
-				document.body.style.overflowY = 'auto';
-			}
+			document.body.style.overflowY = 'auto';
 		}
 	});
 </script>

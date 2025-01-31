@@ -6,7 +6,6 @@ import { writable, type Writable } from 'svelte/store';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 
 export type BottomSheetSettings = {
-	disableScrollingOutside?: boolean;
 	maxHeight?: string;
 	snapPoints?: number[];
 };

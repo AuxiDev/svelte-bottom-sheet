@@ -71,11 +71,10 @@ You can use the BottomSheet component in any SvelteKit project.
 
 #### Properties
 
-| Name                      | Type       | Description                                                                                                                                                                   | Default Value |
-| ------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `disableScrollingOutside` | `boolean`  | Determines whether scrolling outside the bottom sheet is disabled. When set to `true`, any interaction outside the bottom sheet will be blocked.                              | `true`        |
-| `maxHeight`               | `string`   | Sets the maximum height of the bottom sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
-| `snapPoints`              | `number[]` | An array of snap points for the bottom sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
+| Name         | Type       | Description                                                                                                                                                                   | Default Value |
+| ------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`  | `string`   | Sets the maximum height of the bottom sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
+| `snapPoints` | `number[]` | An array of snap points for the bottom sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
 
 ### Events
 
