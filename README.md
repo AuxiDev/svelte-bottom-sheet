@@ -1,58 +1,104 @@
-# create-svelte
+# Svelte Bottom Sheet
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+## Overview
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+The **BottomSheet** component is a sleek, interactive UI element for mobile-first and desktop applications. It provides a smooth and customizable sliding sheet that can be triggered from the bottom of the screen. Whether you're building a mobile app or a responsive web app, the BottomSheet component offers an intuitive and engaging way to display additional content or options.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Customizable Heights**: Control the maximum height and snap points of the sheet.
+- **Event Handling**: Built-in events such as `onopen` and `onclose` to track user interactions.
+- **Smooth Animations**: Sleek transitions for opening, closing, and dragging the sheet.
+- **Disable Scroll**: Option to prevent scrolling on the background when the sheet is open.
+- **Lightweight & Easy to Integrate**: Just add the component and configure the settings.
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Installation
 
-# create a new project in my-app
-npx sv create my-app
+You can use the BottomSheet component in any SvelteKit project.
+
+1. **Install the Component**
+
+   If you're starting from scratch, create a SvelteKit project:
+
+   ```bash
+   npx create sv my-app
+   cd my-app
+   ```
+
+2. **NPM Install the Bottom Sheet**
+
+   ```bash
+   npm i svelte-bottom-sheet
+   ```
+
+3. **Import the component**
+
+   ```javascript
+   <script lang="ts">
+        import BottomSheet from '$lib/BottomSheet.svelte';
+        let isOpen = false;
+   </script>
+
+    <button on:click={() => (isOpen = true)}>Open Bottom Sheet</button>
+
+    <BottomSheet bind:isOpen={isOpen} maxHeight="70%">
+    <h3>Content inside the bottom sheet</h3>
+    <p>Here you can put any content you need.</p>
+    </BottomSheet>
+   ```
+
+## Configuration
+
+### Properties
+
+| Property     | Type                  | Default   | Description                                                                          |
+| ------------ | --------------------- | --------- | ------------------------------------------------------------------------------------ |
+| `isOpen`     | `boolean`             | `false`   | Determines whether the bottom sheet is visible.                                      |
+| `maxHeight`  | `string`              | `'70%'`   | Defines the maximum height of the bottom sheet as a percentage of the screen height. |
+| `snapPoints` | `number[]`            | `[]`      | An array of percentage values where the bottom sheet should snap to when dragged.    |
+| `settings`   | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                                        |
+
+### Methods
+
+| Method         | Description                                         |
+| -------------- | --------------------------------------------------- |
+| `opensheet()`  | Opens the bottom sheet (sets `isOpen` to `true`).   |
+| `closesheet()` | Closes the bottom sheet (sets `isOpen` to `false`). |
+
+### Types
+
+| Name                  | Format                                 | Default                             |
+| --------------------- | -------------------------------------- | ----------------------------------- |
+| `BottomSheetSettings` | `{ disableScrollingOutside: boolean }` | `{ disableScrollingOutside: true }` |
+
+### Settings
+
+| Setting                   | Description                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `disableScrollingOutside` | Prevents the body (everything outside from the Bottom Sheet) from scrolling when the bottom sheet is open. |
+
+## Usage Example
+
+Here's a simple example of how to use the BottomSheet component in your SvelteKit project:
+
+```javascript
+<script lang="ts">
+    import BottomSheet from 'svelte-bottom-sheet';
+    let isOpen = $state(false);
+</script>
+
+<button onclick={() => (isOpen = true)}>Open Bottom Sheet</button>
+
+<BottomSheet bind:isOpen={isOpen} maxHeight="70%">
+    <h3>Content inside the bottom sheet</h3>
+    <p>Here you can put any content you need.</p>
+</BottomSheet>
 ```
 
-## Developing
+## Contributing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request on the [GitHub repository](https://github.com/AUXIDev/svelte-bottom-sheet).
 
-```bash
-npm run dev
+## License
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
-
-## Building
-
-To build your library:
-
-```bash
-npm run package
-```
-
-To create a production version of your showcase app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
-```
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
