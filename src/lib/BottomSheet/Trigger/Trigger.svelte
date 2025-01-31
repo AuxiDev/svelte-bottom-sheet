@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
 	import { getContext } from 'svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	let { children } = $props<{ children?: any }>();
+	let { children, ...rest } = $props<{ children?: any } & HTMLAttributes<HTMLDivElement>>();
 
 	const { toggleSheet } = getContext<SheetContext>('sheetStateContext');
 	const click = () => {
@@ -10,6 +11,6 @@
 	};
 </script>
 
-<div role="button" tabindex="0" onkeypress={() => {}} onclick={click}>
+<div {...rest} role="button" tabindex="0" onkeypress={() => {}} onclick={click}>
 	{@render children?.()}
 </div>

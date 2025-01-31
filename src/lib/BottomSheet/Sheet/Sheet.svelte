@@ -19,20 +19,18 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
+	import { get } from 'svelte/store';
 
-	const { isSheetVisible, closeSheet, openSheet } = getContext<SheetContext>('sheetStateContext');
+	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
 
 	let {
-		maxHeight = '70%',
-		snapPoints = [],
-		settings = { disableScrollingOutside: true },
 		children
 	}: {
-		maxHeight?: string;
-		snapPoints?: number[];
-		settings?: BottomSheetSettings;
 		children?: any;
 	} = $props();
+
+	let maxHeight = getSettings().maxHeight ?? '70%';
+	let snapPoints: number[] = getSettings().snapPoints ?? [];
 
 	// svelte-ignore non_reactive_update
 	let sheetElement: HTMLDivElement;
@@ -162,12 +160,12 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	};
 
 	$effect(() => {
-		if (isSheetVisible) {
-			if (settings?.disableScrollingOutside) {
+		if (get(isSheetVisible)) {
+			if (getSettings().disableScrollingOutside) {
 				document.body.style.overflowY = 'hidden';
 			}
 		} else {
-			if (settings?.disableScrollingOutside) {
+			if (getSettings().disableScrollingOutside) {
 				document.body.style.overflowY = 'auto';
 			}
 		}
@@ -180,7 +178,7 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 	<div class="bottom-sheet-overlay" role="button" tabindex="0" transition:fade={{ duration: 200 }}>
 		<div
 			bind:this={sheetElement}
-			class="bottom-sheet"
+			class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
 			style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
 				? ''
 				: 'transform 0.3s ease-in-out'};"
@@ -206,6 +204,11 @@ The `BottomSheet` component provides a flexible bottom sheet UI that can slide u
 {/if}
 
 <style>
+	.prevent-select {
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
 	.bottom-sheet-overlay {
 		position: fixed;
 		top: 0;
