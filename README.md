@@ -4,6 +4,10 @@
 
 The **BottomSheet** component is a sleek, interactive UI element for mobile-first and desktop applications. It provides a smooth and customizable sliding sheet that can be triggered from the bottom of the screen. Whether you're building a mobile app or a responsive web app, the BottomSheet component offers an intuitive and engaging way to display additional content or options.
 
+### Preview
+
+[Bottom Sheet Preview](https://bottomsheet.auxi.studio/)
+
 ## Features
 
 - **Customizable Heights**: Control the maximum height and snap points of the sheet.
