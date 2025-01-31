@@ -10,11 +10,11 @@ The **BottomSheet** component is a sleek, interactive UI element for mobile-firs
 
 ## Features
 
-- **Customizable Heights**: Control the maximum height and snap points of the sheet.
-- **Event Handling**: Built-in events such as `onopen` and `onclose` to track user interactions.
+- **Customizable**: Control the style, maximum height and snap points of the sheet.
+- **Snap Points**: Option to let the Bottom Sheet snap to specific positions.
 - **Smooth Animations**: Sleek transitions for opening, closing, and dragging the sheet.
-- **Disable Scroll**: Option to prevent scrolling on the background when the sheet is open.
 - **Lightweight & Easy to Integrate**: Just add the component and configure the settings.
+- **Event Handling**: Built-in events such as `onopen` and `onclose` to track user interactions.
 
 ## Installation
 
