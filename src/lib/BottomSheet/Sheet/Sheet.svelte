@@ -82,7 +82,7 @@
 
 		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (snapPoints.length === 1) {
-			if (currentHeight > (sheetElement?.offsetHeight ?? 0) / 5) {
+			if (currentHeight > snappointToPxValue(100 - (getSettings().closePercentage ?? 10))) {
 				closeSheet();
 				currentHeight = 0;
 			} else {

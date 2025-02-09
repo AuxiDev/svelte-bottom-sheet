@@ -6,6 +6,7 @@ import { writable, type Writable } from 'svelte/store';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 
 export type BottomSheetSettings = {
+	closePercentage?: number;
 	maxHeight?: string;
 	snapPoints?: number[];
 };

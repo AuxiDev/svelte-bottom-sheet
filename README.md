@@ -25,7 +25,7 @@ You can use the BottomSheet component in any SvelteKit project.
    If you're starting from scratch, create a SvelteKit project:
 
    ```bash
-   npx create sv my-app
+   npx sv create my-app
    cd my-app
    ```
 
@@ -39,7 +39,7 @@ You can use the BottomSheet component in any SvelteKit project.
 
    ```javascript
     <script lang="ts">
-   	    import BottomSheet from 'svelte-bottom-sheet';
+   	 import BottomSheet from 'svelte-bottom-sheet';
         let isOpen = $state(false);
     </script>
 
@@ -71,10 +71,11 @@ You can use the BottomSheet component in any SvelteKit project.
 
 #### Properties
 
-| Name         | Type       | Description                                                                                                                                                                   | Default Value |
-| ------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`  | `string`   | Sets the maximum height of the bottom sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
-| `snapPoints` | `number[]` | An array of snap points for the bottom sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
+| Name              | Type       | Description                                                                                                                                                                   | Default Value |
+| ----------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`       | `string`   | Sets the maximum height of the Bottom Sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
+| `snapPoints`      | `number[]` | An array of snap points for the Bottom Sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
+| `closePercentage` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close, measured in percentage points.                                                           | `10`          |
 
 ### Events
 
