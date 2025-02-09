@@ -190,6 +190,9 @@
 </main>
 
 <style>
+	.social-container a {
+		color: black;
+	}
 	.social-container {
 		width: 100%;
 		display: flex;
