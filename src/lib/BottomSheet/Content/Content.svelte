@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 
-	let { children, ...rest } = $props<{ children?: any } & HTMLAttributes<HTMLDivElement>>();
+	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div class="bottomSheetContent" {...rest}>
+<div class="bottomSheetContent {rest.class}" {...rest}>
 	{@render children?.()}
 </div>
 

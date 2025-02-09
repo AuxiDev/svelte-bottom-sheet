@@ -9,13 +9,13 @@
 		settings = { maxHeight: '70%', snapPoints: [] },
 		onclose,
 		children
-	} = $props<{
+	}: {
 		isOpen?: boolean;
 		settings?: BottomSheetSettings;
 		children: any;
 		onopen?: () => void;
 		onclose?: () => void;
-	}>();
+	} = $props();
 
 	let isSheetVisible = writable(false);
 	isSheetVisible.subscribe((state) => {

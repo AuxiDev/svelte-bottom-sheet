@@ -7,11 +7,15 @@
 
 	const { isSheetVisible } = getContext<SheetContext>('sheetStateContext');
 
-	let { children, ...rest } = $props<{ children?: any } & HTMLAttributes<HTMLDivElement>>();
+	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
 {#if $isSheetVisible}
-	<div transition:fade={{ duration: 200 }} class="bottom-sheet-overlay" {...rest}></div>
+	<div
+		{...rest}
+		transition:fade={{ duration: 200 }}
+		class="bottom-sheet-overlay {rest.class}"
+	></div>
 {/if}
 {@render children?.()}
 
