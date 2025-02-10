@@ -4,14 +4,16 @@
 	import { fade, slide } from 'svelte/transition';
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
 	import { get } from 'svelte/store';
+	import type { HTMLAttributes } from 'svelte/elements';
 
 	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
 
 	let {
-		children
+		children,
+		...rest
 	}: {
 		children?: any;
-	} = $props();
+	} & HTMLAttributes<HTMLDivElement> = $props();
 
 	let maxHeight = getSettings().maxHeight ?? '70%';
 	let snapPoints: number[] = getSettings().snapPoints ?? [];
@@ -162,11 +164,12 @@
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 
 	<div
+		{...rest}
 		bind:this={sheetElement}
 		class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
 		style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'};"
+			: 'transform 0.3s ease-in-out'}; {rest.style} "
 		role="dialog"
 		ontouchstart={touchStartEvent}
 		ontouchmove={touchMoveEvent}
@@ -203,6 +206,8 @@
 		justify-content: center;
 		align-self: flex-end;
 		width: 100%;
+		max-width: 100%;
+		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
 		touch-action: none;
@@ -229,11 +234,5 @@
 
 	.bottom-sheet-content::-webkit-scrollbar {
 		display: none;
-	}
-	@media (min-width: 768px) {
-		.bottom-sheet {
-			max-width: 600px;
-			margin: 0 auto;
-		}
 	}
 </style>

@@ -11,6 +11,5 @@
 <style>
 	.bottomSheetContent {
 		padding: 20px;
-		background-color: white;
 	}
 </style>
