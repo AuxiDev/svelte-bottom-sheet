@@ -18,7 +18,8 @@
 	if (!sheetContext) {
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
 	}
-	const { isSheetVisible, closeSheet, getSettings } = sheetContext;
+	const { isSheetVisible, closeSheet, getSettings, onSheetDrag, onSheetDragEnd, onSheetDragStart } =
+		sheetContext;
 
 	let maxHeight = getSettings().maxHeight ?? '70%';
 	let snapPoints: number[] = getSettings().snapPoints ?? [];
@@ -54,6 +55,7 @@
 		startHeight = currentHeight;
 		isDragging = true;
 		noScrolledTop = sheetContent.scrollTop;
+		onSheetDragStart();
 	};
 
 	const mouseMoveEvent = (event: MouseEvent) => {
@@ -61,10 +63,12 @@
 		const offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
 
 		currentHeight = offset;
+		onSheetDrag();
 	};
 
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging) return;
+		onSheetDrag();
 
 		if (sheetContent.scrollTop !== 0) {
 			isMovingSheet = false;
@@ -84,6 +88,7 @@
 	};
 
 	const moveEnd = () => {
+		onSheetDragEnd();
 		const snappointToPxValue = (percentage: number): number =>
 			maxHeightPx - (percentage / 100) * maxHeightPx;
 

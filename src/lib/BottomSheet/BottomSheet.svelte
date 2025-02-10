@@ -7,6 +7,9 @@
 		isOpen = $bindable(false),
 		onopen,
 		onclose,
+		onsheetdrag,
+		onsheetdragstart,
+		onsheetdragend,
 		settings = { maxHeight: '70%', snapPoints: [] },
 		children
 	}: {
@@ -15,6 +18,9 @@
 		children: any;
 		onopen?: () => void;
 		onclose?: () => void;
+		onsheetdrag?: () => void;
+		onsheetdragstart?: () => void;
+		onsheetdragend?: () => void;
 	} = $props();
 
 	let isSheetVisible = writable(false);
@@ -35,6 +41,15 @@
 		},
 		toggleSheet: () => {
 			isSheetVisible.update((state: boolean) => !state);
+		},
+		onSheetDrag: () => {
+			onsheetdrag?.();
+		},
+		onSheetDragStart: () => {
+			onsheetdragstart?.();
+		},
+		onSheetDragEnd: () => {
+			onsheetdragend?.();
 		},
 		getSettings: () => {
 			return settings;

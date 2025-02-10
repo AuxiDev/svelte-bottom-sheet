@@ -14,7 +14,7 @@
 		await tick();
 		eventLog = [...eventLog, `${new Date().toLocaleTimeString()}: ${event}`];
 
-		if (eventLog.length > 5) eventLog.shift();
+		if (eventLog.length > 10) eventLog.shift();
 	};
 </script>
 
@@ -164,6 +164,8 @@
 			bind:isOpen={isEventsSheetOpen}
 			onopen={() => logEvent('Bottom Sheet opened.')}
 			onclose={() => logEvent('Bottom Sheet closed.')}
+			onsheetdragstart={() => logEvent('Bottom Sheet Drag started.')}
+			onsheetdragend={() => logEvent('Bottom Sheet Drag ended.')}
 		>
 			<BottomSheet.Trigger
 				style="width: 100px; height: 100px; border: 2px, black, dashed; display: flex; align-items: center; justify-content: center;"
