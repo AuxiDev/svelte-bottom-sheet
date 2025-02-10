@@ -5,8 +5,8 @@
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
 	import { get } from 'svelte/store';
 	import type { HTMLAttributes } from 'svelte/elements';
-
-	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
+	import Handle from '../Handle/Handle.svelte';
+	import Content from '../Content/Content.svelte';
 
 	let {
 		children,
@@ -14,6 +14,11 @@
 	}: {
 		children?: any;
 	} & HTMLAttributes<HTMLDivElement> = $props();
+	const sheetContext = getContext<SheetContext>('sheetStateContext');
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
+	}
+	const { isSheetVisible, closeSheet, getSettings } = sheetContext;
 
 	let maxHeight = getSettings().maxHeight ?? '70%';
 	let snapPoints: number[] = getSettings().snapPoints ?? [];
@@ -179,7 +184,6 @@
 		onmouseup={moveEnd}
 		transition:slide={{ duration: 500, easing: cubicOut }}
 	>
-		<div class="bottom-sheet-handle"></div>
 		<div
 			bind:this={sheetContent}
 			class="bottom-sheet-content"

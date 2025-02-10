@@ -5,12 +5,17 @@
 
 	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
 
-	const { toggleSheet } = getContext<SheetContext>('sheetStateContext');
-	const click = () => {
+	const sheetContext = getContext<SheetContext>('sheetStateContext');
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+	}
+	const { toggleSheet } = sheetContext;
+
+	const handleClick = () => {
 		toggleSheet();
 	};
 </script>
 
-<div {...rest} role="button" tabindex="0" onclick={click}>
+<div {...rest} role="button" tabindex="0" onclick={handleClick}>
 	{@render children?.()}
 </div>

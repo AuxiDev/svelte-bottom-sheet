@@ -48,6 +48,7 @@ You can use the BottomSheet component in any SvelteKit project.
     <BottomSheet bind:isOpen={isOpen} settings={{maxHeight: '70%'}}>
       <BottomSheet.Overlay>
          <BottomSheet.Sheet>
+            <BottomSheet.Handle />
             <BottomSheet.Content>
                <h3>Content inside the bottom sheet</h3>
                <p>Here you can put any content you need.</p>
@@ -102,6 +103,7 @@ There is a lot of stuff you can use inside `BottomSheet` which will be explained
 	</BottomSheet.Trigger>
 	<BottomSheet.Overlay>
 		<BottomSheet.Sheet>
+         <BottomSheet.Handle />
 			<BottomSheet.Content>
 				<h3>Bottom Sheet Title</h3>
 				<p>Text</p>
@@ -145,10 +147,12 @@ There is a lot of stuff you can use inside `BottomSheet` which will be explained
    </BottomSheet>
    ```
 
-4. **Overlay & Content:**
+4. **Overlay & Content & Handle:**
    If you want to add a Overlay, you can do that by wrapping the `BottomSheet.Sheet` with `BottomSheet.Overlay`. You can style the overlay using the `style` property.
 
    You can use `BottomSheet.Content` inside `BottomSheet.Sheet` to display content. It's optional, but you are able to style it.
+
+   When you place `BottomSheet.Handle` inside `BottomSheet.Sheet` you will get a style-able handle.
 
 5. **Customizing the Sheet:**  
    The content inside the `BottomSheet.Sheet` component is fully customizable. You can add everything (really everything).

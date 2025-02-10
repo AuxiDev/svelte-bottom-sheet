@@ -4,6 +4,7 @@ import type BottomSheet from './BottomSheet/BottomSheet.svelte';
 import type SheetTrigger from './BottomSheet/Trigger/Trigger.svelte';
 import { writable, type Writable } from 'svelte/store';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
+import type Handle from './BottomSheet/Handle/Handle.svelte';
 
 export type BottomSheetSettings = {
 	closePercentage?: number;
@@ -20,6 +21,7 @@ export type BottomSheetType = typeof BottomSheet & {
 	Sheet: typeof Sheet;
 	Trigger: typeof SheetTrigger;
 	Overlay: typeof Overlay;
+	Handle: typeof Handle;
 };
 
 export type SheetContext = {
