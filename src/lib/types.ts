@@ -28,6 +28,9 @@ export type SheetContext = {
 	openSheet: () => void;
 	closeSheet: () => void;
 	toggleSheet: () => void;
+	onSheetDrag: () => void;
+	onSheetDragStart: () => void;
+	onSheetDragEnd: () => void;
 	getSettings: () => BottomSheetSettings;
 	isSheetVisible: Writable<boolean>;
 };
