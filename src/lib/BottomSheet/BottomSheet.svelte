@@ -6,8 +6,8 @@
 	let {
 		isOpen = $bindable(false),
 		onopen,
-		settings = { maxHeight: '70%', snapPoints: [] },
 		onclose,
+		settings = { maxHeight: '70%', snapPoints: [] },
 		children
 	}: {
 		isOpen?: boolean;

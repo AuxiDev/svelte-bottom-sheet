@@ -4,8 +4,13 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { fade, slide } from 'svelte/transition';
+	import Handle from '../Handle/Handle.svelte';
 
-	const { isSheetVisible } = getContext<SheetContext>('sheetStateContext');
+	const sheetContext = getContext<SheetContext>('sheetStateContext');
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+	}
+	const { isSheetVisible } = sheetContext;
 
 	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
 </script>

@@ -8,14 +8,17 @@
 	import Handle from '../Handle/Handle.svelte';
 	import Content from '../Content/Content.svelte';
 
-	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
-
 	let {
 		children,
 		...rest
 	}: {
 		children?: any;
 	} & HTMLAttributes<HTMLDivElement> = $props();
+	const sheetContext = getContext<SheetContext>('sheetStateContext');
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
+	}
+	const { isSheetVisible, closeSheet, getSettings } = sheetContext;
 
 	let maxHeight = getSettings().maxHeight ?? '70%';
 	let snapPoints: number[] = getSettings().snapPoints ?? [];
