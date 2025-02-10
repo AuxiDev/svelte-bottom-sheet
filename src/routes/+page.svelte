@@ -71,7 +71,7 @@
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet bind:isOpen={isBasicSheetOpen}>
 			<BottomSheet.Overlay>
-				<BottomSheet.Sheet>
+				<BottomSheet.Sheet style="max-width: 600px; ">
 					<BottomSheet.Content>
 						<h3>Basic Bottom Sheet</h3>
 						<p>
@@ -102,7 +102,7 @@
 			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75] }}
 			bind:isOpen={isSnapPointsSheetOpen}
 		>
-			<BottomSheet.Sheet>
+			<BottomSheet.Sheet style="max-width: 600px; ">
 				<BottomSheet.Content>
 					<h3>Bottom Sheet with Snap Points</h3>
 					<p>
@@ -132,7 +132,7 @@
 		</p>
 		<button onclick={() => (isLongListSheetOpen = true)}>Open Scrollable Sheet</button>
 		<BottomSheet bind:isOpen={isLongListSheetOpen}>
-			<BottomSheet.Sheet>
+			<BottomSheet.Sheet style="max-width: 600px; ">
 				<BottomSheet.Content>
 					<h3>Scrollable List of Items</h3>
 					<p>
@@ -166,7 +166,7 @@
 				style="width: 100px; height: 100px; border: 2px, black, dashed; display: flex; align-items: center; justify-content: center;"
 				>Trigger</BottomSheet.Trigger
 			>
-			<BottomSheet.Sheet>
+			<BottomSheet.Sheet style="max-width: 600px; ">
 				<BottomSheet.Content>
 					<h3>Bottom Sheet Event Tracking</h3>
 					<p>
