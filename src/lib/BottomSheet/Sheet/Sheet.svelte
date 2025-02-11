@@ -162,11 +162,19 @@
 		visibilityUpdate = state;
 	});
 
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
+		}
+	};
+
 	$effect(() => {
 		if (visibilityUpdate) {
 			document.body.style.overflowY = 'hidden';
+			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 		} else {
 			document.body.style.overflowY = 'auto';
+			document.removeEventListener('touchmove', preventPullToRefresh);
 		}
 	});
 </script>
