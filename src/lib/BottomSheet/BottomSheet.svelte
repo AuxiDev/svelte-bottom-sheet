@@ -4,7 +4,7 @@
 	import { get, writable } from 'svelte/store';
 
 	let {
-		isOpen = $bindable(false),
+		isSheetOpen = $bindable(false),
 		onopen,
 		onclose,
 		onsheetdrag,
@@ -13,7 +13,7 @@
 		settings = { maxHeight: '70%', snapPoints: [100] },
 		children
 	}: {
-		isOpen?: boolean;
+		isSheetOpen?: boolean;
 		settings?: BottomSheetSettings;
 		children: Snippet<[]>;
 		onopen?: () => void;
@@ -23,15 +23,7 @@
 		onsheetdragend?: () => void;
 	} = $props();
 
-	let isSheetOpen = $state(false);
-
 	$effect(() => {
-		isSheetOpen = isOpen;
-	});
-
-	$effect(() => {
-		isOpen = isSheetOpen;
-
 		if (isSheetOpen) {
 			onopen?.();
 		} else {

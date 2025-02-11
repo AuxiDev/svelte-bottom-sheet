@@ -24,13 +24,31 @@
 		}
 	};
 
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			sheetContext.closeSheet();
+		}
+	};
+
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sheetElement && !sheetElement.contains(event.target as Node)) {
+			sheetContext.closeSheet();
+		}
+	};
+
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+			document.addEventListener('keydown', handleKeyDown);
+			setTimeout(() => {
+				document.addEventListener('click', handleClickOutside);
+			}, 100);
 		} else {
 			document.body.style.overflowY = 'auto';
 			document.removeEventListener('touchmove', preventPullToRefresh);
+			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('click', handleClickOutside);
 		}
 	});
 </script>
@@ -38,7 +56,6 @@
 {#if sheetContext.isSheetOpen}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-
 	<div
 		{...rest}
 		bind:this={sheetElement}

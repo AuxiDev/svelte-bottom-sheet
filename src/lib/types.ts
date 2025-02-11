@@ -12,10 +12,6 @@ export type BottomSheetSettings = {
 	snapPoints?: number[];
 };
 
-export interface ContextMenuContext {
-	closeMenu: () => void;
-}
-
 export type BottomSheetType = typeof BottomSheet & {
 	Content: typeof BottomSheetContent;
 	Sheet: typeof Sheet;
@@ -25,8 +21,6 @@ export type BottomSheetType = typeof BottomSheet & {
 };
 
 export type SheetContext = {
-	// sheetElement: HTMLDivElement;
-	// sheetContent: HTMLDivElement;
 	sheetHeight: number;
 	isSheetOpen: boolean;
 	isDragging: boolean;
