@@ -71,7 +71,7 @@
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet bind:isOpen={isBasicSheetOpen}>
 			<BottomSheet.Overlay>
-				<BottomSheet.Sheet style="max-width: 600px; ">
+				<BottomSheet.Sheet style="max-width: 600px;">
 					<BottomSheet.Handle />
 					<BottomSheet.Content>
 						<h3>Basic Bottom Sheet</h3>
@@ -134,7 +134,7 @@
 		</p>
 		<button onclick={() => (isLongListSheetOpen = true)}>Open Scrollable Sheet</button>
 		<BottomSheet bind:isOpen={isLongListSheetOpen}>
-			<BottomSheet.Sheet style="max-width: 600px; ">
+			<BottomSheet.Sheet style="max-width: 600px;">
 				<BottomSheet.Handle />
 				<BottomSheet.Content>
 					<h3>Scrollable List of Items</h3>

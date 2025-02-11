@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
-	import { setContext } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { writable } from 'svelte/store';
 
 	let {
@@ -15,7 +15,7 @@
 	}: {
 		isOpen?: boolean;
 		settings?: BottomSheetSettings;
-		children: any;
+		children: Snippet<[]>;
 		onopen?: () => void;
 		onclose?: () => void;
 		onsheetdrag?: () => void;
