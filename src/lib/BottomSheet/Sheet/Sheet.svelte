@@ -34,7 +34,6 @@
 	let startHeight: number = 0;
 	let isDragging: boolean = $state(false);
 	let maxHeightPx: number = 0;
-
 	let visibilityUpdate = $state(false);
 
 	isSheetVisible.subscribe((state) => {
@@ -109,7 +108,6 @@
 		const snappointToPxValue = (percentage: number): number =>
 			maxHeightPx - (percentage / 100) * maxHeightPx;
 
-		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (snapPoints.length === 1) {
 			if (currentHeight > snappointToPxValue(100 - (getSettings().closePercentage ?? 10))) {
 				closeSheet();
@@ -120,7 +118,7 @@
 			resetStatesAfterMove();
 			return;
 		}
-		// Check if the current height is above the lowest snap point, else close it
+
 		const lowestSnapPointPx = snappointToPxValue(Math.min(...snapPoints));
 		if (currentHeight > lowestSnapPointPx) {
 			currentHeight = 0;
@@ -129,11 +127,9 @@
 			return;
 		}
 
-		// Determine movement direction (snapping up or down)
 		const isMovingUp = currentHeight < startHeight;
 		const buffer = snappointToPxValue(95);
 
-		// Buffer logic: Prevent accidental snapping if the movement is small
 		if (
 			(isMovingUp && currentHeight > startHeight - buffer) ||
 			(!isMovingUp && currentHeight < startHeight + buffer)
@@ -143,14 +139,12 @@
 			return;
 		}
 
-		// Find valid snap points based on the direction of movement
 		const validPoints = snapPoints
 			.map((point) => ({ original: point, converted: snappointToPxValue(point) }))
 			.filter((item) =>
 				isMovingUp ? item.converted < currentHeight : item.converted > currentHeight
 			);
 
-		// Find the closest snap point
 		if (validPoints.length > 0) {
 			const closest = validPoints.reduce((prev, curr) =>
 				isMovingUp
@@ -179,37 +173,37 @@
 		}
 	};
 
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			closeSheet();
+		}
+	};
+
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sheetElement && !sheetElement.contains(event.target as Node)) {
+			closeSheet();
+		}
+	};
+
 	$effect(() => {
 		if (visibilityUpdate) {
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+			document.addEventListener('keydown', handleKeyDown);
+			setTimeout(() => {
+				document.addEventListener('click', handleClickOutside);
+			}, 100);
 		} else {
 			document.body.style.overflowY = 'auto';
 			document.removeEventListener('touchmove', preventPullToRefresh);
-		}
-
-		if (sheetContent) {
-			// Allows dragging a Scrollable Sheet down when it's not scrolled to the top if you use the handle.
-			// Set isDraggingFromHandle = true, which is then used in the moveEvents
-			let handle: HTMLElement | null = sheetElement.querySelector('.handle-container');
-			if (handle) {
-				handle.remove();
-				sheetElement.insertBefore(handle, sheetElement.firstChild);
-				handle.addEventListener('touchmove', () => {
-					isDraggingFromHandle = true;
-				});
-				handle.addEventListener('mousemove', () => {
-					isDraggingFromHandle = true;
-				});
-			}
+			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('click', handleClickOutside);
 		}
 	});
 </script>
 
 {#if $isSheetVisible}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-
 	<div
 		{...rest}
 		bind:this={sheetElement}
@@ -217,14 +211,18 @@
 		style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
 			? ''
 			: 'transform 0.3s ease-in-out'}; {rest.style} "
-		role="dialog"
 		ontouchstart={touchStartEvent}
 		ontouchmove={touchMoveEvent}
 		ontouchend={moveEnd}
 		onmousedown={mouseDownEvent}
 		onmousemove={mouseMoveEvent}
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="bottom-sheet-title"
+		aria-describedby="bottom-sheet-description"
 		onmouseup={moveEnd}
 		transition:slide={{ duration: 500, easing: cubicOut }}
+		tabindex="-1"
 	>
 		<div
 			bind:this={sheetContent}
