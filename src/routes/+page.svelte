@@ -14,7 +14,7 @@
 		await tick();
 		eventLog = [...eventLog, `${new Date().toLocaleTimeString()}: ${event}`];
 
-		if (eventLog.length > 5) eventLog.shift();
+		if (eventLog.length > 10) eventLog.shift();
 	};
 </script>
 
@@ -71,7 +71,7 @@
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet bind:isOpen={isBasicSheetOpen}>
 			<BottomSheet.Overlay>
-				<BottomSheet.Sheet style="max-width: 600px; ">
+				<BottomSheet.Sheet style="max-width: 600px;">
 					<BottomSheet.Handle />
 					<BottomSheet.Content>
 						<h3>Basic Bottom Sheet</h3>
@@ -134,7 +134,7 @@
 		</p>
 		<button onclick={() => (isLongListSheetOpen = true)}>Open Scrollable Sheet</button>
 		<BottomSheet bind:isOpen={isLongListSheetOpen}>
-			<BottomSheet.Sheet style="max-width: 600px; ">
+			<BottomSheet.Sheet style="max-width: 600px;">
 				<BottomSheet.Handle />
 				<BottomSheet.Content>
 					<h3>Scrollable List of Items</h3>
@@ -164,6 +164,8 @@
 			bind:isOpen={isEventsSheetOpen}
 			onopen={() => logEvent('Bottom Sheet opened.')}
 			onclose={() => logEvent('Bottom Sheet closed.')}
+			onsheetdragstart={() => logEvent('Bottom Sheet Drag started.')}
+			onsheetdragend={() => logEvent('Bottom Sheet Drag ended.')}
 		>
 			<BottomSheet.Trigger
 				style="width: 100px; height: 100px; border: 2px, black, dashed; display: flex; align-items: center; justify-content: center;"

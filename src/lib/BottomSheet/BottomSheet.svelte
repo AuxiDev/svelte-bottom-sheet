@@ -1,20 +1,26 @@
 <script lang="ts">
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
-	import { setContext } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { writable } from 'svelte/store';
 
 	let {
 		isOpen = $bindable(false),
 		onopen,
 		onclose,
+		onsheetdrag,
+		onsheetdragstart,
+		onsheetdragend,
 		settings = { maxHeight: '70%', snapPoints: [] },
 		children
 	}: {
 		isOpen?: boolean;
 		settings?: BottomSheetSettings;
-		children: any;
+		children: Snippet<[]>;
 		onopen?: () => void;
 		onclose?: () => void;
+		onsheetdrag?: () => void;
+		onsheetdragstart?: () => void;
+		onsheetdragend?: () => void;
 	} = $props();
 
 	let isSheetVisible = writable(false);
@@ -35,6 +41,15 @@
 		},
 		toggleSheet: () => {
 			isSheetVisible.update((state: boolean) => !state);
+		},
+		onSheetDrag: () => {
+			onsheetdrag?.();
+		},
+		onSheetDragStart: () => {
+			onsheetdragstart?.();
+		},
+		onSheetDragEnd: () => {
+			onsheetdragend?.();
 		},
 		getSettings: () => {
 			return settings;

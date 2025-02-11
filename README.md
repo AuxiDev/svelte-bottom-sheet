@@ -80,10 +80,13 @@ You can use the BottomSheet component in any SvelteKit project.
 
 ### Events
 
-| Event       | Description                         |
-| ----------- | ----------------------------------- |
-| `onopen()`  | Fires when the Bottom Sheet opens.  |
-| `onclose()` | Fires when the Bottom Sheet closes. |
+| Event                | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| `onopen()`           | Fires when the Bottom Sheet opens.                      |
+| `onclose()`          | Fires when the Bottom Sheet closes.                     |
+| `onsheetdragstart()` | Fires when the Bottom Sheet starts being dragged.       |
+| `onsheetdragend()`   | Fires when the Bottom Sheet ends being dragged.         |
+| `onsheetdrag()`      | Fires when the Bottom Sheet is currently being dragged. |
 
 ## BottomSheet Component Usage
 

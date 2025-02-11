@@ -1,7 +1,11 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
-	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
+	let {
+		children,
+		...rest
+	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
 <div class="bottomSheetContent {rest.class}" {...rest}>

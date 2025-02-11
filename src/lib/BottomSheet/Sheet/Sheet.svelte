@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, type ComponentType, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
@@ -11,30 +11,35 @@
 	let {
 		children,
 		...rest
-	}: {
-		children?: any;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 	const sheetContext = getContext<SheetContext>('sheetStateContext');
 	if (!sheetContext) {
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
 	}
-	const { isSheetVisible, closeSheet, getSettings } = sheetContext;
+	const { isSheetVisible, closeSheet, getSettings, onSheetDrag, onSheetDragEnd, onSheetDragStart } =
+		sheetContext;
 
 	let maxHeight = getSettings().maxHeight ?? '70%';
 	let snapPoints: number[] = getSettings().snapPoints ?? [];
 
 	// svelte-ignore non_reactive_update
 	let sheetElement: HTMLDivElement;
-	// svelte-ignore non_reactive_update
-	let sheetContent: HTMLDivElement;
+	let sheetContent: HTMLDivElement | null = $state(null);
 	let currentHeight: number = $state(0);
 	let isMovingSheet: boolean = $state(false);
 	let noScrolledTop: number = 0;
+	let isDraggingFromHandle: boolean = false;
 
 	let startY: number = 0;
 	let startHeight: number = 0;
 	let isDragging: boolean = $state(false);
 	let maxHeightPx: number = 0;
+
+	let visibilityUpdate = $state(false);
+
+	isSheetVisible.subscribe((state) => {
+		visibilityUpdate = state;
+	});
 
 	onMount(() => {
 		snapPoints.push(100);
@@ -53,28 +58,44 @@
 		startY = clientStartY;
 		startHeight = currentHeight;
 		isDragging = true;
-		noScrolledTop = sheetContent.scrollTop;
+		noScrolledTop = sheetContent?.scrollTop ?? 0;
+		onSheetDragStart();
 	};
 
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
-		const offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
+		let offset: number;
+
+		if (isDraggingFromHandle) {
+			offset = Math.max(0, event.clientY - startY + startHeight);
+		} else {
+			offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
+		}
 
 		currentHeight = offset;
+		onSheetDrag();
 	};
 
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging) return;
+		onSheetDrag();
 
-		if (sheetContent.scrollTop !== 0) {
+		if (sheetContent?.scrollTop !== 0 && !isDraggingFromHandle) {
 			isMovingSheet = false;
 			return;
 		}
 
+		let offset: number;
+
 		// event.touches[0].clientY - startY - normal offset
 		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
 		// startHeight - offset when we not start at the top with dragging
-		const offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
+		if (isDraggingFromHandle) {
+			// Is used for scrollable sheets. Allows to user to close the sheet when not scrolled to the top, but dragging from the handle.
+			offset = Math.max(0, event.touches[0].clientY - startY + startHeight);
+		} else {
+			offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
+		}
 
 		if (currentHeight != 0) {
 			isMovingSheet = true;
@@ -84,6 +105,7 @@
 	};
 
 	const moveEnd = () => {
+		onSheetDragEnd();
 		const snappointToPxValue = (percentage: number): number =>
 			maxHeightPx - (percentage / 100) * maxHeightPx;
 
@@ -148,18 +170,38 @@
 	const resetStatesAfterMove = () => {
 		isDragging = false;
 		isMovingSheet = false;
+		isDraggingFromHandle = false;
 	};
-	let visibilityUpdate = $state(false);
 
-	isSheetVisible.subscribe((state) => {
-		visibilityUpdate = state;
-	});
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
+		}
+	};
 
 	$effect(() => {
 		if (visibilityUpdate) {
 			document.body.style.overflowY = 'hidden';
+			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 		} else {
 			document.body.style.overflowY = 'auto';
+			document.removeEventListener('touchmove', preventPullToRefresh);
+		}
+
+		if (sheetContent) {
+			// Allows dragging a Scrollable Sheet down when it's not scrolled to the top if you use the handle.
+			// Set isDraggingFromHandle = true, which is then used in the moveEvents
+			let handle: HTMLElement | null = sheetElement.querySelector('.handle-container');
+			if (handle) {
+				handle.remove();
+				sheetElement.insertBefore(handle, sheetElement.firstChild);
+				handle.addEventListener('touchmove', () => {
+					isDraggingFromHandle = true;
+				});
+				handle.addEventListener('mousemove', () => {
+					isDraggingFromHandle = true;
+				});
+			}
 		}
 	});
 </script>
