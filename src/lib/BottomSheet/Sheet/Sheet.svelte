@@ -199,12 +199,14 @@
 		transition:slide={{ duration: 500, easing: cubicOut }}
 	>
 		<div
-			class="bottom-sheet-handle"
-			role="button"
-			tabindex="0"
+			class="handle-container"
 			onmousemove={() => (isDraggingFromHandle = true)}
 			ontouchmove={() => (isDraggingFromHandle = true)}
-		></div>
+			role="button"
+			tabindex="0"
+		>
+			<div class="bottom-sheet-handle" role="button" tabindex="0"></div>
+		</div>
 		<div
 			bind:this={sheetContent}
 			class="bottom-sheet-content"
@@ -216,6 +218,13 @@
 {/if}
 
 <style>
+	.handle-container {
+		width: 100%;
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 	.prevent-select {
 		-webkit-user-select: none;
 		-ms-user-select: none;
