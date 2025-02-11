@@ -4,7 +4,9 @@
 	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div {...rest} class="bottom-sheet-handle {rest.class}"></div>
+<div class="handle-container">
+	<div {...rest} class="bottom-sheet-handle {rest.class}"></div>
+</div>
 
 <style>
 	.bottom-sheet-handle {
@@ -13,5 +15,12 @@
 		background-color: #e0e0e0;
 		border-radius: 2px;
 		margin: 16px auto;
+	}
+	.handle-container {
+		height: 40px;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { fade, slide } from 'svelte/transition';
@@ -12,7 +12,10 @@
 	}
 	const { isSheetVisible } = sheetContext;
 
-	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
+	let {
+		children,
+		...rest
+	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
 {#if $isSheetVisible}
