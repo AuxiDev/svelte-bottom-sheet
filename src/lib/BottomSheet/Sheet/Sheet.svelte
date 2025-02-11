@@ -29,6 +29,8 @@
 	let isDragging: boolean = $state(false);
 	let maxHeightPx: number = 0;
 
+	let isDraggingFromHandle = false;
+
 	onMount(() => {
 		snapPoints.push(100);
 		maxHeightPx = window.innerHeight * (parseInt(maxHeight) / 100);
@@ -51,7 +53,13 @@
 
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
-		const offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
+		let offset: number;
+
+		if (isDraggingFromHandle) {
+			offset = Math.max(0, event.clientY - startY + startHeight);
+		} else {
+			offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
+		}
 
 		currentHeight = offset;
 	};
@@ -59,15 +67,20 @@
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging) return;
 
-		if (sheetContent.scrollTop !== 0) {
+		if (sheetContent.scrollTop !== 0 && !isDraggingFromHandle) {
 			isMovingSheet = false;
 			return;
 		}
 
+		let offset: number;
 		// event.touches[0].clientY - startY - normal offset
 		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
 		// startHeight - offset when we not start at the top with dragging
-		const offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
+		if (isDraggingFromHandle) {
+			offset = Math.max(0, event.touches[0].clientY - startY + startHeight);
+		} else {
+			offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
+		}
 
 		if (currentHeight != 0) {
 			isMovingSheet = true;
@@ -141,6 +154,7 @@
 	const resetStatesAfterMove = () => {
 		isDragging = false;
 		isMovingSheet = false;
+		isDraggingFromHandle = false;
 	};
 	let visibilityUpdate = $state(false);
 
@@ -176,7 +190,13 @@
 		onmouseup={moveEnd}
 		transition:slide={{ duration: 500, easing: cubicOut }}
 	>
-		<div class="bottom-sheet-handle"></div>
+		<div
+			class="bottom-sheet-handle"
+			role="button"
+			tabindex="0"
+			onmousemove={() => (isDraggingFromHandle = true)}
+			ontouchmove={() => (isDraggingFromHandle = true)}
+		></div>
 		<div
 			bind:this={sheetContent}
 			class="bottom-sheet-content"
