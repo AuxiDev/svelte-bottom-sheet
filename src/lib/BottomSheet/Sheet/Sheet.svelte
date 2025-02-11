@@ -35,9 +35,14 @@
 	let isDragging: boolean = $state(false);
 	let maxHeightPx: number = 0;
 
+	let visibilityUpdate = $state(false);
+
+	isSheetVisible.subscribe((state) => {
+		visibilityUpdate = state;
+	});
+
 	onMount(() => {
 		snapPoints.push(100);
-
 		maxHeightPx = window.innerHeight * (parseInt(maxHeight) / 100);
 	});
 
@@ -59,7 +64,6 @@
 
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
-		console.log('hi');
 		let offset: number;
 
 		if (isDraggingFromHandle) {
@@ -168,17 +172,20 @@
 		isMovingSheet = false;
 		isDraggingFromHandle = false;
 	};
-	let visibilityUpdate = $state(false);
 
-	isSheetVisible.subscribe((state) => {
-		visibilityUpdate = state;
-	});
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
+		}
+	};
 
 	$effect(() => {
 		if (visibilityUpdate) {
 			document.body.style.overflowY = 'hidden';
+			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 		} else {
 			document.body.style.overflowY = 'auto';
+			document.removeEventListener('touchmove', preventPullToRefresh);
 		}
 
 		if (sheetContent) {
@@ -188,10 +195,10 @@
 			if (handle) {
 				handle.remove();
 				sheetElement.insertBefore(handle, sheetElement.firstChild);
-				handle.addEventListener('touchmove', (e) => {
+				handle.addEventListener('touchmove', () => {
 					isDraggingFromHandle = true;
 				});
-				handle.addEventListener('mousemove', (e) => {
+				handle.addEventListener('mousemove', () => {
 					isDraggingFromHandle = true;
 				});
 			}
