@@ -44,9 +44,15 @@
 			setTimeout(() => {
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
+			document.addEventListener('keydown', handleKeyDown);
+			setTimeout(() => {
+				document.addEventListener('click', handleClickOutside);
+			}, 100);
 		} else {
 			document.body.style.overflowY = 'auto';
 			document.removeEventListener('touchmove', preventPullToRefresh);
+			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('click', handleClickOutside);
 		}
