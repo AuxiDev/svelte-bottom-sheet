@@ -1,6 +1,13 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import type { SheetContext } from '$lib/types.js';
+	import { getContext, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+
+	const sheetContext = getContext<SheetContext>('sheetContext');
+
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Content must be inside a BottomSheet component');
+	}
 
 	let {
 		children,
@@ -8,12 +15,21 @@
 	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div class="bottomSheetContent {rest.class}" {...rest}>
+<div
+	class="bottom-sheet-content {rest.class}"
+	bind:this={sheetContext.sheetContent}
+	style="overflow-y: {sheetContext.isMovingSheet ? 'hidden' : 'auto'};"
+	{...rest}
+>
 	{@render children?.()}
 </div>
 
 <style>
-	.bottomSheetContent {
+	.bottom-sheet-content {
+		overflow-y: scroll;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 		padding: 20px;
+		height: 100%;
 	}
 </style>

@@ -153,7 +153,7 @@ There is a lot of stuff you can use inside `BottomSheet` which will be explained
 4. **Overlay & Content & Handle:**
    If you want to add a Overlay, you can do that by wrapping the `BottomSheet.Sheet` with `BottomSheet.Overlay`. You can style the overlay using the `style` property.
 
-   You can use `BottomSheet.Content` inside `BottomSheet.Sheet` to display content. It's optional, but you are able to style it.
+   You can use `BottomSheet.Content` inside `BottomSheet.Sheet` to display content. NOT OPTIONAL! (If you want good scrollable sheet support)
 
    When you place `BottomSheet.Handle` inside `BottomSheet.Sheet` you will get a style-able handle.
 

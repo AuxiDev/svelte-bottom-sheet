@@ -25,12 +25,21 @@ export type BottomSheetType = typeof BottomSheet & {
 };
 
 export type SheetContext = {
+	// sheetElement: HTMLDivElement;
+	// sheetContent: HTMLDivElement;
+	sheetHeight: number;
+	isSheetOpen: boolean;
+	isDragging: boolean;
+	isMovingSheet: boolean;
+	isDraggingFromHandle: boolean;
+	sheetContent: HTMLDivElement | null;
+	settings: BottomSheetSettings;
+	touchStartEvent: (event: TouchEvent) => void;
+	mouseDownEvent: (event: MouseEvent) => void;
+	mouseMoveEvent: (event: MouseEvent) => void;
+	touchMoveEvent: (event: TouchEvent) => void;
+	moveEnd: () => void;
 	openSheet: () => void;
 	closeSheet: () => void;
 	toggleSheet: () => void;
-	onSheetDrag: () => void;
-	onSheetDragStart: () => void;
-	onSheetDragEnd: () => void;
-	getSettings: () => BottomSheetSettings;
-	isSheetVisible: Writable<boolean>;
 };

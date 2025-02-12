@@ -8,14 +8,14 @@
 		...rest
 	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 
-	const sheetContext = getContext<SheetContext>('sheetStateContext');
+	const sheetContext = getContext<SheetContext>('sheetContext');
+
 	if (!sheetContext) {
-		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+		throw new Error('BottomSheet.Trigger must be inside a BottomSheet component');
 	}
-	const { toggleSheet } = sheetContext;
 
 	const handleClick = () => {
-		toggleSheet();
+		sheetContext.toggleSheet();
 	};
 </script>
 

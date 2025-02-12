@@ -1,10 +1,23 @@
 <script lang="ts">
+	import type { SheetContext } from '$lib/types.js';
+	import { getContext } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+
+	const sheetContext = getContext<SheetContext>('sheetContext');
+
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+	}
 
 	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div class="handle-container">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="handle-container"
+	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
+	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
+>
 	<div {...rest} class="bottom-sheet-handle {rest.class}"></div>
 </div>
 
