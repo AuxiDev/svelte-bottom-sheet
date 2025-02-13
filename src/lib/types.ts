@@ -2,7 +2,6 @@ import BottomSheetContent from './BottomSheet/Content/Content.svelte';
 import type Sheet from './BottomSheet/Sheet/Sheet.svelte';
 import type BottomSheet from './BottomSheet/BottomSheet.svelte';
 import type SheetTrigger from './BottomSheet/Trigger/Trigger.svelte';
-import { writable, type Writable } from 'svelte/store';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 import type Handle from './BottomSheet/Handle/Handle.svelte';
 
@@ -18,6 +17,12 @@ export type BottomSheetType = typeof BottomSheet & {
 	Trigger: typeof SheetTrigger;
 	Overlay: typeof Overlay;
 	Handle: typeof Handle;
+};
+
+export type SheetIdentificationContext = {
+	sheetId: string;
+	headingId: string;
+	descriptionId: string;
 };
 
 export type SheetContext = {
