@@ -69,7 +69,7 @@
 			overwhelming them.
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
-		<BottomSheet bind:isOpen={isBasicSheetOpen}>
+		<BottomSheet bind:isSheetOpen={isBasicSheetOpen}>
 			<BottomSheet.Overlay>
 				<BottomSheet.Sheet style="max-width: 600px;">
 					<BottomSheet.Handle />
@@ -101,7 +101,7 @@
 		<button onclick={() => (isSnapPointsSheetOpen = true)}>Open Snap Points Sheet</button>
 		<BottomSheet
 			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75] }}
-			bind:isOpen={isSnapPointsSheetOpen}
+			bind:isSheetOpen={isSnapPointsSheetOpen}
 		>
 			<BottomSheet.Sheet style="max-width: 600px; ">
 				<BottomSheet.Handle />
@@ -133,7 +133,7 @@
 			handle scrollable content. When the list grows too large, users can scroll to see more.
 		</p>
 		<button onclick={() => (isLongListSheetOpen = true)}>Open Scrollable Sheet</button>
-		<BottomSheet bind:isOpen={isLongListSheetOpen}>
+		<BottomSheet bind:isSheetOpen={isLongListSheetOpen}>
 			<BottomSheet.Sheet style="max-width: 600px;">
 				<BottomSheet.Handle />
 				<BottomSheet.Content>
@@ -161,7 +161,7 @@
 			log of user interactions.<br /><br />The Bottom Sheet Component also provides a trigger area.
 		</p>
 		<BottomSheet
-			bind:isOpen={isEventsSheetOpen}
+			bind:isSheetOpen={isEventsSheetOpen}
 			onopen={() => logEvent('Bottom Sheet opened.')}
 			onclose={() => logEvent('Bottom Sheet closed.')}
 			onsheetdragstart={() => logEvent('Bottom Sheet Drag started.')}

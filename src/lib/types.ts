@@ -2,7 +2,6 @@ import BottomSheetContent from './BottomSheet/Content/Content.svelte';
 import type Sheet from './BottomSheet/Sheet/Sheet.svelte';
 import type BottomSheet from './BottomSheet/BottomSheet.svelte';
 import type SheetTrigger from './BottomSheet/Trigger/Trigger.svelte';
-import { writable, type Writable } from 'svelte/store';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 import type Handle from './BottomSheet/Handle/Handle.svelte';
 
@@ -12,10 +11,6 @@ export type BottomSheetSettings = {
 	snapPoints?: number[];
 };
 
-export interface ContextMenuContext {
-	closeMenu: () => void;
-}
-
 export type BottomSheetType = typeof BottomSheet & {
 	Content: typeof BottomSheetContent;
 	Sheet: typeof Sheet;
@@ -24,9 +19,13 @@ export type BottomSheetType = typeof BottomSheet & {
 	Handle: typeof Handle;
 };
 
+export type SheetIdentificationContext = {
+	sheetId: string;
+	headingId: string;
+	descriptionId: string;
+};
+
 export type SheetContext = {
-	// sheetElement: HTMLDivElement;
-	// sheetContent: HTMLDivElement;
 	sheetHeight: number;
 	isSheetOpen: boolean;
 	isDragging: boolean;

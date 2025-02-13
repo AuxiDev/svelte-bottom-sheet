@@ -2,7 +2,7 @@
 	import { getContext, onMount, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
-	import type { SheetContext } from '$lib/types.js';
+	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
@@ -11,6 +11,12 @@
 	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 
 	const sheetContext = getContext<SheetContext>('sheetContext');
+	const sheetIdentificationContext = getContext<SheetIdentificationContext>(
+		'sheetIdentificationContext'
+	);
+
+	let previousActiveElement: HTMLElement | null;
+
 	if (!sheetContext) {
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
 	}
@@ -24,30 +30,93 @@
 		}
 	};
 
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sheetElement && !sheetElement.contains(event.target as Node)) {
+			sheetContext.closeSheet();
+		}
+	};
+
+	const getFocusableElements = () => {
+		return Array.from(
+			sheetElement.querySelectorAll<HTMLElement>(
+				'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+			)
+		);
+	};
+
+	const handleFocusTrap = (event: KeyboardEvent) => {
+		if (event.key === 'Tab') {
+			const focusableElements = getFocusableElements();
+			if (!focusableElements.length) return;
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+			const isTabPressed = !event.shiftKey;
+			const isShiftTabPressed = event.shiftKey;
+
+			if (isShiftTabPressed && document.activeElement === firstElement) {
+				lastElement.focus();
+				event.preventDefault();
+			}
+
+			if (isTabPressed && document.activeElement === lastElement) {
+				firstElement.focus();
+				event.preventDefault();
+			}
+		}
+	};
+
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			sheetContext.closeSheet();
+		}
+		handleFocusTrap(event);
+	};
+
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
+			console.log(previousActiveElement);
+			previousActiveElement = document.activeElement as HTMLElement;
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+			document.addEventListener('keydown', handleKeyDown);
+
+			setTimeout(() => {
+				const focusableElements = getFocusableElements();
+				if (focusableElements.length) {
+					focusableElements[0].focus();
+				} else {
+					sheetElement?.focus();
+				}
+				document.addEventListener('click', handleClickOutside);
+			}, 100);
 		} else {
 			document.body.style.overflowY = 'auto';
 			document.removeEventListener('touchmove', preventPullToRefresh);
+			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('click', handleClickOutside);
+			previousActiveElement?.focus();
 		}
 	});
 </script>
 
 {#if sheetContext.isSheetOpen}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-
 	<div
 		{...rest}
 		bind:this={sheetElement}
 		class="bottom-sheet {sheetContext.isDragging ? 'prevent-select' : ''}"
 		style="height: {sheetContext.settings
-			.maxHeight};  transform: translateY({sheetContext.sheetHeight}px); transition: {sheetContext.isDragging
+			.maxHeight}; transform: translateY({sheetContext.sheetHeight}px); transition: {sheetContext.isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'}; {rest.style} "
+			: 'transform 0.3s ease-in-out'}; {rest.style}"
 		role="dialog"
+		aria-modal="true"
+		aria-labelledby={sheetIdentificationContext.headingId}
+		aria-describedby={sheetIdentificationContext.descriptionId}
+		id={sheetIdentificationContext.sheetId}
+		tabindex="-1"
+		aria-live="polite"
 		ontouchstart={sheetContext.touchStartEvent}
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}

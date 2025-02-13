@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { type SheetContext, type BottomSheetSettings } from '$lib/types.js';
-	import { getContext, onMount, setContext, type Snippet } from 'svelte';
-	import { get, writable } from 'svelte/store';
+	import {
+		type SheetContext,
+		type BottomSheetSettings,
+		type SheetIdentificationContext
+	} from '$lib/types.js';
+	import { onMount, setContext, type Snippet } from 'svelte';
 
 	let {
-		isOpen = $bindable(false),
+		isSheetOpen = $bindable(false),
 		onopen,
 		onclose,
 		onsheetdrag,
@@ -13,7 +16,7 @@
 		settings = { maxHeight: '70%', snapPoints: [100] },
 		children
 	}: {
-		isOpen?: boolean;
+		isSheetOpen?: boolean;
 		settings?: BottomSheetSettings;
 		children: Snippet<[]>;
 		onopen?: () => void;
@@ -23,15 +26,7 @@
 		onsheetdragend?: () => void;
 	} = $props();
 
-	let isSheetOpen = $state(false);
-
 	$effect(() => {
-		isSheetOpen = isOpen;
-	});
-
-	$effect(() => {
-		isOpen = isSheetOpen;
-
 		if (isSheetOpen) {
 			onopen?.();
 		} else {
@@ -40,6 +35,9 @@
 	});
 
 	onMount(() => {
+		if (!settings.snapPoints?.includes(100)) {
+			settings.snapPoints?.push(100);
+		}
 		maxHeightPx = window.innerHeight * (parseInt(settings.maxHeight ?? '70%') / 100);
 	});
 
@@ -52,6 +50,10 @@
 	let startHeight: number;
 	let noScrolledTop: number = 0;
 	let maxHeightPx: number = 0;
+
+	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
+	const headingId = `${sheetId}-heading`;
+	const descriptionId = `${sheetId}-description`;
 
 	const touchStartEvent = (event: TouchEvent) => {
 		initializeMove(event.touches[0].clientY);
@@ -234,7 +236,14 @@
 		}
 	};
 
+	let sheetIdentifcationContext: SheetIdentificationContext = {
+		sheetId: sheetId,
+		headingId: headingId,
+		descriptionId: descriptionId
+	};
+
 	setContext<SheetContext>('sheetContext', sheetContext);
+	setContext<SheetIdentificationContext>('sheetIdentificationContext', sheetIdentifcationContext);
 </script>
 
 <div>

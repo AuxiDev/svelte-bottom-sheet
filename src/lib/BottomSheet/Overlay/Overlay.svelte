@@ -19,6 +19,8 @@
 {#if sheetContext.isSheetOpen}
 	<div
 		{...rest}
+		role="presentation"
+		aria-hidden="true"
 		transition:fade={{ duration: 200 }}
 		class="bottom-sheet-overlay {rest.class}"
 	></div>

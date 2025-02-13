@@ -19,6 +19,7 @@
 	class="bottom-sheet-content {rest.class}"
 	bind:this={sheetContext.sheetContent}
 	style="overflow-y: {sheetContext.isMovingSheet ? 'hidden' : 'auto'};"
+	role="document"
 	{...rest}
 >
 	{@render children?.()}
