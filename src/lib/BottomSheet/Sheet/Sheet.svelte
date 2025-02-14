@@ -75,7 +75,6 @@
 
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
-			console.log(previousActiveElement);
 			previousActiveElement = document.activeElement as HTMLElement;
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });

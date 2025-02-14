@@ -1,6 +1,6 @@
 <script lang="ts">
 	import BottomSheet from '$lib/BottomSheet/index.js';
-	import Sheet from '$lib/BottomSheet/Sheet/Sheet.svelte';
+	import BottomSheet2 from '$lib/BottomSheet/BottomSheet.svelte';
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 
@@ -10,6 +10,13 @@
 	let eventLog = $state<string[]>([]);
 	let isLongListSheetOpen = $state(false);
 
+	let snapPointsSheet: BottomSheet2;
+
+	$effect(() => {
+		if (isSnapPointsSheetOpen) {
+			//snapPointsSheet.setSnapPoint(25);
+		}
+	});
 	const logEvent = async (event: string) => {
 		await tick();
 		eventLog = [...eventLog, `${new Date().toLocaleTimeString()}: ${event}`];
@@ -100,8 +107,10 @@
 		</p>
 		<button onclick={() => (isSnapPointsSheetOpen = true)}>Open Snap Points Sheet</button>
 		<BottomSheet
-			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75] }}
+			bind:this={snapPointsSheet}
+			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75], startingSnapPoint: 50 }}
 			bind:isSheetOpen={isSnapPointsSheetOpen}
+			onsnap={(point) => console.log(`Sheet snapped to ${point}%`)}
 		>
 			<BottomSheet.Sheet style="max-width: 600px; ">
 				<BottomSheet.Handle />
