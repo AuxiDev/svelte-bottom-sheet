@@ -13,6 +13,7 @@
 		onsheetdrag,
 		onsheetdragstart,
 		onsheetdragend,
+		onsnap,
 		settings = { maxHeight: '70%', snapPoints: [100] },
 		children
 	}: {
@@ -24,6 +25,7 @@
 		onsheetdrag?: () => void;
 		onsheetdragstart?: () => void;
 		onsheetdragend?: () => void;
+		onsnap?: (point: number) => void;
 	} = $props();
 
 	$effect(() => {
@@ -31,16 +33,19 @@
 			onopen?.();
 		} else {
 			onclose?.();
+			setSnapPoint(settings?.startingSnapPoint ?? 100);
 		}
 	});
 
 	onMount(() => {
+		maxHeightPx = window.innerHeight * (parseInt(settings.maxHeight ?? '70%') / 100);
 		if (!settings.snapPoints?.includes(100)) {
 			settings.snapPoints?.push(100);
 		}
-		maxHeightPx = window.innerHeight * (parseInt(settings.maxHeight ?? '70%') / 100);
+		setSnapPoint(settings?.startingSnapPoint ?? 100, false);
 	});
 
+	// States & Vars needed for sheet-positon calculation.
 	let sheetHeight = $state(0);
 	let isDraggingFromHandle = $state(false);
 	let sheetContent: HTMLDivElement | null = $state(null);
@@ -51,9 +56,32 @@
 	let noScrolledTop: number = 0;
 	let maxHeightPx: number = 0;
 
+	// A11Y related IDs
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
 	const headingId = `${sheetId}-heading`;
 	const descriptionId = `${sheetId}-description`;
+
+	/**
+	 * Allows you to change the snap-point a snap-able sheet is snapped to.
+	 * You can only snap the sheet to snap-points defined in the settings.
+	 * @param {number} point - The point you want to snap to.
+	 * @param {boolean} throwEvent [OPTIONAL] - Whether a onsnap event is emitted or not. Default: true
+	 * @returns {boolean} Whether the snap was sucessful or not.
+	 */
+	export const setSnapPoint = (point: number, throwEvent: boolean = true): boolean => {
+		if (settings.snapPoints?.includes(point)) {
+			sheetHeight = snappointToPxValue(point);
+			if (throwEvent) {
+				onsnap?.(point);
+			}
+			return true;
+		}
+		return false;
+	};
+
+	// Converts % points into the px value in relation to the maxHeight of the sheet.
+	const snappointToPxValue = (percentage: number): number =>
+		maxHeightPx - (percentage / 100) * maxHeightPx;
 
 	const touchStartEvent = (event: TouchEvent) => {
 		initializeMove(event.touches[0].clientY);
@@ -112,10 +140,9 @@
 		sheetHeight = offset;
 		onsheetdrag?.();
 	};
+
 	const moveEnd = () => {
 		onsheetdragend?.();
-		const snappointToPxValue = (percentage: number): number =>
-			maxHeightPx - (percentage / 100) * maxHeightPx;
 
 		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (settings.snapPoints?.length === 1) {
@@ -170,6 +197,7 @@
 						? curr
 						: prev
 			);
+			onsnap?.(closest.original);
 			sheetHeight = closest.converted;
 		}
 

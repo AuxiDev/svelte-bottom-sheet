@@ -9,6 +9,7 @@ export type BottomSheetSettings = {
 	closePercentage?: number;
 	maxHeight?: string;
 	snapPoints?: number[];
+	startingSnapPoint?: number;
 };
 
 export type BottomSheetType = typeof BottomSheet & {
