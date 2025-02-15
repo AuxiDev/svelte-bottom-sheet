@@ -30,7 +30,7 @@
 
 	const defaultSettings: Required<BottomSheetSettings> = {
 		closeThreshold: 10,
-		autoClosethreshold: 0,
+		autoCloseThreshold: 0,
 		maxHeight: '70%',
 		snapPoints: [100],
 		startingSnapPoint: 100
@@ -93,6 +93,19 @@
 	const snappointToPxValue = (percentage: number): number =>
 		maxHeightPx - (percentage / 100) * maxHeightPx;
 
+	const tryAutoClose = () => {
+		if (
+			settings.autoCloseThreshold &&
+			sheetHeight > snappointToPxValue(100 - settings.autoCloseThreshold)
+		) {
+			sheetContext.closeSheet();
+			console.log('hi');
+			sheetHeight = 0;
+			resetStatesAfterMove();
+			return;
+		}
+	};
+
 	const touchStartEvent = (event: TouchEvent) => {
 		initializeMove(event.touches[0].clientY);
 	};
@@ -151,19 +164,6 @@
 		sheetHeight = offset;
 		onsheetdrag?.();
 		tryAutoClose();
-	};
-
-	const tryAutoClose = () => {
-		if (
-			settings.autoClosethreshold &&
-			sheetHeight > snappointToPxValue(100 - settings.autoClosethreshold)
-		) {
-			sheetContext.closeSheet();
-			console.log('hi');
-			sheetHeight = 0;
-			resetStatesAfterMove();
-			return;
-		}
 	};
 
 	const moveEnd = () => {

@@ -7,7 +7,7 @@ import type Handle from './BottomSheet/Handle/Handle.svelte';
 
 export type BottomSheetSettings = {
 	closeThreshold?: number;
-	autoClosethreshold?: number;
+	autoCloseThreshold?: number;
 	maxHeight?: string;
 	snapPoints?: number[];
 	startingSnapPoint?: number;
