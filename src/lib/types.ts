@@ -8,7 +8,7 @@ import type Handle from './BottomSheet/Handle/Handle.svelte';
 export type BottomSheetSettings = {
 	closeThreshold?: number;
 	autoCloseThreshold?: number;
-	maxHeight?: string;
+	maxHeight?: number;
 	snapPoints?: number[];
 	startingSnapPoint?: number;
 };
@@ -34,7 +34,8 @@ export type SheetContext = {
 	isMovingSheet: boolean;
 	isDraggingFromHandle: boolean;
 	sheetContent: HTMLDivElement | null;
-	settings: BottomSheetSettings;
+	settings: Required<BottomSheetSettings>;
+	maxHeightPx: number;
 	touchStartEvent: (event: TouchEvent) => void;
 	mouseDownEvent: (event: MouseEvent) => void;
 	mouseMoveEvent: (event: MouseEvent) => void;

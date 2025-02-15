@@ -4,6 +4,7 @@
 		type BottomSheetSettings,
 		type SheetIdentificationContext
 	} from '$lib/types.js';
+	import { measurementToPx } from '$lib/utils.js';
 	import { onMount, setContext, type Snippet } from 'svelte';
 
 	let {
@@ -14,7 +15,7 @@
 		onsheetdragstart,
 		onsheetdragend,
 		onsnap,
-		settings = { maxHeight: '70%', snapPoints: [100] },
+		settings,
 		children
 	}: {
 		isSheetOpen?: boolean;
@@ -28,43 +29,48 @@
 		onsnap?: (point: number) => void;
 	} = $props();
 
-	const defaultSettings: Required<BottomSheetSettings> = {
-		closeThreshold: 10,
+	const defaultSheetSettings: Required<BottomSheetSettings> = {
+		closeThreshold: 0.9,
 		autoCloseThreshold: 0,
-		maxHeight: '70%',
-		snapPoints: [100],
-		startingSnapPoint: 100
+		maxHeight: 0.7,
+		snapPoints: [1],
+		startingSnapPoint: 1
 	};
 
-	settings = { ...defaultSettings, ...settings };
-	if (!settings.snapPoints?.includes(100)) {
-		settings.snapPoints?.push(100);
+	const sheetSettings: Required<BottomSheetSettings> = { ...defaultSheetSettings, ...settings };
+
+	if (!sheetSettings.snapPoints.includes(1)) {
+		sheetSettings.snapPoints.push(1);
 	}
+
+	onMount(() => {
+		if (sheetSettings.maxHeight > 1) {
+			maxHeightPx = sheetSettings.maxHeight;
+		} else {
+			maxHeightPx = window.innerHeight * sheetSettings.maxHeight;
+		}
+		setSnapPoint(sheetSettings.startingSnapPoint, false);
+	});
 
 	$effect(() => {
 		if (isSheetOpen) {
 			onopen?.();
 		} else {
 			onclose?.();
-			setSnapPoint(settings?.startingSnapPoint ?? 100, false);
+			setSnapPoint(sheetSettings.startingSnapPoint, false);
 		}
-	});
-
-	onMount(() => {
-		maxHeightPx = window.innerHeight * (parseInt(settings.maxHeight ?? '70%') / 100);
-		setSnapPoint(settings?.startingSnapPoint ?? 100, false);
 	});
 
 	// States & Vars needed for sheet-positon calculation.
 	let sheetHeight = $state(0);
 	let isDraggingFromHandle = $state(false);
+	let maxHeightPx = $state(0);
 	let sheetContent: HTMLDivElement | null = $state(null);
 	let isDragging = $state(false);
 	let isMovingSheet = $state(false);
 	let startY: number;
 	let startHeight: number;
 	let noScrolledTop: number = 0;
-	let maxHeightPx: number = 0;
 
 	// A11Y related IDs
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
@@ -79,8 +85,8 @@
 	 * @returns {boolean} Whether the snap was sucessful or not.
 	 */
 	export const setSnapPoint = (point: number, throwEvent: boolean = true): boolean => {
-		if (settings.snapPoints?.includes(point)) {
-			sheetHeight = snappointToPxValue(point);
+		if (sheetSettings.snapPoints.includes(point)) {
+			sheetHeight = measurementToPx(point, maxHeightPx);
 			if (throwEvent) {
 				onsnap?.(point);
 			}
@@ -89,31 +95,41 @@
 		return false;
 	};
 
-	// Converts % points into the px value in relation to the maxHeight of the sheet.
-	const snappointToPxValue = (percentage: number): number =>
-		maxHeightPx - (percentage / 100) * maxHeightPx;
-
+	/**
+	 * Tries to automatically close the bottom sheet if it exceeds the auto-close threshold.
+	 */
 	const tryAutoClose = () => {
-		if (
-			settings.autoCloseThreshold &&
-			sheetHeight > snappointToPxValue(100 - settings.autoCloseThreshold)
-		) {
-			sheetContext.closeSheet();
-			console.log('hi');
+		if (sheetHeight > measurementToPx(sheetSettings.autoCloseThreshold, maxHeightPx)) {
 			sheetHeight = 0;
+			sheetContext.closeSheet();
 			resetStatesAfterMove();
 			return;
 		}
 	};
 
+	/**
+	 * Handles the touch start event, initializing the drag operation.
+	 *
+	 * @param {TouchEvent} event - The touch event.
+	 */
 	const touchStartEvent = (event: TouchEvent) => {
 		initializeMove(event.touches[0].clientY);
 	};
 
+	/**
+	 * Handles the mouse down event, initializing the drag operation.
+	 *
+	 * @param {MouseEvent} event - The mouse event.
+	 */
 	const mouseDownEvent = (event: MouseEvent) => {
 		initializeMove(event.clientY);
 	};
 
+	/**
+	 * Initializes the movement logic when dragging starts.
+	 *
+	 * @param {number} clientStartY - The Y position of the initial touch/click.
+	 */
 	const initializeMove = (clientStartY: number) => {
 		startY = clientStartY;
 		startHeight = sheetHeight;
@@ -122,6 +138,11 @@
 		onsheetdragstart?.();
 	};
 
+	/**
+	 * Handles mouse movement while dragging the bottom sheet.
+	 *
+	 * @param {MouseEvent} event - The mouse event.
+	 */
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
 		let offset: number;
@@ -137,6 +158,11 @@
 		tryAutoClose();
 	};
 
+	/**
+	 * Handles touch movement while dragging the bottom sheet.
+	 *
+	 * @param {TouchEvent} event - The touch event.
+	 */
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging) return;
 
@@ -147,11 +173,7 @@
 
 		let offset: number;
 
-		// event.touches[0].clientY - startY - normal offset
-		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
-		// startHeight - offset when we not start at the top with dragging
 		if (isDraggingFromHandle) {
-			// Is used for scrollable sheets. Allows to user to close the sheet when not scrolled to the top, but dragging from the handle.
 			offset = Math.max(0, event.touches[0].clientY - startY + startHeight);
 		} else {
 			offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
@@ -166,12 +188,15 @@
 		tryAutoClose();
 	};
 
+	/**
+	 * Handles the end of a drag movement, determining whether to close or snap to a point.
+	 */
 	const moveEnd = () => {
 		onsheetdragend?.();
 
-		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
-		if (settings.snapPoints?.length === 1) {
-			if (sheetHeight > snappointToPxValue(100 - (settings.closeThreshold ?? 10))) {
+		// If there is only one snap point (1), apply a larger buffer for closing behavior
+		if (sheetSettings.snapPoints.length === 1) {
+			if (sheetHeight > measurementToPx(sheetSettings.closeThreshold, maxHeightPx)) {
 				sheetContext.closeSheet();
 				sheetHeight = 0;
 			} else {
@@ -180,22 +205,25 @@
 			resetStatesAfterMove();
 			return;
 		}
-		//Check if the current height is above the lowest snap point, else close it
-		if (settings.snapPoints) {
-			const lowestSnapPointPx = snappointToPxValue(Math.min(...settings.snapPoints));
-			if (sheetHeight > lowestSnapPointPx) {
-				sheetHeight = 0;
-				sheetContext.closeSheet();
-				resetStatesAfterMove();
-				return;
-			}
+
+		let snapPointsInPx = sheetSettings.snapPoints.map((point) =>
+			measurementToPx(point, maxHeightPx)
+		);
+
+		// Check if the current height is above the lowest snap point; otherwise, close it
+		const lowestSnapPointPx = Math.max(...snapPointsInPx);
+		if (sheetHeight > lowestSnapPointPx) {
+			sheetHeight = 0;
+			sheetContext.closeSheet();
+			resetStatesAfterMove();
+			return;
 		}
 
 		// Determine movement direction (snapping up or down)
 		const isMovingUp = sheetHeight < startHeight;
-		const buffer = snappointToPxValue(95);
+		const buffer = measurementToPx(0.95, maxHeightPx);
 
-		// Buffer logic: Prevent accidental snapping if the movement is small
+		// Prevent accidental snapping if the movement is small
 		if (
 			(isMovingUp && sheetHeight > startHeight - buffer) ||
 			(!isMovingUp && sheetHeight < startHeight + buffer)
@@ -205,10 +233,9 @@
 			return;
 		}
 
-		// Find valid snap points based on the direction of movement
-		//@ts-ignore
-		const validPoints = settings.snapPoints
-			.map((point) => ({ original: point, converted: snappointToPxValue(point) }))
+		// Find valid snap points based on the movement direction
+		const validPoints = sheetSettings.snapPoints
+			.map((point) => ({ original: point, converted: measurementToPx(point, maxHeightPx) }))
 			.filter((item) => (isMovingUp ? item.converted < sheetHeight : item.converted > sheetHeight));
 
 		// Find the closest snap point
@@ -229,6 +256,9 @@
 		resetStatesAfterMove();
 	};
 
+	/**
+	 * Resets state variables after movement has ended.
+	 */
 	const resetStatesAfterMove = () => {
 		isDragging = false;
 		isMovingSheet = false;
@@ -272,7 +302,13 @@
 		set sheetContent(element: HTMLDivElement) {
 			sheetContent = element;
 		},
-		settings: settings,
+		get maxHeightPx() {
+			return maxHeightPx;
+		},
+		set maxHeightPx(number: number) {
+			maxHeightPx = number;
+		},
+		settings: sheetSettings,
 		touchStartEvent: touchStartEvent,
 		mouseDownEvent: mouseDownEvent,
 		mouseMoveEvent: mouseMoveEvent,

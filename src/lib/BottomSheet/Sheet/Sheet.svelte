@@ -105,8 +105,7 @@
 		{...rest}
 		bind:this={sheetElement}
 		class="bottom-sheet {sheetContext.isDragging ? 'prevent-select' : ''}"
-		style="height: {sheetContext.settings
-			.maxHeight}; transform: translateY({sheetContext.sheetHeight}px); transition: {sheetContext.isDragging
+		style="height: {sheetContext.maxHeightPx}px; transform: translateY({sheetContext.sheetHeight}px); transition: {sheetContext.isDragging
 			? ''
 			: 'transform 0.3s ease-in-out'}; {rest.style}"
 		role="dialog"

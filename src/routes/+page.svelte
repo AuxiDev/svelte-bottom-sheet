@@ -12,11 +12,6 @@
 
 	let snapPointsSheet: BottomSheet2;
 
-	$effect(() => {
-		if (isSnapPointsSheetOpen) {
-			//snapPointsSheet.setSnapPoint(25);
-		}
-	});
 	const logEvent = async (event: string) => {
 		await tick();
 		eventLog = [...eventLog, `${new Date().toLocaleTimeString()}: ${event}`];
@@ -76,7 +71,10 @@
 			overwhelming them.
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
-		<BottomSheet bind:isSheetOpen={isBasicSheetOpen} settings={{ autoCloseThreshold: 90 }}>
+		<BottomSheet
+			bind:isSheetOpen={isBasicSheetOpen}
+			settings={{ autoCloseThreshold: 0.1, closeThreshold: 0.8 }}
+		>
 			<BottomSheet.Overlay>
 				<BottomSheet.Sheet style="max-width: 600px;">
 					<BottomSheet.Handle />
@@ -108,7 +106,7 @@
 		<button onclick={() => (isSnapPointsSheetOpen = true)}>Open Snap Points Sheet</button>
 		<BottomSheet
 			bind:this={snapPointsSheet}
-			settings={{ maxHeight: '90%', snapPoints: [25, 50, 75], startingSnapPoint: 50 }}
+			settings={{ maxHeight: 0.9, snapPoints: [0.25, 0.5, 0.75, 100], startingSnapPoint: 0.5 }}
 			bind:isSheetOpen={isSnapPointsSheetOpen}
 			onsnap={(point) => console.log(`Sheet snapped to ${point}%`)}
 		>
