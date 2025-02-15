@@ -28,20 +28,30 @@
 		onsnap?: (point: number) => void;
 	} = $props();
 
+	const defaultSettings: Required<BottomSheetSettings> = {
+		closeThreshold: 10,
+		autoCloseThreshold: 0,
+		maxHeight: '70%',
+		snapPoints: [100],
+		startingSnapPoint: 100
+	};
+
+	settings = { ...defaultSettings, ...settings };
+	if (!settings.snapPoints?.includes(100)) {
+		settings.snapPoints?.push(100);
+	}
+
 	$effect(() => {
 		if (isSheetOpen) {
 			onopen?.();
 		} else {
 			onclose?.();
-			setSnapPoint(settings?.startingSnapPoint ?? 100);
+			setSnapPoint(settings?.startingSnapPoint ?? 100, false);
 		}
 	});
 
 	onMount(() => {
 		maxHeightPx = window.innerHeight * (parseInt(settings.maxHeight ?? '70%') / 100);
-		if (!settings.snapPoints?.includes(100)) {
-			settings.snapPoints?.push(100);
-		}
 		setSnapPoint(settings?.startingSnapPoint ?? 100, false);
 	});
 
@@ -83,6 +93,19 @@
 	const snappointToPxValue = (percentage: number): number =>
 		maxHeightPx - (percentage / 100) * maxHeightPx;
 
+	const tryAutoClose = () => {
+		if (
+			settings.autoCloseThreshold &&
+			sheetHeight > snappointToPxValue(100 - settings.autoCloseThreshold)
+		) {
+			sheetContext.closeSheet();
+			console.log('hi');
+			sheetHeight = 0;
+			resetStatesAfterMove();
+			return;
+		}
+	};
+
 	const touchStartEvent = (event: TouchEvent) => {
 		initializeMove(event.touches[0].clientY);
 	};
@@ -111,6 +134,7 @@
 
 		sheetHeight = offset;
 		onsheetdrag?.();
+		tryAutoClose();
 	};
 
 	const touchMoveEvent = (event: TouchEvent) => {
@@ -139,6 +163,7 @@
 
 		sheetHeight = offset;
 		onsheetdrag?.();
+		tryAutoClose();
 	};
 
 	const moveEnd = () => {
@@ -146,7 +171,7 @@
 
 		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
 		if (settings.snapPoints?.length === 1) {
-			if (sheetHeight > snappointToPxValue(100 - (settings.closePercentage ?? 10))) {
+			if (sheetHeight > snappointToPxValue(100 - (settings.closeThreshold ?? 10))) {
 				sheetContext.closeSheet();
 				sheetHeight = 0;
 			} else {

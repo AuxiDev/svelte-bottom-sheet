@@ -72,21 +72,23 @@ You can use the BottomSheet component in any SvelteKit project.
 
 #### Properties
 
-| Name              | Type       | Description                                                                                                                                                                   | Default Value |
-| ----------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`       | `string`   | Sets the maximum height of the Bottom Sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
-| `snapPoints`      | `number[]` | An array of snap points for the Bottom Sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
-| `closePercentage` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close, measured in percentage points.                                                           | `10`          |
+| Name                 | Type       | Description                                                                                                                                                                   | Default Value |
+| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`          | `string`   | Sets the maximum height of the Bottom Sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
+| `snapPoints`         | `number[]` | An array of snap points for the Bottom Sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
+| `closeTreshhold`     | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close, measured in percentage points.                                                           | `10`          |
+| `autoCloseTreshhold` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to automatically close. Use 0 when this feature should be disabled.                                | `0`           |
 
 ### Events
 
-| Event                | Description                                             |
-| -------------------- | ------------------------------------------------------- |
-| `onopen()`           | Fires when the Bottom Sheet opens.                      |
-| `onclose()`          | Fires when the Bottom Sheet closes.                     |
-| `onsheetdragstart()` | Fires when the Bottom Sheet starts being dragged.       |
-| `onsheetdragend()`   | Fires when the Bottom Sheet ends being dragged.         |
-| `onsheetdrag()`      | Fires when the Bottom Sheet is currently being dragged. |
+| Event                   | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `onopen()`              | Fires when the Bottom Sheet opens.                                 |
+| `onclose()`             | Fires when the Bottom Sheet closes.                                |
+| `onsheetdragstart()`    | Fires when the Bottom Sheet starts being dragged.                  |
+| `onsheetdragend()`      | Fires when the Bottom Sheet ends being dragged.                    |
+| `onsheetdrag()`         | Fires when the Bottom Sheet is currently being dragged.            |
+| `onsnap(point: number)` | Fires when the Bottom Sheet has snapped to an existing snap-point. |
 
 ## BottomSheet Component Usage
 
