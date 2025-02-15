@@ -76,7 +76,7 @@
 			overwhelming them.
 		</p>
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
-		<BottomSheet bind:isSheetOpen={isBasicSheetOpen}>
+		<BottomSheet bind:isSheetOpen={isBasicSheetOpen} settings={{ autoClosethreshold: 0 }}>
 			<BottomSheet.Overlay>
 				<BottomSheet.Sheet style="max-width: 600px;">
 					<BottomSheet.Handle />

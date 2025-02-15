@@ -6,7 +6,8 @@ import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 import type Handle from './BottomSheet/Handle/Handle.svelte';
 
 export type BottomSheetSettings = {
-	closePercentage?: number;
+	closeThreshold?: number;
+	autoClosethreshold?: number;
 	maxHeight?: string;
 	snapPoints?: number[];
 	startingSnapPoint?: number;
