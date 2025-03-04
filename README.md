@@ -35,17 +35,18 @@ You can use the BottomSheet component in any SvelteKit project.
    npm i svelte-bottom-sheet
    ```
 
-3. **Import the component**
+3. **Import the component and use it**
 
    ```javascript
     <script lang="ts">
-   	 import BottomSheet from 'svelte-bottom-sheet';
+   	  import BottomSheet from 'svelte-bottom-sheet';
         let isOpen = $state(false);
     </script>
 
-    <button onclick={() => (isOpen = true)}>Open Bottom Sheet</button>
-
-    <BottomSheet bind:isOpen={isOpen} settings={{maxHeight: '70%'}}>
+    <BottomSheet settings={{maxHeight: 0.7}}>
+      <BottomSheet.Trigger>
+         <p>Open the sheet</p>
+      </BottomSheet.Trigger>
       <BottomSheet.Overlay>
          <BottomSheet.Sheet>
             <BottomSheet.Handle />
@@ -59,111 +60,180 @@ You can use the BottomSheet component in any SvelteKit project.
     </BottomSheet>
    ```
 
-## Configuration
+## Components
 
-### Properties
+### BottomSheet
+
+#### Description
+
+This is the root component of every Bottom Sheet. It allows you to add your own configuration, attach functions which are called when a specific event is fired and add all other components which need to be used for the Bottom Sheet.
+
+#### Properties
 
 | Property   | Type                  | Default   | Description                                                            |
 | ---------- | --------------------- | --------- | ---------------------------------------------------------------------- |
 | `isOpen`   | `boolean`             | `false`   | Determines whether the bottom sheet is visible. BINDABLE (bind:isOpen) |
 | `settings` | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                          |
 
-### BottomSheetSettings Type
+#### Events
+
+| Event              | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `onopen`           | Fires when the Bottom Sheet opens.                        |
+| `onclose`          | Fires when the Bottom Sheet closes.                       |
+| `onsheetdrag`      | Fires while the Bottom Sheet is being dragged.            |
+| `onsheetdragstart` | Fires when the Bottom Sheet starts being dragged.         |
+| `onsheetdragend`   | Fires when the Bottom Sheet ends being dragged.           |
+| `onsnap`           | Fires when a snapable Bottom Sheet snaps to a snap point. |
+
+### BottomSheet.Trigger (Required)
+
+#### Description
+
+This component creates a trigger area around its children which when clicked will open or close the Bottom Sheet.
 
 #### Properties
 
-| Name                 | Type       | Description                                                                                                                                                                   | Default Value |
-| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`          | `string`   | Sets the maximum height of the Bottom Sheet. The value should be in percentage (`90%`).                                                                                       | `70%`         |
-| `snapPoints`         | `number[]` | An array of snap points for the Bottom Sheet. Each value represents a height at which the sheet can stop during the transition. Values in percentage points. (`[25, 50, 75]`) | `[]`          |
-| `closeTreshhold`     | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close, measured in percentage points.                                                           | `10`          |
-| `autoCloseTreshhold` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to automatically close. Use 0 when this feature should be disabled.                                | `0`           |
+| Property  | Type                             | Default   | Description                           |
+| --------- | -------------------------------- | --------- | ------------------------------------- |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLElement property options. |
 
-### Events
+### BottomSheet.Overlay (Required)
 
-| Event                   | Description                                                        |
-| ----------------------- | ------------------------------------------------------------------ |
-| `onopen()`              | Fires when the Bottom Sheet opens.                                 |
-| `onclose()`             | Fires when the Bottom Sheet closes.                                |
-| `onsheetdragstart()`    | Fires when the Bottom Sheet starts being dragged.                  |
-| `onsheetdragend()`      | Fires when the Bottom Sheet ends being dragged.                    |
-| `onsheetdrag()`         | Fires when the Bottom Sheet is currently being dragged.            |
-| `onsnap(point: number)` | Fires when the Bottom Sheet has snapped to an existing snap-point. |
+#### Description
 
-## BottomSheet Component Usage
+An overlay which covers the screen while the Bottom Sheet is opened.
 
-There is a lot of stuff you can use inside `BottomSheet` which will be explained after the example usage.
+#### Properties
 
-### Example Usage
+| Property  | Type                             | Default   | Description                              |
+| --------- | -------------------------------- | --------- | ---------------------------------------- |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLDivElement property options. |
 
-```javascript
+### BottomSheet.Sheet (Required)
 
+#### Description
+
+This is the functional Bottom Sheet component, which will be shown / hidden when the Bottom Sheet opens / closes. This applies to all children.
+
+#### Properties
+
+| Property  | Type                             | Default   | Description                              |
+| --------- | -------------------------------- | --------- | ---------------------------------------- |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLDivElement property options. |
+
+### BottomSheet.Handle (Optional)
+
+#### Description
+
+The handle is more than just a visual element—it provides functional support for user interactions. When dragging the handle, users can always pull down the Bottom Sheet, even if it’s not fully scrolled to the top.
+
+Additionally, it is fully customizable and includes accessibility features, such as opening, closing, and snapping to snap points using arrow keys.
+
+#### Properties
+
+| Property  | Type                             | Default   | Description                              |
+| --------- | -------------------------------- | --------- | ---------------------------------------- |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLDivElement property options. |
+
+#### Keyboard Controls (when focused)
+
+| Key                | Action                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| **Arrow Up (↑)**   | Moves the Bottom Sheet to the next snap point (if applicable).                            |
+| **Arrow Down (↓)** | Moves the Bottom Sheet to the previous snap point or closes it if at the lowest position. |
+| **Home**           | Moves the Bottom Sheet to the highest snappoint when snappoints are set.                  |
+| **End**            | Moves the Bottom Sheet to the lowest snappoint when snappoints are set.                   |
+| **Escape (Esc)**   | Closes the Bottom Sheet.                                                                  |
+
+### BottomSheet.Content (Required)
+
+#### Description
+
+This is the component where your Bottom Sheet content goes into. This component also makes scrolling in the Bottom Sheet possible.
+
+#### Properties
+
+| Property  | Type                             | Default   | Description                              |
+| --------- | -------------------------------- | --------- | ---------------------------------------- |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLDivElement property options. |
+
+## **BottomSheetSettings Type**
+
+### **Properties**
+
+| Name                 | Type       | Description                                                                                                                                                   | Default Value |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`          | `number`   | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels. | `0.7`         |
+| `snapPoints`         | `number[]` | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                    | `[1]`         |
+| `closeThreshold`     | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                          | `0.1`         |
+| `autoCloseThreshold` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                 | `0`           |
+| `startingSnappoint`  | `number`   | The snappoint the Bottom Sheet will start at when opened.                                                                                                     | `1`           |
+| `disableDragging`    | `boolean`  | Disable dragging of the sheet.                                                                                                                                | `false`       |
+
+### Notes
+
+- Any value between `0` and `1` will be interpreted as a percentage (e.g., `0.7` = `70%`).
+- Any value **≥1** will be interpreted as pixels (e.g., `300` = `300px`).
+
+## **Controlling the Bottom Sheet Programmatically**
+
+In addition to using the `Trigger` component, you can directly control the Bottom Sheet’s visibility and behavior through bindings and function calls.
+
+### **Binding the `isOpen` Property**
+
+The `isOpen` property can be bound to a variable, allowing you to open or close the Bottom Sheet programmatically.
+
+#### Example Usage
+
+```svelte
 <script lang="ts">
-   let isSheetOpen = $state(false);
-<script>
+	let isSheetOpen = $state(false);
+</script>
 
-<BottomSheet bind:isOpen={isSheetOpen}>
-	<BottomSheet.Trigger>
-		<p>Click to open the sheet.</p>
-	</BottomSheet.Trigger>
-	<BottomSheet.Overlay>
-		<BottomSheet.Sheet>
-         <BottomSheet.Handle />
-			<BottomSheet.Content>
-				<h3>Bottom Sheet Title</h3>
-				<p>Text</p>
-			</BottomSheet.Content>
-		</BottomSheet.Sheet>
-	</BottomSheet.Overlay>
-</BottomSheet>
+<BottomSheet bind:isOpen={isSheetOpen} />
 ```
 
-### Key Features
+Now, setting isSheetOpen = true will open the Bottom Sheet, and setting it to false will close it.
 
-1. **Binding the `isOpen` Property:**  
-   The `isOpen` property is bound to a variable (here, `isEventsSheetOpen`) to track whether the bottom sheet is open or closed. You can control the sheet’s state programmatically by modifying the bound variable.
+### **Assigning the Bottom Sheet to a Variable**
 
-   Example:
+You can also assign the Bottom Sheet to a variable using the bind:this directive. This allows you to call methods on the component instance.
 
-   ```javascript
-   let isEventsSheetOpen = $state(false);
-   ```
+### **Snapping to a Specific Snap Point**
 
-2. **Trigger Area:**  
-   The `BottomSheet.Trigger` component defines the area that opens / closes the bottom sheet when clicked. You can style it and use any content inside the trigger.
+If your Bottom Sheet has defined snapPoints, you can programmatically move it to a specific snap position using the setSnapPoint method.
 
-   Example:
+#### **Method: `setSnapPoint(point: number, throwEvent: boolean = true): boolean`**
 
-   ```javascript
-   <BottomSheet.Trigger>Trigger</BottomSheet.Trigger>
-   ```
+#### Parameters
 
-3. **Handling Open/Close Events:**  
-   You can listen to `onopen` and `onclose` events to trigger custom logic when the sheet is opened or closed. This is useful for tracking interactions or performing other actions.
+| Parameter    | Type      | Default | Description                                  |
+| ------------ | --------- | ------- | -------------------------------------------- |
+| `point`      | `number`  | -       | The snap point to move the Bottom Sheet to.  |
+| `throwEvent` | `boolean` | `true`  | Whether an `onsnap` event should be emitted. |
 
-   Example:
+#### Returns
 
-   ```javascript
-   <BottomSheet
-   	onopen={() => logEvent('Bottom Sheet opened.')}
-   	onclose={() => logEvent('Bottom Sheet closed.')}
-   >
-   	...
-   </BottomSheet>
-   ```
+| Type      | Description                                                                          |
+| --------- | ------------------------------------------------------------------------------------ |
+| `boolean` | `true` if snapping was successful, `false` if the provided snappoint does not exist. |
 
-4. **Overlay & Content & Handle:**
-   If you want to add a Overlay, you can do that by wrapping the `BottomSheet.Sheet` with `BottomSheet.Overlay`. You can style the overlay using the `style` property.
+#### **Example Usage**
 
-   You can use `BottomSheet.Content` inside `BottomSheet.Sheet` to display content. NOT OPTIONAL! (If you want good scrollable sheet support)
+```svelte
+<script lang="ts">
+	let sheet;
 
-   When you place `BottomSheet.Handle` inside `BottomSheet.Sheet` you will get a style-able handle.
+	function snapToMiddle() {
+		sheet?.setSnapPoint(0.5);
+	}
+</script>
 
-5. **Customizing the Sheet:**  
-   The content inside the `BottomSheet.Sheet` component is fully customizable. You can add everything (really everything).
-
-6. **Notes on Trigger and `isOpen`:**  
-   You can both use the `Trigger Area` and the `isOpen State` for opening and closing the sheet. Depends on your preferences.
+<BottomSheet bind:this={sheet} settings={{ snapPoints: [0.25, 0.5, 0.75] }}>
+	<button onclick={snapToMiddle}>Snap to 50%</button>
+</BottomSheet>
+```
 
 ## Contributing
 

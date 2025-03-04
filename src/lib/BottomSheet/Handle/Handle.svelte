@@ -13,6 +13,7 @@
 	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
 
 	const handleKeyDown = (event: KeyboardEvent) => {
+		if (sheetContext.settings.disableDragging) return;
 		const maxHeightPx = sheetContext.maxHeightPx;
 		const snapPoints = sheetContext.settings.snapPoints;
 
