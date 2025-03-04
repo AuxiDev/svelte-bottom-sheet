@@ -4,6 +4,7 @@
  * - If the value is > 1, it is treated as an absolute pixel value.
  *
  * @param {number} measurement - The measurement value.
+ * @param {number} maxHeightPx - The maximum height in pixel.
  * @returns {number} The calculated pixel value.
  */
 export const measurementToPx = (measurement: number, maxHeightPx: number) => {

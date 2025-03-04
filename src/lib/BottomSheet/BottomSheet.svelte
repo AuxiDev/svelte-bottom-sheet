@@ -34,7 +34,8 @@
 		autoCloseThreshold: 0,
 		maxHeight: 0.7,
 		snapPoints: [1],
-		startingSnapPoint: 1
+		startingSnapPoint: 1,
+		disableDragging: false
 	};
 
 	const sheetSettings: Required<BottomSheetSettings> = { ...defaultSheetSettings, ...settings };
@@ -131,6 +132,7 @@
 	 * @param {number} clientStartY - The Y position of the initial touch/click.
 	 */
 	const initializeMove = (clientStartY: number) => {
+		if (sheetSettings.disableDragging) return;
 		startY = clientStartY;
 		startHeight = sheetHeight;
 		isDragging = true;
@@ -192,6 +194,7 @@
 	 * Handles the end of a drag movement, determining whether to close or snap to a point.
 	 */
 	const moveEnd = () => {
+		if (sheetSettings.disableDragging) return;
 		onsheetdragend?.();
 
 		// If there is only one snap point (1), apply a larger buffer for closing behavior
