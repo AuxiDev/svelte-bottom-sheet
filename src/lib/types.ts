@@ -12,6 +12,7 @@ export type BottomSheetSettings = {
 	snapPoints?: number[];
 	startingSnapPoint?: number;
 	disableDragging?: boolean;
+	position?: 'bottom' | 'top' | 'left' | 'right';
 };
 
 export type BottomSheetType = typeof BottomSheet & {

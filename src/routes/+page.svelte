@@ -73,10 +73,14 @@
 		<button onclick={() => (isBasicSheetOpen = true)}>Open Bottom Sheet</button>
 		<BottomSheet
 			bind:isSheetOpen={isBasicSheetOpen}
-			settings={{ autoCloseThreshold: 0.1, closeThreshold: 0.8 }}
+			settings={{
+				autoCloseThreshold: 0.1,
+				closeThreshold: 0.8,
+				maxHeight: 0.7
+			}}
 		>
 			<BottomSheet.Overlay>
-				<BottomSheet.Sheet style="max-width: 600px;">
+				<BottomSheet.Sheet style="max-width: 600px; ">
 					<BottomSheet.Handle />
 					<BottomSheet.Content>
 						<h3>Basic Bottom Sheet</h3>
@@ -106,7 +110,12 @@
 		<button onclick={() => (isSnapPointsSheetOpen = true)}>Open Snap Points Sheet</button>
 		<BottomSheet
 			bind:this={snapPointsSheet}
-			settings={{ maxHeight: 0.9, snapPoints: [0.25, 0.5, 0.75, 100], startingSnapPoint: 0.5 }}
+			settings={{
+				maxHeight: 0.9,
+				snapPoints: [0.25, 0.5, 0.75],
+				startingSnapPoint: 0.5,
+				position: 'bottom'
+			}}
 			bind:isSheetOpen={isSnapPointsSheetOpen}
 			onsnap={(point) => console.log(`Sheet snapped to ${point}%`)}
 		>

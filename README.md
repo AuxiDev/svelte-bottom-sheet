@@ -40,7 +40,6 @@ You can use the BottomSheet component in any SvelteKit project.
    ```javascript
     <script lang="ts">
    	  import BottomSheet from 'svelte-bottom-sheet';
-        let isOpen = $state(false);
     </script>
 
     <BottomSheet settings={{maxHeight: 0.7}}>
@@ -70,10 +69,10 @@ This is the root component of every Bottom Sheet. It allows you to add your own 
 
 #### Properties
 
-| Property   | Type                  | Default   | Description                                                            |
-| ---------- | --------------------- | --------- | ---------------------------------------------------------------------- |
-| `isOpen`   | `boolean`             | `false`   | Determines whether the bottom sheet is visible. BINDABLE (bind:isOpen) |
-| `settings` | `BottomSheetSettings` | `default` | Settings for the BottomSheet.                                          |
+| Property   | Type                                 | Default   | Description                                                            |
+| ---------- | ------------------------------------ | --------- | ---------------------------------------------------------------------- |
+| `isOpen`   | `boolean`                            | `false`   | Determines whether the bottom sheet is visible. BINDABLE (bind:isOpen) |
+| `settings` | [BottomSheetSettings](#settingstype) | `default` | Settings for the BottomSheet.                                          |
 
 #### Events
 
@@ -158,18 +157,19 @@ This is the component where your Bottom Sheet content goes into. This component 
 | --------- | -------------------------------- | --------- | ---------------------------------------- |
 | `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLDivElement property options. |
 
-## **BottomSheetSettings Type**
+## <a name="settingstype"></a>**BottomSheetSettings Type**
 
 ### **Properties**
 
-| Name                 | Type       | Description                                                                                                                                                   | Default Value |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`          | `number`   | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels. | `0.7`         |
-| `snapPoints`         | `number[]` | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                    | `[1]`         |
-| `closeThreshold`     | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                          | `0.1`         |
-| `autoCloseThreshold` | `number`   | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                 | `0`           |
-| `startingSnappoint`  | `number`   | The snappoint the Bottom Sheet will start at when opened.                                                                                                     | `1`           |
-| `disableDragging`    | `boolean`  | Disable dragging of the sheet.                                                                                                                                | `false`       |
+| Name                 | Type                                  | Description                                                                                                                                                   | Default Value |
+| -------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`          | `number`                              | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels. | `0.7`         |
+| `snapPoints`         | `number[]`                            | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                    | `[1]`         |
+| `closeThreshold`     | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                          | `0.1`         |
+| `autoCloseThreshold` | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                 | `0`           |
+| `startingSnappoint`  | `number`                              | The snappoint the Bottom Sheet will start at when opened.                                                                                                     | `1`           |
+| `disableDragging`    | `boolean`                             | Disable dragging of the sheet.                                                                                                                                | `false`       |
+| `position`           | `"top"` `"bottom"` `"left"` `"right"` | Set the position where the sheet is positioned and moved to.                                                                                                  | `bottom`      |
 
 ### Notes
 
@@ -191,7 +191,7 @@ The `isOpen` property can be bound to a variable, allowing you to open or close 
 	let isSheetOpen = $state(false);
 </script>
 
-<BottomSheet bind:isOpen={isSheetOpen} />
+<BottomSheet bind:isSheetOpen />
 ```
 
 Now, setting isSheetOpen = true will open the Bottom Sheet, and setting it to false will close it.
@@ -234,6 +234,18 @@ If your Bottom Sheet has defined snapPoints, you can programmatically move it to
 	<button onclick={snapToMiddle}>Snap to 50%</button>
 </BottomSheet>
 ```
+
+## Bottom Sheet Positions
+
+It is possible to not only positionthe Bottom Sheet on the `bottom`, you can also position it `left`, `right` and on the `top` of the screen. Take a look on the [Bottom Sheet Settings](#settingstype) to see how you can change the positions.
+
+### **Note**
+
+Before version 2.0, the sheet only supported the `bottom` position, and positioning was not configurable. The width of the sheet was configured using the `max-width` style.
+
+With version 2.0 introducing position options, switching to `left` or `right` while using `max-width` for controlling the sheets horizontal width, will cause issues, because the positioning direction would be horizontal.
+
+Please use the `height` and `maxHeight` style to control the sheets "width", in this case the "height".
 
 ## Contributing
 

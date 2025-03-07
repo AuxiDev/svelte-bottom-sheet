@@ -1,3 +1,9 @@
+<!--
+NOTE! Depending on the sheets position (bottom, top, left, right ), the sheets works with height / width. 
+For an easier usage and because the sheet can only be at one position, it's every variable which has something
+to has "height" in it's name.  
+-->
+
 <script lang="ts">
 	import {
 		type SheetContext,
@@ -35,7 +41,8 @@
 		maxHeight: 0.7,
 		snapPoints: [1],
 		startingSnapPoint: 1,
-		disableDragging: false
+		disableDragging: false,
+		position: 'bottom'
 	};
 
 	const sheetSettings: Required<BottomSheetSettings> = { ...defaultSheetSettings, ...settings };
@@ -47,6 +54,8 @@
 	onMount(() => {
 		if (sheetSettings.maxHeight > 1) {
 			maxHeightPx = sheetSettings.maxHeight;
+		} else if (sheetSettings.position === 'left' || sheetSettings.position === 'right') {
+			maxHeightPx = window.innerWidth * sheetSettings.maxHeight;
 		} else {
 			maxHeightPx = window.innerHeight * sheetSettings.maxHeight;
 		}
@@ -72,6 +81,7 @@
 	let startY: number;
 	let startHeight: number;
 	let noScrolledTop: number = 0;
+	let startX: number = 0;
 
 	// A11Y related IDs
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
@@ -114,7 +124,7 @@
 	 * @param {TouchEvent} event - The touch event.
 	 */
 	const touchStartEvent = (event: TouchEvent) => {
-		initializeMove(event.touches[0].clientY);
+		initializeMove(event.touches[0].clientY, event.touches[0].clientX);
 	};
 
 	/**
@@ -123,21 +133,60 @@
 	 * @param {MouseEvent} event - The mouse event.
 	 */
 	const mouseDownEvent = (event: MouseEvent) => {
-		initializeMove(event.clientY);
+		initializeMove(event.clientY, event.clientX);
 	};
 
 	/**
 	 * Initializes the movement logic when dragging starts.
 	 *
 	 * @param {number} clientStartY - The Y position of the initial touch/click.
+	 * @param {number} clientStartX - The X position of the initial touch/click.
 	 */
-	const initializeMove = (clientStartY: number) => {
+	const initializeMove = (clientStartY: number, clientStartX: number) => {
 		if (sheetSettings.disableDragging) return;
 		startY = clientStartY;
+		startX = clientStartX;
 		startHeight = sheetHeight;
 		isDragging = true;
 		noScrolledTop = sheetContent?.scrollTop ?? 0;
 		onsheetdragstart?.();
+	};
+
+	/**
+	 * Calculates the offset based on the current X- and Y-Position and the general sheet position.
+	 *
+	 * @param {number} clientY - The Y position of the current touch/click.
+	 * @param {number} clientX - The X position of the current touch/click.
+	 */
+	const calculateOffSet = (clientY: number, clientX: number) => {
+		let offset: number = 0;
+		if (sheetSettings.position === 'bottom') {
+			if (isDraggingFromHandle) {
+				offset = Math.max(0, clientY - startY + startHeight);
+			} else {
+				offset = Math.max(0, clientY - startY - noScrolledTop + startHeight);
+			}
+		} else if (sheetSettings.position === 'top') {
+			if (isDraggingFromHandle) {
+				offset = Math.max(0, startY - clientY + startHeight);
+			} else {
+				offset = Math.max(0, startY - clientY - noScrolledTop + startHeight);
+			}
+		} else if (sheetSettings.position === 'left') {
+			if (isDraggingFromHandle) {
+				offset = Math.max(0, startX - clientX + startHeight);
+			} else {
+				offset = Math.max(0, startX - clientX - noScrolledTop + startHeight);
+			}
+		} else if (sheetSettings.position === 'right') {
+			if (isDraggingFromHandle) {
+				offset = Math.max(0, clientX - startX + startHeight);
+			} else {
+				offset = Math.max(0, clientX - startX - noScrolledTop + startHeight);
+			}
+		}
+
+		return offset;
 	};
 
 	/**
@@ -147,13 +196,7 @@
 	 */
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
-		let offset: number;
-
-		if (isDraggingFromHandle) {
-			offset = Math.max(0, event.clientY - startY + startHeight);
-		} else {
-			offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
-		}
+		let offset: number = calculateOffSet(event.clientY, event.clientX);
 
 		sheetHeight = offset;
 		onsheetdrag?.();
@@ -173,13 +216,7 @@
 			return;
 		}
 
-		let offset: number;
-
-		if (isDraggingFromHandle) {
-			offset = Math.max(0, event.touches[0].clientY - startY + startHeight);
-		} else {
-			offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
-		}
+		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
 
 		if (sheetHeight != 0) {
 			isMovingSheet = true;

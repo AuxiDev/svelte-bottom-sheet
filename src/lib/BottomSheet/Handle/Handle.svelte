@@ -53,7 +53,7 @@
 </script>
 
 <div
-	class="handle-container"
+	class="handle-container position-{sheetContext.settings.position}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
 	role="slider"
@@ -81,6 +81,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.position-left,
+	.position-right {
+		width: 40px;
+		height: 100%;
+	}
+
+	.position-left .bottom-sheet-handle,
+	.position-right .bottom-sheet-handle {
+		transform: rotate(90deg);
 	}
 
 	.handle-container:focus-visible {
