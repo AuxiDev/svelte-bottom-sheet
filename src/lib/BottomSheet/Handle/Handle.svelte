@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
+	import { measurementToPx } from '$lib/utils.js';
 	import { getContext } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
@@ -12,47 +13,47 @@
 	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
 
 	const handleKeyDown = (event: KeyboardEvent) => {
-		const maxHeightPx =
-			window.innerHeight * (parseInt(sheetContext.settings.maxHeight ?? '70%') / 100);
-		const snapPoints = sheetContext.settings.snapPoints || [100];
+		if (sheetContext.settings.disableDragging) return;
+		const maxHeightPx = sheetContext.maxHeightPx;
+		const snapPoints = sheetContext.settings.snapPoints;
 
-		const snapPointsPx = snapPoints
-			.map((point) => maxHeightPx - (point / 100) * maxHeightPx)
+		let snapPointsInPx = snapPoints
+			.map((point) => measurementToPx(point, maxHeightPx))
 			.sort((a, b) => b - a);
 
-		const currentIndex = snapPointsPx.findIndex(
+		const currentIndex = snapPointsInPx.findIndex(
 			(point) => Math.abs(point - sheetContext.sheetHeight) < 10
 		);
 
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
-				if (currentIndex < snapPointsPx.length - 1) {
-					sheetContext.sheetHeight = snapPointsPx[currentIndex + 1];
+				if (currentIndex < snapPointsInPx.length - 1) {
+					sheetContext.sheetHeight = snapPointsInPx[currentIndex + 1];
 				}
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
 				if (currentIndex > 0) {
-					sheetContext.sheetHeight = snapPointsPx[currentIndex - 1];
+					sheetContext.sheetHeight = snapPointsInPx[currentIndex - 1];
 				} else {
 					sheetContext.closeSheet();
 				}
 				break;
 			case 'Home':
 				event.preventDefault();
-				sheetContext.sheetHeight = snapPointsPx[snapPointsPx.length - 1];
+				sheetContext.sheetHeight = snapPointsInPx[snapPointsInPx.length - 1];
 				break;
 			case 'End':
 				event.preventDefault();
-				sheetContext.sheetHeight = snapPointsPx[0];
+				sheetContext.sheetHeight = snapPointsInPx[0];
 				break;
 		}
 	};
 </script>
 
 <div
-	class="handle-container"
+	class="handle-container position-{sheetContext.settings.position}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
 	role="slider"
@@ -80,6 +81,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.position-left,
+	.position-right {
+		width: 40px;
+		height: 100%;
+	}
+
+	.position-left .bottom-sheet-handle,
+	.position-right .bottom-sheet-handle {
+		transform: rotate(90deg);
 	}
 
 	.handle-container:focus-visible {

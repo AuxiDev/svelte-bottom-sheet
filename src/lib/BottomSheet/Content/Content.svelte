@@ -32,5 +32,7 @@
 		scrollbar-width: none;
 		padding: 20px;
 		height: 100%;
+		max-width: 100%;
+		flex-grow: 1;
 	}
 </style>

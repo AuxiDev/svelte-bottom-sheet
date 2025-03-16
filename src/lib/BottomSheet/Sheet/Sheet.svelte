@@ -16,6 +16,10 @@
 	);
 
 	let previousActiveElement: HTMLElement | null;
+	let axisForSlide: 'x' | 'y' =
+		sheetContext.settings.position === 'left' || sheetContext.settings.position === 'right'
+			? 'x'
+			: 'y';
 
 	if (!sheetContext) {
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
@@ -73,6 +77,34 @@
 		handleFocusTrap(event);
 	};
 
+	let transformStyle = () => {
+		switch (sheetContext.settings.position) {
+			case 'bottom':
+				return `translateY(${sheetContext.sheetHeight}px)`;
+			case 'top':
+				return `translateY(-${sheetContext.sheetHeight}px)`;
+			case 'left':
+				return `translateX(-${sheetContext.sheetHeight}px)`;
+			case 'right':
+				return `translateX(${sheetContext.sheetHeight}px)`;
+			default:
+				return `translateY(${sheetContext.sheetHeight}px)`;
+		}
+	};
+
+	let dimensionStyle = () => {
+		switch (sheetContext.settings.position) {
+			case 'bottom':
+			case 'top':
+				return `height: ${sheetContext.maxHeightPx}px;`;
+			case 'left':
+			case 'right':
+				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
+			default:
+				return `height: ${sheetContext.maxHeightPx}px;`;
+		}
+	};
+
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
@@ -104,9 +136,10 @@
 	<div
 		{...rest}
 		bind:this={sheetElement}
-		class="bottom-sheet {sheetContext.isDragging ? 'prevent-select' : ''}"
-		style="height: {sheetContext.settings
-			.maxHeight}; transform: translateY({sheetContext.sheetHeight}px); transition: {sheetContext.isDragging
+		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
+			? 'prevent-select'
+			: ''}"
+		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
 			: 'transform 0.3s ease-in-out'}; {rest.style}"
 		role="dialog"
@@ -122,7 +155,7 @@
 		onmousedown={sheetContext.mouseDownEvent}
 		onmousemove={sheetContext.mouseMoveEvent}
 		onmouseup={sheetContext.moveEnd}
-		transition:slide={{ duration: 500, easing: cubicOut }}
+		transition:slide={{ duration: 500, easing: cubicOut, axis: axisForSlide }}
 	>
 		{@render children?.()}
 	</div>
@@ -137,7 +170,6 @@
 	.bottom-sheet {
 		background-color: #fff;
 		position: fixed;
-		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
@@ -153,12 +185,32 @@
 		z-index: 2;
 	}
 
-	.bottom-sheet-handle {
-		width: 40px;
-		height: 4px;
-		background-color: #e0e0e0;
-		border-radius: 2px;
-		margin: 16px auto;
+	.position-left {
+		display: flex;
+		flex-direction: row-reverse;
+		top: 0;
+		bottom: 0;
+		margin: auto 0;
+		border-radius: 0px 16px 16px 0px;
+	}
+
+	.position-right {
+		display: flex;
+		top: 0;
+		bottom: 0;
+		left: unset;
+		right: 0;
+		margin: auto 0;
+		border-radius: 16px 0px 0px 16px;
+	}
+
+	.position-top {
+		display: flex;
+		flex-direction: column-reverse;
+		border-radius: 0 0 16px 16px;
+		margin: 0 auto;
+		top: 0;
+		bottom: unset;
 	}
 
 	.bottom-sheet-content::-webkit-scrollbar {
