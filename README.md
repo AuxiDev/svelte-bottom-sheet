@@ -236,7 +236,7 @@ If your Bottom Sheet has defined snapPoints, you can programmatically move it to
 </BottomSheet>
 ```
 
-## Bottom Sheet Positions
+## Bottom Sheet Positions [EXPERIMENTAL]
 
 It is possible to not only positionthe Bottom Sheet on the `bottom`, you can also position it `left`, `right` and on the `top` of the screen. Take a look on the [Bottom Sheet Settings](#settingstype) to see how you can change the positions.
 

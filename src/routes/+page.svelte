@@ -2,7 +2,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import BottomSheet from '$lib/BottomSheet/index.js';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	let darkMode = $state(false);
 	let isBasicSheetOpen = $state(false);
@@ -14,6 +14,7 @@
 	let isCustomTopOpen = $state(false);
 	let eventLog = $state<string[]>([]);
 	let mobileMenuOpen = $state(false);
+	let githubStars = $state(219);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
 
 	const logEvent = async (event: string) => {
@@ -22,6 +23,16 @@
 
 		if (eventLog.length > 5) eventLog.shift();
 	};
+
+	async function getStars() {
+		const response = await fetch('https://api.github.com/repos/auxidev/svelte-bottom-sheet');
+		const data = await response.json();
+		return data;
+	}
+
+	onMount(async () => {
+		githubStars = (await getStars()).stargazers_count;
+	});
 
 	const items = Array(50)
 		.fill(0)
@@ -48,6 +59,7 @@
 	<div class="grid-pattern"></div>
 </div>
 
+<!--Header Section-->
 <header class:dark={darkMode} data-nav-open={mobileMenuOpen}>
 	<div class="container header-content">
 		<div class="logo">
@@ -119,6 +131,7 @@
 	</div>
 </header>
 
+<!--Main Section-->
 <main>
 	<section class="hero">
 		<div class="container">
@@ -128,8 +141,36 @@
 			</h1>
 			<p class="subtitle" transition:fly={{ y: 20, duration: 800, delay: 400, easing: quintOut }}>
 				Explore interactive bottom sheets with smooth transitions, snap points, and event tracking.
-				Built for SvelteKit 5 with the new runes syntax.
+				Built for SvelteKit.
 			</p>
+
+			<a
+				href="https://github.com/AuxiDev/svelte-bottom-sheet"
+				class="star-button"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<div class="star-icon-wrapper">
+					<svg
+						fill="#FFD700"
+						width={20}
+						height={20}
+						class="star-icon"
+						viewBox="0 0 16 16"
+						xmlns="http://www.w3.org/2000/svg"
+						aria-hidden="true"
+					>
+						<path
+							d="M8 12.586l-4.95 2.605 1.2-5.41L.3 5.803l5.49-.475L8 .586l2.21 4.742 5.49.475-3.95 3.978 1.2 5.41z"
+						/>
+					</svg>
+				</div>
+				<div class="star-count">
+					<span class="star-label">Star</span>
+					<span class="star-number">{githubStars}</span>
+				</div>
+				<div class="star-cta">Star this repo!</div>
+			</a>
 
 			<div
 				class="cta-buttons"
@@ -839,6 +880,106 @@
 	}
 	.secondary-button:hover {
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+	}
+
+	.star-button {
+		display: flex;
+		align-items: center;
+		padding: 0.5rem 1.5rem;
+		height: 35px;
+		max-width: 400px;
+		width: 100%;
+		justify-self: center;
+		background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+		border: 1px solid rgba(255, 105, 180, 0.3);
+		border-radius: 50px;
+		color: #1a202c;
+		text-decoration: none;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		box-shadow: 0 4px 15px rgba(255, 28, 142, 0.2);
+		margin: 16px 16px 40px;
+	}
+
+	.star-button:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 8px 25px rgba(255, 28, 142, 0.3);
+	}
+
+	.star-icon-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 12px;
+	}
+
+	.star-icon {
+		transition: all 0.5s ease;
+		animation: star-pulse 1.5s infinite alternate ease-in-out;
+	}
+
+	@keyframes star-pulse {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.3) rotate(20deg);
+		}
+		100% {
+			transform: scale(1) rotate(-5deg);
+		}
+	}
+
+	.star-count {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.star-label {
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+
+	.star-number {
+		font-size: 1.2rem;
+		font-weight: 700;
+		line-height: 1.5rem;
+	}
+
+	.star-cta {
+		position: absolute;
+		right: -180px;
+		background: linear-gradient(90deg, #ff1c8e, #ff6f00);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 20px;
+		font-weight: 600;
+		font-size: 0.9rem;
+		transition: all 0.5s ease;
+		opacity: 0;
+		animation: slide-in 15s ease-in-out;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes slide-in {
+		0% {
+			right: -180px;
+			opacity: 0;
+		}
+		4% {
+			right: 20px;
+			opacity: 1;
+		}
+		16% {
+			right: 20px;
+			opacity: 1;
+		}
+		20% {
+			right: -180px;
+			opacity: 0;
+		}
 	}
 
 	/* Showcase */
