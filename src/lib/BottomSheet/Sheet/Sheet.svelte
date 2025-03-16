@@ -106,10 +106,7 @@
 	};
 
 	const preventScroll = (event: Event) => {
-		if (
-			!sheetElement.contains(event.target as Node) ||
-			!(event.target as Node).contains(event.target as Node)
-		) {
+		if (!sheetElement.contains(event.target as Node)) {
 			event.preventDefault();
 		}
 	};
@@ -117,8 +114,8 @@
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			// document.body.style.overflow = 'hidden';
-			// document.documentElement.style.overflow = 'hidden';
+			document.body.style.overflow = 'hidden';
+			document.documentElement.style.overflow = 'hidden';
 			document.addEventListener('wheel', preventScroll, { passive: false });
 			document.addEventListener('touchmove', preventScroll, { passive: false });
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
@@ -164,7 +161,6 @@
 		id={sheetIdentificationContext.sheetId}
 		tabindex="-1"
 		aria-live="polite"
-		aria-hidden="true"
 		ontouchstart={sheetContext.touchStartEvent}
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}
