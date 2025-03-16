@@ -28,6 +28,7 @@
 	// svelte-ignore non_reactive_update
 	let sheetElement: HTMLDivElement;
 
+
 	const preventPullToRefresh = (event: TouchEvent) => {
 		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
 			event.preventDefault();
@@ -48,15 +49,18 @@
 		);
 	};
 
+
 	const handleFocusTrap = (event: KeyboardEvent) => {
 		if (event.key === 'Tab') {
 			const focusableElements = getFocusableElements();
 			if (!focusableElements.length) return;
 
+
 			const firstElement = focusableElements[0];
 			const lastElement = focusableElements[focusableElements.length - 1];
 			const isTabPressed = !event.shiftKey;
 			const isShiftTabPressed = event.shiftKey;
+
 
 			if (isShiftTabPressed && document.activeElement === firstElement) {
 				lastElement.focus();
@@ -92,6 +96,7 @@
 		}
 	};
 
+
 	let dimensionStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'bottom':
@@ -103,6 +108,13 @@
 			default:
 				return `height: ${sheetContext.maxHeightPx}px;`;
 		}
+
+	};
+
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
+		}
 	};
 
 	$effect(() => {
@@ -110,6 +122,7 @@
 			previousActiveElement = document.activeElement as HTMLElement;
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+
 			document.addEventListener('keydown', handleKeyDown);
 
 			setTimeout(() => {
@@ -127,6 +140,7 @@
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('click', handleClickOutside);
 			previousActiveElement?.focus();
+
 		}
 	});
 </script>
@@ -157,11 +171,20 @@
 		onmouseup={sheetContext.moveEnd}
 		transition:slide={{ duration: 500, easing: cubicOut, axis: axisForSlide }}
 	>
+
 		{@render children?.()}
+
 	</div>
 {/if}
 
 <style>
+	.handle-container {
+		width: 100%;
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 	.prevent-select {
 		-webkit-user-select: none;
 		-ms-user-select: none;
