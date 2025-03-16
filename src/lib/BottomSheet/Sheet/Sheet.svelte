@@ -105,12 +105,20 @@
 		}
 	};
 
+	const preventScroll = (event: Event) => {
+		if (!sheetElement.contains(event.target as Node)) {
+			event.preventDefault();
+		}
+	};
+
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			document.body.style.overflowY = 'hidden';
+			document.body.style.overflow = 'hidden';
+			document.documentElement.style.overflow = 'hidden';
+			document.addEventListener('wheel', preventScroll, { passive: false });
+			document.addEventListener('touchmove', preventScroll, { passive: false });
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
-
 			document.addEventListener('keydown', handleKeyDown);
 
 			setTimeout(() => {
@@ -123,10 +131,13 @@
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
 		} else {
-			document.body.style.overflowY = 'auto';
+			document.body.style.overflow = 'auto';
+			document.documentElement.style.overflow = '';
+			document.removeEventListener('wheel', preventScroll);
+			document.removeEventListener('touchmove', preventScroll);
+			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
-			document.removeEventListener('click', handleClickOutside);
 			previousActiveElement?.focus();
 		}
 	});
@@ -163,13 +174,6 @@
 {/if}
 
 <style>
-	.handle-container {
-		width: 100%;
-		height: 40px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
 	.prevent-select {
 		-webkit-user-select: none;
 		-ms-user-select: none;

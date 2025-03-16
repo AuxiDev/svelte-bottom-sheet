@@ -34,5 +34,6 @@
 		height: 100%;
 		max-width: 100%;
 		flex-grow: 1;
+		-webkit-overflow-scrolling: touch;
 	}
 </style>

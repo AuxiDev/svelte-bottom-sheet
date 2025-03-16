@@ -44,11 +44,8 @@
 </script>
 
 <svelte:head>
-	<title>Modern Bottom Sheet Preview | SvelteKit 5</title>
-	<meta
-		name="description"
-		content="Interactive preview of bottom sheet components for SvelteKit 5"
-	/>
+	<title>Modern Bottom Sheet Preview | SvelteKit</title>
+	<meta name="description" content="Interactive preview of bottom sheet components for SvelteKit" />
 </svelte:head>
 
 <div class="background" class:dark={darkMode}>
@@ -631,7 +628,6 @@
 		line-height: 1.6;
 		color: #1a202c;
 		background-color: #ffffff;
-		overflow-x: hidden;
 		transition:
 			background-color 0.3s ease,
 			color 0.3s ease;
@@ -639,9 +635,10 @@
 
 	.container {
 		width: 100%;
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 1.5rem;
+	}
+
+	main {
+		margin: 1rem;
 	}
 
 	/* Background */
@@ -700,8 +697,11 @@
 	header {
 		position: fixed;
 		top: 0;
+		left: 0;
+		max-width: 100%;
 		z-index: 100;
-		width: 100%;
+		overflow: hidden;
+		width: 100dvw;
 		transition:
 			background-color 0.3s ease,
 			border-color 0.3s ease;
@@ -713,11 +713,14 @@
 	.header-content {
 		display: flex;
 		width: 100%;
+		max-width: 100vw;
 		justify-content: space-around;
 		gap: 1rem;
 		align-items: center;
 		height: 70px;
+		overflow-x: hidden;
 	}
+
 	.logo {
 		display: flex;
 		align-items: center;
@@ -895,7 +898,7 @@
 		padding: 0.5rem 1.5rem;
 		height: 35px;
 		max-width: 400px;
-		width: 100%;
+		width: 80%;
 		justify-self: center;
 		background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
 		border: 1px solid rgba(255, 105, 180, 0.3);
