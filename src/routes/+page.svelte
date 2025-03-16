@@ -79,6 +79,8 @@
 				href="https://github.com/AuxiDev/svelte-bottom-sheet"
 				class="github-link"
 				aria-label="GitHub Repository"
+				target="_blank"
+				rel="noopener noreferrer"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +181,12 @@
 				<button class="primary-button">
 					<a href="#basic" class="href" style="text-decoration: none; color: white;">Try out</a>
 				</button>
-				<a href="https://github.com/AuxiDev/svelte-bottom-sheet" class="secondary-button">
+				<a
+					href="https://github.com/AuxiDev/svelte-bottom-sheet"
+					class="secondary-button"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
 					Star on GitHub
 				</a>
 			</div>
@@ -1205,11 +1212,16 @@
 		color: #4a5568;
 		border: none;
 		font-weight: bold;
+		transition: transform 0.2s ease;
 	}
 
 	.active {
 		background: linear-gradient(90deg, #ff1c8e, #ff6f00);
 		color: white;
+	}
+
+	.position-option:hover {
+		transform: translateY(-2px);
 	}
 	.position-option.top {
 		grid-column: 2;
