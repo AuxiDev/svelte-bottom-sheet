@@ -15,6 +15,7 @@ The **BottomSheet** component is a sleek, interactive UI element for mobile-firs
 - **Smooth Animations**: Sleek transitions for opening, closing, and dragging the sheet.
 - **Lightweight & Easy to Integrate**: Just add the component and configure the settings.
 - **Event Handling**: Built-in events such as `onopen` and `onclose` to track user interactions.
+- **Different Position**: Position the sheet not only on the `bottom` but also on the `sides` and on the `top`
 
 ## Installation
 
@@ -180,9 +181,9 @@ This is the component where your Bottom Sheet content goes into. This component 
 
 In addition to using the `Trigger` component, you can directly control the Bottom Sheet’s visibility and behavior through bindings and function calls.
 
-### **Binding the `isOpen` Property**
+### **Binding the `isSheetOpen` Property**
 
-The `isOpen` property can be bound to a variable, allowing you to open or close the Bottom Sheet programmatically.
+The `isSheetOpen` property can be bound to a variable, allowing you to open or close the Bottom Sheet programmatically.
 
 #### Example Usage
 

@@ -77,7 +77,7 @@
 		handleFocusTrap(event);
 	};
 
-	let transformStyle = $derived.by(() => {
+	let transformStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'bottom':
 				return `translateY(${sheetContext.sheetHeight}px)`;
@@ -90,7 +90,7 @@
 			default:
 				return `translateY(${sheetContext.sheetHeight}px)`;
 		}
-	});
+	};
 
 	let dimensionStyle = () => {
 		switch (sheetContext.settings.position) {
@@ -139,7 +139,7 @@
 		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
 			? 'prevent-select'
 			: ''}"
-		style="{dimensionStyle()} transform: {transformStyle}; transition: {sheetContext.isDragging
+		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
 			: 'transform 0.3s ease-in-out'}; {rest.style}"
 		role="dialog"
