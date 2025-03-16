@@ -1,18 +1,26 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
-	import { getContext } from 'svelte';
-	import { cubicOut } from 'svelte/easing';
+	import { getContext, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { fade, slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
-	const { isSheetVisible } = getContext<SheetContext>('sheetStateContext');
+	const sheetContext = getContext<SheetContext>('sheetContext');
 
-	let { children, ...rest }: { children?: any } & HTMLAttributes<HTMLDivElement> = $props();
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+	}
+
+	let {
+		children,
+		...rest
+	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-{#if $isSheetVisible}
+{#if sheetContext.isSheetOpen}
 	<div
 		{...rest}
+		role="presentation"
+		aria-hidden="true"
 		transition:fade={{ duration: 200 }}
 		class="bottom-sheet-overlay {rest.class}"
 	></div>

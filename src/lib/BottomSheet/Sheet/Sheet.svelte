@@ -1,166 +1,115 @@
 <script lang="ts">
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
-	import type { BottomSheetSettings, SheetContext } from '$lib/types.js';
-	import { get } from 'svelte/store';
-
-	const { isSheetVisible, closeSheet, getSettings } = getContext<SheetContext>('sheetStateContext');
+	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
+	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
-		children
-	}: {
-		children?: any;
-	} = $props();
+		children,
+		...rest
+	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
 
-	let maxHeight = getSettings().maxHeight ?? '70%';
-	let snapPoints: number[] = getSettings().snapPoints ?? [];
+	const sheetContext = getContext<SheetContext>('sheetContext');
+	const sheetIdentificationContext = getContext<SheetIdentificationContext>(
+		'sheetIdentificationContext'
+	);
+
+	let previousActiveElement: HTMLElement | null;
+	let axisForSlide: 'x' | 'y' =
+		sheetContext.settings.position === 'left' || sheetContext.settings.position === 'right'
+			? 'x'
+			: 'y';
+
+	if (!sheetContext) {
+		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
+	}
 
 	// svelte-ignore non_reactive_update
 	let sheetElement: HTMLDivElement;
-	// svelte-ignore non_reactive_update
-	let sheetContent: HTMLDivElement;
-	let currentHeight: number = $state(0);
-	let isMovingSheet: boolean = $state(false);
-	let noScrolledTop: number = 0;
 
-	let startY: number = 0;
-	let startHeight: number = 0;
-	let isDragging: boolean = $state(false);
-	let maxHeightPx: number = 0;
 
-	let isDraggingFromHandle = false;
-
-	onMount(() => {
-		snapPoints.push(100);
-		maxHeightPx = window.innerHeight * (parseInt(maxHeight) / 100);
-	});
-
-	const touchStartEvent = (event: TouchEvent) => {
-		initializeMove(event.touches[0].clientY);
-	};
-
-	const mouseDownEvent = (event: MouseEvent) => {
-		initializeMove(event.clientY);
-	};
-
-	const initializeMove = (clientStartY: number) => {
-		startY = clientStartY;
-		startHeight = currentHeight;
-		isDragging = true;
-		noScrolledTop = sheetContent.scrollTop;
-	};
-
-	const mouseMoveEvent = (event: MouseEvent) => {
-		if (!isDragging) return;
-		let offset: number;
-
-		if (isDraggingFromHandle) {
-			offset = Math.max(0, event.clientY - startY + startHeight);
-		} else {
-			offset = Math.max(0, event.clientY - startY - noScrolledTop + startHeight);
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
 		}
-
-		currentHeight = offset;
 	};
 
-	const touchMoveEvent = (event: TouchEvent) => {
-		if (!isDragging) return;
-
-		if (sheetContent.scrollTop !== 0 && !isDraggingFromHandle) {
-			isMovingSheet = false;
-			return;
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sheetElement && !sheetElement.contains(event.target as Node)) {
+			sheetContext.closeSheet();
 		}
-
-		let offset: number;
-		// event.touches[0].clientY - startY - normal offset
-		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
-		// startHeight - offset when we not start at the top with dragging
-		if (isDraggingFromHandle) {
-			offset = Math.max(0, event.touches[0].clientY - startY + startHeight);
-		} else {
-			offset = Math.max(0, event.touches[0].clientY - startY - noScrolledTop + startHeight);
-		}
-
-		if (currentHeight != 0) {
-			isMovingSheet = true;
-		}
-
-		currentHeight = offset;
 	};
 
-	const moveEnd = () => {
-		const snappointToPxValue = (percentage: number): number =>
-			maxHeightPx - (percentage / 100) * maxHeightPx;
+	const getFocusableElements = () => {
+		return Array.from(
+			sheetElement.querySelectorAll<HTMLElement>(
+				'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+			)
+		);
+	};
 
-		// If there is only 1 snappoint (must be 100), there will be a bigger buffer to close the sheet (default behaviour)
-		if (snapPoints.length === 1) {
-			if (currentHeight > snappointToPxValue(100 - (getSettings().closePercentage ?? 10))) {
-				closeSheet();
-				currentHeight = 0;
-			} else {
-				currentHeight = 0;
+
+	const handleFocusTrap = (event: KeyboardEvent) => {
+		if (event.key === 'Tab') {
+			const focusableElements = getFocusableElements();
+			if (!focusableElements.length) return;
+
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+			const isTabPressed = !event.shiftKey;
+			const isShiftTabPressed = event.shiftKey;
+
+
+			if (isShiftTabPressed && document.activeElement === firstElement) {
+				lastElement.focus();
+				event.preventDefault();
 			}
-			resetStatesAfterMove();
-			return;
+
+			if (isTabPressed && document.activeElement === lastElement) {
+				firstElement.focus();
+				event.preventDefault();
+			}
 		}
-		// Check if the current height is above the lowest snap point, else close it
-		const lowestSnapPointPx = snappointToPxValue(Math.min(...snapPoints));
-		if (currentHeight > lowestSnapPointPx) {
-			currentHeight = 0;
-			closeSheet();
-			resetStatesAfterMove();
-			return;
-		}
-
-		// Determine movement direction (snapping up or down)
-		const isMovingUp = currentHeight < startHeight;
-		const buffer = snappointToPxValue(95);
-
-		// Buffer logic: Prevent accidental snapping if the movement is small
-		if (
-			(isMovingUp && currentHeight > startHeight - buffer) ||
-			(!isMovingUp && currentHeight < startHeight + buffer)
-		) {
-			currentHeight = startHeight;
-			resetStatesAfterMove();
-			return;
-		}
-
-		// Find valid snap points based on the direction of movement
-		const validPoints = snapPoints
-			.map((point) => ({ original: point, converted: snappointToPxValue(point) }))
-			.filter((item) =>
-				isMovingUp ? item.converted < currentHeight : item.converted > currentHeight
-			);
-
-		// Find the closest snap point
-		if (validPoints.length > 0) {
-			const closest = validPoints.reduce((prev, curr) =>
-				isMovingUp
-					? curr.converted > prev.converted
-						? curr
-						: prev
-					: curr.converted < prev.converted
-						? curr
-						: prev
-			);
-			currentHeight = closest.converted;
-		}
-
-		resetStatesAfterMove();
 	};
 
-	const resetStatesAfterMove = () => {
-		isDragging = false;
-		isMovingSheet = false;
-		isDraggingFromHandle = false;
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			sheetContext.closeSheet();
+		}
+		handleFocusTrap(event);
 	};
-	let visibilityUpdate = $state(false);
 
-	isSheetVisible.subscribe((state) => {
-		visibilityUpdate = state;
-	});
+	let transformStyle = () => {
+		switch (sheetContext.settings.position) {
+			case 'bottom':
+				return `translateY(${sheetContext.sheetHeight}px)`;
+			case 'top':
+				return `translateY(-${sheetContext.sheetHeight}px)`;
+			case 'left':
+				return `translateX(-${sheetContext.sheetHeight}px)`;
+			case 'right':
+				return `translateX(${sheetContext.sheetHeight}px)`;
+			default:
+				return `translateY(${sheetContext.sheetHeight}px)`;
+		}
+	};
+
+
+	let dimensionStyle = () => {
+		switch (sheetContext.settings.position) {
+			case 'bottom':
+			case 'top':
+				return `height: ${sheetContext.maxHeightPx}px;`;
+			case 'left':
+			case 'right':
+				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
+			default:
+				return `height: ${sheetContext.maxHeightPx}px;`;
+		}
+
+	};
 
 	const preventPullToRefresh = (event: TouchEvent) => {
 		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
@@ -169,51 +118,62 @@
 	};
 
 	$effect(() => {
-		if (visibilityUpdate) {
+		if (sheetContext.isSheetOpen) {
+			previousActiveElement = document.activeElement as HTMLElement;
 			document.body.style.overflowY = 'hidden';
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+
+			document.addEventListener('keydown', handleKeyDown);
+
+			setTimeout(() => {
+				const focusableElements = getFocusableElements();
+				if (focusableElements.length) {
+					focusableElements[0].focus();
+				} else {
+					sheetElement?.focus();
+				}
+				document.addEventListener('click', handleClickOutside);
+			}, 100);
 		} else {
 			document.body.style.overflowY = 'auto';
 			document.removeEventListener('touchmove', preventPullToRefresh);
+			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('click', handleClickOutside);
+			previousActiveElement?.focus();
+
 		}
 	});
 </script>
 
-{#if $isSheetVisible}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
+{#if sheetContext.isSheetOpen}
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-
 	<div
+		{...rest}
 		bind:this={sheetElement}
-		class="bottom-sheet {isDragging ? 'prevent-select' : ''}"
-		style="height: {maxHeight};  transform: translateY({currentHeight}px); transition: {isDragging
+		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
+			? 'prevent-select'
+			: ''}"
+		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'};"
+			: 'transform 0.3s ease-in-out'}; {rest.style}"
 		role="dialog"
-		ontouchstart={touchStartEvent}
-		ontouchmove={touchMoveEvent}
-		ontouchend={moveEnd}
-		onmousedown={mouseDownEvent}
-		onmousemove={mouseMoveEvent}
-		onmouseup={moveEnd}
-		transition:slide={{ duration: 500, easing: cubicOut }}
+		aria-modal="true"
+		aria-labelledby={sheetIdentificationContext.headingId}
+		aria-describedby={sheetIdentificationContext.descriptionId}
+		id={sheetIdentificationContext.sheetId}
+		tabindex="-1"
+		aria-live="polite"
+		ontouchstart={sheetContext.touchStartEvent}
+		ontouchmove={sheetContext.touchMoveEvent}
+		ontouchend={sheetContext.moveEnd}
+		onmousedown={sheetContext.mouseDownEvent}
+		onmousemove={sheetContext.mouseMoveEvent}
+		onmouseup={sheetContext.moveEnd}
+		transition:slide={{ duration: 500, easing: cubicOut, axis: axisForSlide }}
 	>
-		<div
-			class="handle-container"
-			onmousemove={() => (isDraggingFromHandle = true)}
-			ontouchmove={() => (isDraggingFromHandle = true)}
-			role="button"
-			tabindex="0"
-		>
-			<div class="bottom-sheet-handle" role="button" tabindex="0"></div>
-		</div>
-		<div
-			bind:this={sheetContent}
-			class="bottom-sheet-content"
-			style="overflow-y: {isMovingSheet ? 'hidden' : 'auto'};"
-		>
-			{@render children?.()}
-		</div>
+
+		{@render children?.()}
+
 	</div>
 {/if}
 
@@ -239,6 +199,8 @@
 		justify-content: center;
 		align-self: flex-end;
 		width: 100%;
+		max-width: 100%;
+		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
 		touch-action: none;
@@ -246,30 +208,35 @@
 		z-index: 2;
 	}
 
-	.bottom-sheet-handle {
-		width: 40px;
-		height: 4px;
-		background-color: #e0e0e0;
-		border-radius: 2px;
-		margin: 16px auto;
+	.position-left {
+		display: flex;
+		flex-direction: row-reverse;
+		top: 0;
+		bottom: 0;
+		margin: auto 0;
+		border-radius: 0px 16px 16px 0px;
 	}
 
-	.bottom-sheet-content {
-		max-height: calc(100%);
+	.position-right {
+		display: flex;
+		top: 0;
+		bottom: 0;
+		left: unset;
+		right: 0;
+		margin: auto 0;
+		border-radius: 16px 0px 0px 16px;
 	}
-	.bottom-sheet-content {
-		overflow-y: scroll;
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+
+	.position-top {
+		display: flex;
+		flex-direction: column-reverse;
+		border-radius: 0 0 16px 16px;
+		margin: 0 auto;
+		top: 0;
+		bottom: unset;
 	}
 
 	.bottom-sheet-content::-webkit-scrollbar {
 		display: none;
-	}
-	@media (min-width: 768px) {
-		.bottom-sheet {
-			max-width: 600px;
-			margin: 0 auto;
-		}
 	}
 </style>
