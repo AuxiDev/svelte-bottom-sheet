@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { fly, fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import BottomSheet from '$lib/BottomSheet/index.js';
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
+	import type { PageData } from './$types.js';
+
+	const { data }: { data: PageData } = $props();
 
 	let darkMode = $state(false);
 	let isBasicSheetOpen = $state(false);
@@ -14,7 +17,7 @@
 	let isCustomTopOpen = $state(false);
 	let eventLog = $state<string[]>([]);
 	let mobileMenuOpen = $state(false);
-	let githubStars = $state(219);
+	let githubStars = $state(data.stars);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
 
 	const logEvent = async (event: string) => {
@@ -23,16 +26,6 @@
 
 		if (eventLog.length > 5) eventLog.shift();
 	};
-
-	async function getStars() {
-		const response = await fetch('https://api.github.com/repos/auxidev/svelte-bottom-sheet');
-		const data = await response.json();
-		return data;
-	}
-
-	onMount(async () => {
-		githubStars = (await getStars()).stargazers_count;
-	});
 
 	const items = Array(50)
 		.fill(0)
