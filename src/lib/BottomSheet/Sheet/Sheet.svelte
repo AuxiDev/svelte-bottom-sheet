@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { preventScroll } from '$lib/utils.js';
 
 	let {
 		children,
@@ -105,19 +106,28 @@
 		}
 	};
 
-	const preventScroll = (event: Event) => {
-		if (!sheetElement.contains(event.target as Node)) {
-			event.preventDefault();
+	const recursiveParentCheck = (target: Element) => {
+		if (target.parentElement?.className.startsWith('bottom-sheet')) {
+			return true;
+		} else if (target.parentElement !== null) {
+			return recursiveParentCheck(target.parentElement);
 		}
+
+		return false;
 	};
 
 	$effect(() => {
+		const wheelConroller = new AbortController();
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			document.body.style.overflow = 'hidden';
-			document.documentElement.style.overflow = 'hidden';
-			document.addEventListener('wheel', preventScroll, { passive: false });
-			document.addEventListener('touchmove', preventScroll, { passive: false });
+			document.body.style.touchAction = 'none';
+			if (navigator.userAgent.toLowerCase().includes('firefox')) {
+				document.body.style.overflow = 'hidden';
+			}
+			document.addEventListener('wheel', (e) => preventScroll(e, sheetElement), {
+				passive: false,
+				signal: wheelConroller.signal
+			});
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 			document.addEventListener('keydown', handleKeyDown);
 
@@ -131,10 +141,11 @@
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
 		} else {
-			document.body.style.overflow = 'auto';
-			document.documentElement.style.overflow = '';
-			document.removeEventListener('wheel', preventScroll);
-			document.removeEventListener('touchmove', preventScroll);
+			document.body.style.touchAction = 'initial';
+			if (navigator.userAgent.toLowerCase().includes('firefox')) {
+				document.body.style.overflow = 'auto';
+			}
+			wheelConroller.abort();
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
@@ -195,6 +206,7 @@
 		touch-action: none;
 		border-radius: 16px 16px 0 0;
 		z-index: 2;
+		pointer-events: all;
 	}
 
 	.position-left {

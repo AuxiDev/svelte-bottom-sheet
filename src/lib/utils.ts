@@ -14,3 +14,33 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
 		return maxHeightPx - measurement * maxHeightPx;
 	}
 };
+
+/**
+ * Prevents scrolling
+ *
+ * @param {Event} event - TouchMove / Wheel Event where the behaviour should be blocked.
+ * @param {Element} element - Element which should contain the event target
+ */
+export const preventScroll = (event: Event, element: Element) => {
+	if (element && !element.contains(event.target as Node)) {
+		event.preventDefault();
+	}
+
+	if (
+		((event.target as Element).className &&
+			(event.target as Element).className.startsWith('bottom-sheet')) ||
+		recursiveParentCheck(event.target as Element)
+	) {
+		event.preventDefault();
+	}
+};
+
+const recursiveParentCheck = (target: Element) => {
+	if (target.parentElement?.className.startsWith('bottom-sheet')) {
+		return true;
+	} else if (target.parentElement !== null) {
+		return recursiveParentCheck(target.parentElement);
+	}
+
+	return false;
+};

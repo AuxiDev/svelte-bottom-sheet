@@ -22,6 +22,6 @@ export async function load() {
 		const data = await response.json();
 		return { stars: data.stargazers_count };
 	} catch (err) {
-		throw error(500, 'Error fetching GitHub stars');
+		return { stars: 219 };
 	}
 }

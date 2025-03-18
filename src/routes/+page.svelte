@@ -4,6 +4,7 @@
 	import BottomSheet from '$lib/BottomSheet/index.js';
 	import { tick } from 'svelte';
 	import type { PageData } from './$types.js';
+	import Overlay from '$lib/BottomSheet/Overlay/Overlay.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -504,29 +505,32 @@
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isLongListSheetOpen}>
-	<BottomSheet.Sheet style="max-width: 600px;">
-		<BottomSheet.Handle />
-		<BottomSheet.Content>
-			<h3>Scrollable List of Items</h3>
-			<p>
-				As the number of items increases, the sheet becomes scrollable, allowing users to easily
-				browse through the content without overcrowding the screen. This feature is ideal for
-				displaying long lists or content that doesn't need to take up the entire screen.
-			</p>
-			<ul class="item-list">
-				{#each items as item}
-					<li class="item">
-						<div class="item-header">
-							<h4>{item.title}</h4>
-						</div>
-						<p>{item.description}</p>
-					</li>
-				{/each}
-			</ul>
-			<button class="sheet-button" onclick={() => (isLongListSheetOpen = false)}>Close Sheet</button
-			>
-		</BottomSheet.Content>
-	</BottomSheet.Sheet>
+	<BottomSheet.Overlay>
+		<BottomSheet.Sheet style="max-width: 600px;">
+			<BottomSheet.Handle />
+			<BottomSheet.Content>
+				<h3>Scrollable List of Items</h3>
+				<p>
+					As the number of items increases, the sheet becomes scrollable, allowing users to easily
+					browse through the content without overcrowding the screen. This feature is ideal for
+					displaying long lists or content that doesn't need to take up the entire screen.
+				</p>
+				<ul class="item-list">
+					{#each items as item}
+						<li class="item">
+							<div class="item-header">
+								<h4>{item.title}</h4>
+							</div>
+							<p>{item.description}</p>
+						</li>
+					{/each}
+				</ul>
+				<button class="sheet-button" onclick={() => (isLongListSheetOpen = false)}
+					>Close Sheet</button
+				>
+			</BottomSheet.Content>
+		</BottomSheet.Sheet>
+	</BottomSheet.Overlay>
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomRightOpen} settings={{ position: 'right' }}>
@@ -630,6 +634,7 @@
 		width: 100%;
 		max-width: 1200px;
 		justify-self: center;
+		margin: auto;
 	}
 
 	main {
@@ -894,7 +899,6 @@
 		height: 35px;
 		max-width: 400px;
 		width: 80%;
-		justify-self: center;
 		background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
 		border: 1px solid rgba(255, 105, 180, 0.3);
 		border-radius: 50px;
@@ -904,7 +908,7 @@
 		position: relative;
 		overflow: hidden;
 		box-shadow: 0 4px 15px rgba(255, 28, 142, 0.2);
-		margin: 16px 16px 40px;
+		margin: 0px auto 40px auto;
 	}
 
 	.star-button:hover {
