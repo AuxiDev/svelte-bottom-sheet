@@ -68,6 +68,8 @@ You can use the BottomSheet component in any SvelteKit project.
 
 This is the root component of every Bottom Sheet. It allows you to add your own configuration, attach functions which are called when a specific event is fired and add all other components which need to be used for the Bottom Sheet.
 
+Default `z-index` is `50`.
+
 #### Properties
 
 | Property   | Type                                 | Default   | Description                                                            |
@@ -86,7 +88,13 @@ This is the root component of every Bottom Sheet. It allows you to add your own 
 | `onsheetdragend`   | Fires when the Bottom Sheet ends being dragged.           |
 | `onsnap`           | Fires when a snapable Bottom Sheet snaps to a snap point. |
 
-### BottomSheet.Trigger (Required)
+#### Keyboard Controls (when active)
+
+| Key              | Action                   |
+| ---------------- | ------------------------ |
+| **Escape (Esc)** | Closes the Bottom Sheet. |
+
+### BottomSheet.Trigger (Optional)
 
 #### Description
 
@@ -98,11 +106,12 @@ This component creates a trigger area around its children which when clicked wil
 | --------- | -------------------------------- | --------- | ------------------------------------- |
 | `...rest` | `HTMLAttributes<HTMLDivElement>` | `default` | Default HTMLElement property options. |
 
-### BottomSheet.Overlay (Required)
+### BottomSheet.Overlay (Optional)
 
 #### Description
 
 An overlay which covers the screen while the Bottom Sheet is opened.
+Default `z-index` is `49`.
 
 #### Properties
 
@@ -162,15 +171,16 @@ This is the component where your Bottom Sheet content goes into. This component 
 
 ### **Properties**
 
-| Name                 | Type                                  | Description                                                                                                                                                   | Default Value |
-| -------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`          | `number`                              | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels. | `0.7`         |
-| `snapPoints`         | `number[]`                            | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                    | `[1]`         |
-| `closeThreshold`     | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                          | `0.1`         |
-| `autoCloseThreshold` | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                 | `0`           |
-| `startingSnappoint`  | `number`                              | The snappoint the Bottom Sheet will start at when opened.                                                                                                     | `1`           |
-| `disableDragging`    | `boolean`                             | Disable dragging of the sheet.                                                                                                                                | `false`       |
-| `position`           | `"top"` `"bottom"` `"left"` `"right"` | Set the position where the sheet is positioned and moved to.                                                                                                  | `bottom`      |
+| Name                 | Type                                  | Description                                                                                                                                                            | Default Value |
+| -------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`          | `number`                              | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels.          | `0.7`         |
+| `snapPoints`         | `number[]`                            | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                             | `[1]`         |
+| `closeThreshold`     | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                                   | `0.1`         |
+| `autoCloseThreshold` | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                          | `0`           |
+| `startingSnappoint`  | `number`                              | The snappoint the Bottom Sheet will start at when opened.                                                                                                              | `1`           |
+| `disableDragging`    | `boolean`                             | Disable dragging of the sheet.                                                                                                                                         | `false`       |
+| `position`           | `"top"` `"bottom"` `"left"` `"right"` | Set the position where the sheet is positioned and moved to.                                                                                                           | `bottom`      |
+| `disableClosing`     | `boolean`                             | Whether the sheet should be closable by keybinds or not. Includes: ESC-Keybind and outside-click-action. Closing by binding the isSheetOpen-Property is still allowed! | `false`       |
 
 ### Notes
 

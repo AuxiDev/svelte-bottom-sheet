@@ -42,7 +42,8 @@ to has "height" in it's name.
 		snapPoints: [1],
 		startingSnapPoint: 1,
 		disableDragging: false,
-		position: 'bottom'
+		position: 'bottom',
+		disableClosing: false
 	};
 
 	const sheetSettings: Required<BottomSheetSettings> = { ...defaultSheetSettings, ...settings };
@@ -196,6 +197,8 @@ to has "height" in it's name.
 	 */
 	const mouseMoveEvent = (event: MouseEvent) => {
 		if (!isDragging) return;
+		// Setting isDraggingFromHandle to true, because when dragging with the mouse, you should be able to drag it down no matter if scrolled to the top
+		isDraggingFromHandle = true;
 		let offset: number = calculateOffSet(event.clientY, event.clientX);
 
 		sheetHeight = offset;

@@ -36,7 +36,7 @@
 				event.preventDefault();
 				if (currentIndex > 0) {
 					sheetContext.sheetHeight = snapPointsInPx[currentIndex - 1];
-				} else {
+				} else if (!sheetContext.settings.disableClosing) {
 					sheetContext.closeSheet();
 				}
 				break;

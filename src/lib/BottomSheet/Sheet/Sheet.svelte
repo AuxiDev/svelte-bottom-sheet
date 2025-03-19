@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext, onMount, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
-	import { fade, slide } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
@@ -29,7 +29,11 @@
 	let sheetElement: HTMLDivElement;
 
 	const handleClickOutside = (event: MouseEvent) => {
-		if (sheetElement && !sheetElement.contains(event.target as Node)) {
+		if (
+			sheetElement &&
+			!sheetElement.contains(event.target as Node) &&
+			!sheetContext.settings.disableClosing
+		) {
 			sheetContext.closeSheet();
 		}
 	};
@@ -65,7 +69,7 @@
 	};
 
 	const handleKeyDown = (event: KeyboardEvent) => {
-		if (event.key === 'Escape') {
+		if (event.key === 'Escape' && !sheetContext.settings.disableClosing) {
 			sheetContext.closeSheet();
 		}
 		handleFocusTrap(event);
@@ -108,11 +112,11 @@
 	let wheelConroller = new AbortController();
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
-			wheelConroller = new AbortController();
 			previousActiveElement = document.activeElement as HTMLElement;
 			if (navigator.userAgent.toLowerCase().includes('firefox')) {
 				document.body.style.overflow = 'hidden';
 			}
+			wheelConroller = new AbortController();
 			document.addEventListener(
 				'wheel',
 				(e) => {
@@ -156,7 +160,6 @@
 				document.body.style.overflow = 'auto';
 			}
 			wheelConroller.abort();
-
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);

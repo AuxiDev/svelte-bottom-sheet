@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
-	import { preventScroll, recursiveParentCheck } from '$lib/utils.js';
 
 	import { getContext, onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -15,6 +14,10 @@
 
 	let touchStartY = 0;
 
+	/**
+	 * This functions finds a scrollable parent-element of the provided element within the sheet.
+	 * @param element - Element which might be inside a scrollable element within the sheet
+	 */
 	const getScrollableElement = (element: Element) => {
 		while (element && element !== document.documentElement) {
 			if (!element || element.className.split(' ').includes('bottom-sheet')) {
@@ -33,6 +36,11 @@
 		return null;
 	};
 
+	/**
+	 * Event which allows only scrollable elements within the sheet to be scrolled. Everything inside the
+	 * content is allowed to be scrolled.
+	 * @param {TouchEvent} event - TouchEvent
+	 */
 	const stopScrollPropagationTouch = (event: TouchEvent) => {
 		const target = event.target as Element;
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
@@ -55,7 +63,7 @@
 	/**
 	 * Event which allows only scrollable elements within the sheet to be scrolled. Everything inside the
 	 * content is allowed to be scrolled.
-	 * @param event
+	 * @param {WheelEvent} event - WheelEvent
 	 */
 	const stopScrollPropagationWheel = (event: WheelEvent) => {
 		const target = event.target as Element;
