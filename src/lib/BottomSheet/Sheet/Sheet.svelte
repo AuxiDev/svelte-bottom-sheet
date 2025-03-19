@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getContext, onMount, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
-	import { slide } from 'svelte/transition';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { slideTransition } from '$lib/utils.js';
 
 	let {
 		children,
@@ -192,7 +192,12 @@
 		onmousedown={sheetContext.mouseDownEvent}
 		onmousemove={sheetContext.mouseMoveEvent}
 		onmouseup={sheetContext.moveEnd}
-		transition:slide={{ duration: 500, easing: cubicOut, axis: axisForSlide }}
+		transition:slideTransition={{
+			duration: 500,
+			easing: cubicOut,
+			axis: axisForSlide,
+			position: sheetContext.settings.position
+		}}
 	>
 		{@render children?.()}
 	</div>

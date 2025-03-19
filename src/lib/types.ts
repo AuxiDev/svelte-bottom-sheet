@@ -5,6 +5,8 @@ import type SheetTrigger from './BottomSheet/Trigger/Trigger.svelte';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 import type Handle from './BottomSheet/Handle/Handle.svelte';
 
+export type sheetPosition = 'bottom' | 'top' | 'left' | 'right';
+
 export type BottomSheetSettings = {
 	closeThreshold?: number;
 	autoCloseThreshold?: number;
@@ -13,7 +15,7 @@ export type BottomSheetSettings = {
 	startingSnapPoint?: number;
 	disableDragging?: boolean;
 	disableClosing?: boolean;
-	position?: 'bottom' | 'top' | 'left' | 'right';
+	position?: sheetPosition;
 };
 
 export type BottomSheetType = typeof BottomSheet & {

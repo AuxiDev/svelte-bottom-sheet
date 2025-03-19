@@ -1,3 +1,6 @@
+import { cubicOut } from 'svelte/easing';
+import type { sheetPosition } from './types.js';
+
 /**
  * Converts a measurement value into pixels relative to the `maxHeight`.
  * - If the value is ≤ 1, it represents a percentage of `maxHeight`.
@@ -13,4 +16,67 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
 	} else {
 		return maxHeightPx - measurement * maxHeightPx;
 	}
+};
+
+/**
+ * Slides an element in and out.
+ *
+ * @param {Element} node
+ * @param {SlideParams} [params]
+ * @param {sheetPosition} position
+ * @returns {TransitionConfig}
+ */
+export const slideTransition = (
+	node: HTMLElement,
+	{
+		delay = 0,
+		duration = 400,
+		easing = cubicOut,
+		axis = 'y',
+		position = 'bottom'
+	}: {
+		delay?: number;
+		duration?: number;
+		easing?: (t: number) => number;
+		axis?: 'x' | 'y';
+		position: sheetPosition;
+	}
+) => {
+	const style: any = getComputedStyle(node);
+
+	const negativeTranslate = position == 'top' || position == 'left';
+	const opacity = parseFloat(style.opacity);
+	const primary_property = axis === 'y' ? 'translateY' : 'translateX';
+	const primary_distance = axis === 'y' ? node.offsetHeight : node.offsetWidth;
+	const secondary_properties = axis === 'y' ? ['top', 'bottom'] : ['left', 'right'];
+	const capitalized_secondary_properties = secondary_properties.map(
+		(e) => `${e[0].toUpperCase()}${e.slice(1)}` as 'Left' | 'Right' | 'Top' | 'Bottom'
+	);
+	const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
+	const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
+	const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
+	const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
+	const border_width_start_value = parseFloat(
+		style[`border${capitalized_secondary_properties[0]}Width`]
+	);
+	const border_width_end_value = parseFloat(
+		style[`border${capitalized_secondary_properties[1]}Width`]
+	);
+
+	return {
+		delay,
+		duration,
+		easing,
+		css: (t: number) => `
+            overflow: hidden;
+            opacity: ${Math.min(t * 20, 1) * opacity};
+            transform: ${primary_property}(${(1 - t) * (negativeTranslate ? -1 : 1) * primary_distance}px);
+            padding-${secondary_properties[0]}: ${t * padding_start_value}px;
+            padding-${secondary_properties[1]}: ${t * padding_end_value}px;
+            margin-${secondary_properties[0]}: ${t * margin_start_value}px;
+            margin-${secondary_properties[1]}: ${t * margin_end_value}px;
+            border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;
+            border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;
+        `
+	};
 };
