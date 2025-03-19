@@ -38,7 +38,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: flex-end;
-		z-index: 1;
+		z-index: 49;
 		overflow: hidden;
 	}
 </style>

@@ -699,7 +699,7 @@
 		top: 0;
 		left: 0;
 		max-width: 100%;
-		z-index: 100;
+		z-index: 30;
 		overflow: hidden;
 		width: 100dvw;
 		transition:

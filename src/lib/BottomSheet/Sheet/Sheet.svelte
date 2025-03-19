@@ -4,7 +4,6 @@
 	import { fade, slide } from 'svelte/transition';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { preventScroll } from '$lib/utils.js';
 
 	let {
 		children,
@@ -106,30 +105,41 @@
 		}
 	};
 
-	const recursiveParentCheck = (target: Element) => {
-		if (target.parentElement?.className.startsWith('bottom-sheet')) {
-			return true;
-		} else if (target.parentElement !== null) {
-			return recursiveParentCheck(target.parentElement);
-		}
-
-		return false;
-	};
-
+	let wheelConroller = new AbortController();
 	$effect(() => {
-		const wheelConroller = new AbortController();
 		if (sheetContext.isSheetOpen) {
+			wheelConroller = new AbortController();
 			previousActiveElement = document.activeElement as HTMLElement;
-			document.body.style.touchAction = 'none';
 			if (navigator.userAgent.toLowerCase().includes('firefox')) {
 				document.body.style.overflow = 'hidden';
 			}
-			document.addEventListener('wheel', (e) => preventScroll(e, sheetElement), {
-				passive: false,
-				signal: wheelConroller.signal
-			});
+			document.addEventListener(
+				'wheel',
+				(e) => {
+					e.preventDefault();
+				},
+				{
+					passive: false,
+					signal: wheelConroller.signal
+				}
+			);
+
+			document.addEventListener(
+				'touchmove',
+				(e) => {
+					{
+						if (e.cancelable) e.preventDefault();
+					}
+				},
+				{
+					passive: false,
+					signal: wheelConroller.signal
+				}
+			);
+
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 			document.addEventListener('keydown', handleKeyDown);
+			document.body.style.touchAction = 'none';
 
 			setTimeout(() => {
 				const focusableElements = getFocusableElements();
@@ -146,6 +156,7 @@
 				document.body.style.overflow = 'auto';
 			}
 			wheelConroller.abort();
+
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
@@ -205,7 +216,7 @@
 		overflow: hidden;
 		touch-action: none;
 		border-radius: 16px 16px 0 0;
-		z-index: 2;
+		z-index: 50;
 		pointer-events: all;
 	}
 

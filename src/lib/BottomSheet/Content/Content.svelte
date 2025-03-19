@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
-	import { preventScroll } from '$lib/utils.js';
+	import { preventScroll, recursiveParentCheck } from '$lib/utils.js';
 
 	import { getContext, onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -12,58 +12,84 @@
 		children,
 		...rest
 	}: { children?: Snippet<[]> | undefined } & HTMLAttributes<HTMLDivElement> = $props();
-	let isScrollable = $state(false);
 
-	const touchMoveConroller = new AbortController();
-	onMount(() => {
-		if (sheetContext.sheetContent) {
-			sheetContext.sheetContent.scrollTop = 1;
-			isScrollable = sheetContext.sheetContent.scrollTop > 0;
-			sheetContext.sheetContent.scrollTop = 0;
+	let touchStartY = 0;
+
+	const getScrollableElement = (element: Element) => {
+		while (element && element !== document.documentElement) {
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				return;
+			}
+			const overflowY = window.getComputedStyle(element).overflowY;
+			if (
+				overflowY !== 'visible' &&
+				overflowY !== 'hidden' &&
+				element.scrollHeight > element.clientHeight
+			) {
+				return element;
+			}
+			element = element.parentElement as HTMLElement;
+		}
+		return null;
+	};
+
+	const stopScrollPropagationTouch = (event: TouchEvent) => {
+		const target = event.target as Element;
+		const scrollableElement = getScrollableElement(target) as HTMLElement;
+
+		if (!scrollableElement) {
+			return;
+		}
+		const touchMoveY = event.touches[0].clientY;
+		const scrollTop = scrollableElement.scrollTop;
+		const atTop = scrollTop <= 0;
+		const scrollingUp = touchMoveY > touchStartY;
+		if (atTop && scrollingUp) {
+			sheetContext.isDraggingFromHandle = true;
+			return;
 		}
 
-		if (!isScrollable) {
-			document.addEventListener(
-				'touchmove',
-				(e) => preventScroll(e, sheetContext.sheetContent as HTMLDivElement),
-				{
-					passive: false,
-					signal: touchMoveConroller.signal
-				}
-			);
-		}
-
-		return () => {
-			touchMoveConroller.abort();
-		};
-	});
+		event.stopPropagation();
+	};
 
 	/**
-	 * Event which allows the background (body) not to be scrolled. Everything inside the
+	 * Event which allows only scrollable elements within the sheet to be scrolled. Everything inside the
 	 * content is allowed to be scrolled.
 	 * @param event
 	 */
 	const stopScrollPropagationWheel = (event: WheelEvent) => {
-		if (!sheetContext.sheetContent || !isScrollable) return;
-		const atTop = sheetContext.sheetContent.scrollTop <= 0;
-		const atBottom =
-			sheetContext.sheetContent.scrollTop >=
-			sheetContext.sheetContent.scrollHeight - sheetContext.sheetContent.clientHeight;
+		const target = event.target as Element;
+		const scrollableElement = getScrollableElement(target) as HTMLElement;
 
-		if ((event.deltaY > 0 && !atBottom) || (event.deltaY < 0 && !atTop)) {
+		if (!scrollableElement) {
+			return;
+		}
+
+		const scrollTop = scrollableElement.scrollTop;
+		const scrollHeight = scrollableElement.scrollHeight;
+		const clientHeight = scrollableElement.clientHeight;
+
+		const atTop = scrollTop <= 0;
+		const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+		const scrollingUp = event.deltaY < 0;
+
+		if ((atTop && !scrollingUp) || (atBottom && scrollingUp) || (!atTop && !atBottom)) {
 			event.stopPropagation();
-		} else {
-			event.preventDefault();
+			return;
 		}
 	};
 </script>
 
 <div
-	class="bottom-sheet-content {rest.class}"
+	class="bottom-sheet-content {rest.class} "
 	bind:this={sheetContext.sheetContent}
 	style="overflow-y: {sheetContext.isMovingSheet ? 'hidden' : 'auto'};"
 	role="document"
 	onwheel={stopScrollPropagationWheel}
+	ontouchstart={(e) => {
+		touchStartY = e.touches[0].clientY;
+	}}
+	ontouchmove={stopScrollPropagationTouch}
 	{...rest}
 >
 	{@render children?.()}
@@ -76,18 +102,5 @@
 		height: 100%;
 		max-width: 100%;
 		flex-grow: 1;
-		-webkit-overflow-scrolling: touch;
-		overscroll-behavior: contain;
-		scrollbar-width: thin; /* Firefox special treatment */
-	}
-	.bottom-sheet-content::-webkit-scrollbar {
-		width: 8px;
-	}
-	.bottom-sheet-content::-webkit-scrollbar-track {
-		background: transparent;
-	}
-	.bottom-sheet-content::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
 	}
 </style>

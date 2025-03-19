@@ -29,17 +29,20 @@ export const preventScroll = (event: Event, element: Element) => {
 	if (
 		((event.target as Element).className &&
 			(event.target as Element).className.startsWith('bottom-sheet')) ||
-		recursiveParentCheck(event.target as Element)
+		recursiveParentCheck(event.target as Element, 'bottom-sheet')
 	) {
+		if (recursiveParentCheck(event.target as Element, 'scrollable')) {
+			return;
+		}
 		event.preventDefault();
 	}
 };
 
-const recursiveParentCheck = (target: Element) => {
-	if (target.parentElement?.className.startsWith('bottom-sheet')) {
+export const recursiveParentCheck = (target: Element, targetClass: string): boolean => {
+	if (target.parentElement?.className.split(' ').includes(targetClass)) {
 		return true;
 	} else if (target.parentElement !== null) {
-		return recursiveParentCheck(target.parentElement);
+		return recursiveParentCheck(target.parentElement, targetClass);
 	}
 
 	return false;
