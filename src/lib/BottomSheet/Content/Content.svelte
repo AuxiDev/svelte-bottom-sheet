@@ -50,13 +50,17 @@
 		}
 		const touchMoveY = event.touches[0].clientY;
 		const scrollTop = scrollableElement.scrollTop;
+		const scrollHeight = scrollableElement.scrollHeight;
+		const clientHeight = scrollableElement.clientHeight;
 		const atTop = scrollTop <= 0;
 		const scrollingUp = touchMoveY > touchStartY;
+		const atBottom = Math.round(scrollTop) + clientHeight >= scrollHeight;
 		if (atTop && scrollingUp) {
 			sheetContext.isDraggingFromHandle = true;
 			return;
+		} else if (!scrollingUp && atBottom) {
+			return;
 		}
-
 		event.stopPropagation();
 	};
 
@@ -110,5 +114,7 @@
 		height: 100%;
 		max-width: 100%;
 		flex-grow: 1;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 </style>

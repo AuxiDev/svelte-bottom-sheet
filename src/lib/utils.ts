@@ -17,6 +17,17 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
 		return maxHeightPx - measurement * maxHeightPx;
 	}
 };
+const getTranslateY = (element: Element) => {
+	const style = window.getComputedStyle(element);
+	const matrix = new DOMMatrix(style.transform);
+	return matrix.m42;
+};
+
+const getTranslateX = (element: Element) => {
+	const style = window.getComputedStyle(element);
+	const matrix = new DOMMatrix(style.transform);
+	return matrix.m41;
+};
 
 /**
  * Slides an element in and out.
@@ -33,21 +44,39 @@ export const slideTransition = (
 		duration = 400,
 		easing = cubicOut,
 		axis = 'y',
-		position = 'bottom'
+		position = 'bottom',
+		sheetHeight = 0,
+		sheetMaxHeight = 0
 	}: {
 		delay?: number;
 		duration?: number;
 		easing?: (t: number) => number;
 		axis?: 'x' | 'y';
 		position: sheetPosition;
+		sheetHeight: number;
+		sheetMaxHeight: number;
 	}
 ) => {
 	const style: any = getComputedStyle(node);
 
+	switch (position) {
+		case 'top':
+		case 'bottom':
+			sheetHeight = sheetMaxHeight - Math.abs(getTranslateY(node));
+			break;
+		case 'left':
+		case 'right':
+			sheetHeight = sheetMaxHeight - Math.abs(getTranslateX(node));
+			break;
+	}
+
+	if (sheetHeight === 0) {
+		sheetHeight = node.offsetHeight;
+	}
 	const negativeTranslate = position == 'top' || position == 'left';
 	const opacity = parseFloat(style.opacity);
 	const primary_property = axis === 'y' ? 'translateY' : 'translateX';
-	const primary_distance = axis === 'y' ? node.offsetHeight : node.offsetWidth;
+	const primary_distance = sheetHeight;
 	const secondary_properties = axis === 'y' ? ['top', 'bottom'] : ['left', 'right'];
 	const capitalized_secondary_properties = secondary_properties.map(
 		(e) => `${e[0].toUpperCase()}${e.slice(1)}` as 'Left' | 'Right' | 'Top' | 'Bottom'
@@ -70,6 +99,7 @@ export const slideTransition = (
 		css: (t: number) => `
             overflow: hidden;
             opacity: ${Math.min(t * 20, 1) * opacity};
+			${axis === 'y' ? `maxHeight: ${primary_distance}px;` : `maxWidth: ${primary_distance}px;`}
             transform: ${primary_property}(${(1 - t) * (negativeTranslate ? -1 : 1) * primary_distance}px);
             padding-${secondary_properties[0]}: ${t * padding_start_value}px;
             padding-${secondary_properties[1]}: ${t * padding_end_value}px;

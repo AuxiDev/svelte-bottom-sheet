@@ -196,7 +196,9 @@
 			duration: 500,
 			easing: cubicOut,
 			axis: axisForSlide,
-			position: sheetContext.settings.position
+			position: sheetContext.settings.position,
+			sheetHeight: sheetContext.sheetHeight,
+			sheetMaxHeight: sheetContext.maxHeightPx
 		}}
 	>
 		{@render children?.()}
