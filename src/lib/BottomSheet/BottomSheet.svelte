@@ -162,16 +162,12 @@ to has "height" in it's name.
 	const calculateOffSet = (clientY: number, clientX: number) => {
 		let offset: number = 0;
 		if (sheetSettings.position === 'bottom') {
-			if (isDraggingFromHandle) {
-				offset = Math.max(0, clientY - startY + startHeight);
-			} else {
-				offset = Math.max(0, clientY - startY - noScrolledTop + startHeight);
-			}
+			offset = Math.max(0, clientY - startY - noScrolledTop + startHeight);
 		} else if (sheetSettings.position === 'top') {
 			if (isDraggingFromHandle) {
 				offset = Math.max(0, startY - clientY + startHeight);
 			} else {
-				offset = Math.max(0, startY - clientY - noScrolledTop + startHeight);
+				offset = startY - clientY - noScrolledTop + startHeight;
 			}
 		} else if (sheetSettings.position === 'left') {
 			if (isDraggingFromHandle) {
@@ -219,8 +215,10 @@ to has "height" in it's name.
 			return;
 		}
 
+		// event.touches[0].clientY - startY - normal offset
+		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
+		// startHeight - offset when we not start at the top with dragging
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
-
 		if (sheetHeight != 0) {
 			isMovingSheet = true;
 		}

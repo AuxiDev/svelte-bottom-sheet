@@ -4,7 +4,6 @@
 	import BottomSheet from '$lib/BottomSheet/index.js';
 	import { tick } from 'svelte';
 	import type { PageData } from './$types.js';
-	import Overlay from '$lib/BottomSheet/Overlay/Overlay.svelte';
 
 	const { data }: { data: PageData } = $props();
 
