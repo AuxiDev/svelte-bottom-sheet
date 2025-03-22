@@ -89,11 +89,57 @@
 		}
 	};
 
+	let isAnimation = $state(false);
+	let sheetScrollPosition = 0;
+
+	$effect(() => {
+		if (!sheetContext.isMovingSheet && sheetContext.sheetElement !== null) {
+			sheetScrollPosition = sheetContext.sheetElement.scrollTop as number;
+			isAnimation = true;
+
+			setTimeout(() => {
+				isAnimation = false;
+			}, 500);
+
+			setTimeout(() => {
+				if (sheetContext.sheetElement) {
+					sheetContext.sheetElement.scrollTop = sheetScrollPosition;
+				}
+			}, 100);
+		}
+	});
+
+	let heightHistory = [0, 0];
+	let sheetHeightHistory = [0, 0];
+
 	let dimensionStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'bottom':
-			case 'top':
-				return `height: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px;  margin-bottom: ${sheetContext.sheetHeight}px;`;
+			case 'top': {
+				/* When you have got a sheet with snappoint, you still want to be able to scroll it when it's not at the very top, were usually the default scroll behaviour 
+				would apply (duo to max-height). Therefore, we adjust the height to be as much as the user can see. 
+				Because this ruins the animation, we have to push it up or down, and through the animation add for a short period (time of the animation, 500ms) 
+				some more content so there aren't any gaps.
+				*/
+				const isBottom = sheetContext.settings.position === 'bottom';
+
+				if (!isAnimation) {
+					heightHistory = [heightHistory[1], sheetContext.maxHeightPx - sheetContext.sheetHeight];
+					sheetHeightHistory = [sheetHeightHistory[1], sheetContext.sheetHeight];
+				}
+
+				const height =
+					isAnimation && heightHistory[1] < heightHistory[0] ? heightHistory[0] : heightHistory[1];
+				const offset =
+					isAnimation && heightHistory[1] < heightHistory[0]
+						? sheetHeightHistory[0]
+						: sheetHeightHistory[1];
+
+				return isBottom
+					? `height: ${height}px; margin-bottom: ${offset}px;`
+					: `height: ${height}px; margin-top: ${offset}px;`;
+			}
+
 			case 'left':
 			case 'right':
 				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
@@ -114,10 +160,16 @@
 	 */
 	const getScrollableElement = (element: Element) => {
 		while (element && element !== document.documentElement) {
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				return element;
-			}
 			const overflowY = window.getComputedStyle(element).overflowY;
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				if (
+					overflowY !== 'visible' &&
+					overflowY !== 'hidden' &&
+					element.scrollHeight > element.clientHeight
+				) {
+					return element;
+				}
+			}
 			if (
 				overflowY !== 'visible' &&
 				overflowY !== 'hidden' &&
@@ -160,6 +212,7 @@
 			if (navigator.userAgent.toLowerCase().includes('firefox')) {
 				document.body.style.overflow = 'hidden';
 			}
+
 			wheelConroller = new AbortController();
 			document.addEventListener(
 				'wheel',
@@ -222,9 +275,9 @@
 			: ''}"
 		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'}; overflow: {sheetContext.isMovingSheet
+			: 'transform 0.3s ease-in-out'}; overflow-y: {sheetContext.isMovingSheet
 			? 'hidden'
-			: 'auto'}; {rest.style}"
+			: 'auto'};  {rest.style}"
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={sheetIdentificationContext.headingId}
@@ -271,10 +324,11 @@
 		height: 100%;
 		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-		overflow: scroll;
-		touch-action: none;
+		overflow-y: auto;
 		border-radius: 16px 16px 0 0;
 		z-index: 50;
+		/* -ms-overflow-style: none;
+		scrollbar-width: none; */
 	}
 
 	.position-left {
@@ -303,9 +357,6 @@
 		margin: 0 auto;
 		top: 0;
 		bottom: unset;
-	}
-
-	.bottom-sheet-content::-webkit-scrollbar {
-		display: none;
+		justify-content: flex-start;
 	}
 </style>

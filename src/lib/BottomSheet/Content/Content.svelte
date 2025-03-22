@@ -16,7 +16,6 @@
 <div
 	class="bottom-sheet-content {rest.class} "
 	bind:this={sheetContext.sheetContent}
-	style="overflow-y: scroll;"
 	role="document"
 	{...rest}
 >
@@ -25,11 +24,10 @@
 
 <style>
 	.bottom-sheet-content {
-		position: absolute;
-		overflow-y: auto;
 		padding: 20px;
 		max-width: 100%;
 		flex-grow: 1;
-		overflow-y: auto !important;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 </style>

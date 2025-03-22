@@ -76,16 +76,14 @@
 		margin: 16px auto;
 	}
 	.handle-container {
+		position: sticky;
 		height: 40px;
 		width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		position: sticky;
-		top: 0;
 		background-color: white;
-		background: white;
-		z-index: 60;
+		z-index: 51;
 	}
 
 	.position-left,
@@ -97,6 +95,22 @@
 	.position-left .bottom-sheet-handle,
 	.position-right .bottom-sheet-handle {
 		transform: rotate(90deg);
+	}
+
+	.position-bottom {
+		top: 0;
+	}
+
+	.position-top {
+		bottom: 0;
+	}
+
+	.position-left {
+		right: 0;
+	}
+
+	.position-right {
+		left: 0;
 	}
 
 	.handle-container:focus-visible {

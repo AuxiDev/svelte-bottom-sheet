@@ -472,7 +472,7 @@
 		maxHeight: 0.9,
 		snapPoints: [0.25, 0.5, 0.75],
 		startingSnapPoint: 0.5,
-		position: 'bottom'
+		position: 'top'
 	}}
 	onsnap={(point) => logEvent(`Sheet snapped to ${point * 100}%`)}
 >

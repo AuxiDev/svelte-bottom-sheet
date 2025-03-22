@@ -163,12 +163,16 @@ to has "height" in it's name.
 	const calculateOffSet = (clientY: number, clientX: number) => {
 		let offset: number = 0;
 		if (sheetSettings.position === 'bottom') {
-			offset = Math.max(0, clientY - startY - noScrolledTop + startHeight);
+			if (isDraggingFromHandle) {
+				offset = Math.max(0, clientY - startY + startHeight);
+			} else {
+				offset = Math.max(0, clientY - startY - noScrolledTop + startHeight);
+			}
 		} else if (sheetSettings.position === 'top') {
 			if (isDraggingFromHandle) {
 				offset = Math.max(0, startY - clientY + startHeight);
 			} else {
-				offset = startY - clientY - noScrolledTop + startHeight;
+				offset = Math.max(0, startY - clientY - noScrolledTop + startHeight);
 			}
 		} else if (sheetSettings.position === 'left') {
 			if (isDraggingFromHandle) {
@@ -205,10 +209,16 @@ to has "height" in it's name.
 
 	const getScrollableElement = (element: Element) => {
 		while (element && element !== document.documentElement) {
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				return element;
-			}
 			const overflowY = window.getComputedStyle(element).overflowY;
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				if (
+					overflowY !== 'visible' &&
+					overflowY !== 'hidden' &&
+					element.scrollHeight > element.clientHeight
+				) {
+					return element;
+				}
+			}
 			if (
 				overflowY !== 'visible' &&
 				overflowY !== 'hidden' &&
@@ -232,34 +242,33 @@ to has "height" in it's name.
 		if (sheetElement?.scrollTop !== 0 && !isDraggingFromHandle) {
 			isMovingSheet = false;
 		}
+		const target = event.target as Element;
+		const scrollableElement = getScrollableElement(target) as HTMLElement;
 
-		if (!isDraggingFromHandle && !isMovingSheet) {
-			const target = event.target as Element;
-			const scrollableElement = getScrollableElement(target) as HTMLElement;
-
-			if (!scrollableElement) {
-				return;
-			}
+		if (!isDraggingFromHandle && !isMovingSheet && scrollableElement) {
 			const touchMoveY = event.touches[0].clientY;
 			const scrollTop = scrollableElement.scrollTop;
 			const scrollHeight = scrollableElement.scrollHeight;
 			const clientHeight = scrollableElement.clientHeight;
-			const atTop = scrollTop <= 0;
-			const scrollingUp = touchMoveY > startY;
-			const atBottom = Math.round(scrollTop) + clientHeight >= scrollHeight;
-			if (atTop && scrollingUp) {
-				isMovingSheet = true;
+
+			let scrollingUp = touchMoveY > startY;
+			const atBottom = Math.abs(Math.round(scrollTop)) + clientHeight >= scrollHeight;
+			let atTop;
+
+			if (sheetSettings.position === 'top') {
+				atTop = scrollTop >= 0;
+			} else if (sheetSettings.position === 'bottom') {
+				atTop = scrollTop <= 0;
+				scrollingUp = !scrollingUp;
+			}
+
+			if ((atTop && scrollingUp) || (!scrollingUp && atBottom) || (!atTop && !atBottom)) {
+				event.stopPropagation();
 				return;
 			} else if (atTop && !scrollingUp) {
-				event.stopPropagation();
-				return;
-			} else if (!scrollingUp && atBottom) {
-				return;
-			} else if (!atTop && !atBottom) {
-				event.stopPropagation();
+				isMovingSheet = true;
 				return;
 			} else if (atBottom && scrollingUp) {
-				event.stopPropagation();
 				return;
 			}
 		}
