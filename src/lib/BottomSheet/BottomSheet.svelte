@@ -77,6 +77,7 @@ to has "height" in it's name.
 	let isDraggingFromHandle = $state(false);
 	let maxHeightPx = $state(0);
 	let sheetContent: HTMLDivElement | null = $state(null);
+	let sheetElement: HTMLDivElement | null = $state(null);
 	let isDragging = $state(false);
 	let isMovingSheet = $state(false);
 	let startY: number;
@@ -149,7 +150,7 @@ to has "height" in it's name.
 		startX = clientStartX;
 		startHeight = sheetHeight;
 		isDragging = true;
-		noScrolledTop = sheetContent?.scrollTop ?? 0;
+		noScrolledTop = sheetElement?.scrollTop ?? 0;
 		onsheetdragstart?.();
 	};
 
@@ -202,17 +203,65 @@ to has "height" in it's name.
 		tryAutoClose();
 	};
 
+	const getScrollableElement = (element: Element) => {
+		while (element && element !== document.documentElement) {
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				return element;
+			}
+			const overflowY = window.getComputedStyle(element).overflowY;
+			if (
+				overflowY !== 'visible' &&
+				overflowY !== 'hidden' &&
+				element.scrollHeight > element.clientHeight
+			) {
+				return element;
+			}
+			element = element.parentElement as HTMLElement;
+		}
+		return null;
+	};
+
 	/**
 	 * Handles touch movement while dragging the bottom sheet.
 	 *
 	 * @param {TouchEvent} event - The touch event.
 	 */
 	const touchMoveEvent = (event: TouchEvent) => {
-		if (!isDragging) return;
+		if (!isDragging || !sheetElement) return;
 
-		if (sheetContent?.scrollTop !== 0 && !isDraggingFromHandle) {
+		if (sheetElement?.scrollTop !== 0 && !isDraggingFromHandle) {
 			isMovingSheet = false;
-			return;
+		}
+
+		if (!isDraggingFromHandle && !isMovingSheet) {
+			const target = event.target as Element;
+			const scrollableElement = getScrollableElement(target) as HTMLElement;
+
+			if (!scrollableElement) {
+				return;
+			}
+			const touchMoveY = event.touches[0].clientY;
+			const scrollTop = scrollableElement.scrollTop;
+			const scrollHeight = scrollableElement.scrollHeight;
+			const clientHeight = scrollableElement.clientHeight;
+			const atTop = scrollTop <= 0;
+			const scrollingUp = touchMoveY > startY;
+			const atBottom = Math.round(scrollTop) + clientHeight >= scrollHeight;
+			if (atTop && scrollingUp) {
+				isMovingSheet = true;
+				return;
+			} else if (atTop && !scrollingUp) {
+				event.stopPropagation();
+				return;
+			} else if (!scrollingUp && atBottom) {
+				return;
+			} else if (!atTop && !atBottom) {
+				event.stopPropagation();
+				return;
+			} else if (atBottom && scrollingUp) {
+				event.stopPropagation();
+				return;
+			}
 		}
 
 		// event.touches[0].clientY - startY - normal offset
@@ -342,6 +391,12 @@ to has "height" in it's name.
 		},
 		set sheetContent(element: HTMLDivElement) {
 			sheetContent = element;
+		},
+		get sheetElement() {
+			return sheetElement!;
+		},
+		set sheetElement(element: HTMLDivElement) {
+			sheetElement = element;
 		},
 		get maxHeightPx() {
 			return maxHeightPx;

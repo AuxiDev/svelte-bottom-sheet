@@ -39,6 +39,7 @@ export type SheetContext = {
 	isMovingSheet: boolean;
 	isDraggingFromHandle: boolean;
 	sheetContent: HTMLDivElement | null;
+	sheetElement: HTMLDivElement | null;
 	settings: Required<BottomSheetSettings>;
 	maxHeightPx: number;
 	touchStartEvent: (event: TouchEvent) => void;

@@ -81,6 +81,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		position: sticky;
+		top: 0;
+		background-color: white;
+		background: white;
+		z-index: 60;
 	}
 
 	.position-left,

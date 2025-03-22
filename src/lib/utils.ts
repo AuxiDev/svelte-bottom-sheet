@@ -58,25 +58,26 @@ export const slideTransition = (
 	}
 ) => {
 	const style: any = getComputedStyle(node);
-
+	let primary_distance = 0;
 	switch (position) {
 		case 'top':
 		case 'bottom':
-			sheetHeight = sheetMaxHeight - Math.abs(getTranslateY(node));
+			primary_distance = sheetMaxHeight - Math.abs(getTranslateY(node));
 			break;
 		case 'left':
 		case 'right':
-			sheetHeight = sheetMaxHeight - Math.abs(getTranslateX(node));
+			primary_distance = sheetMaxHeight - Math.abs(getTranslateX(node));
 			break;
 	}
 
 	if (sheetHeight === 0) {
-		sheetHeight = node.offsetHeight;
+		primary_distance = node.offsetHeight;
 	}
+
 	const negativeTranslate = position == 'top' || position == 'left';
 	const opacity = parseFloat(style.opacity);
 	const primary_property = axis === 'y' ? 'translateY' : 'translateX';
-	const primary_distance = sheetHeight;
+
 	const secondary_properties = axis === 'y' ? ['top', 'bottom'] : ['left', 'right'];
 	const capitalized_secondary_properties = secondary_properties.map(
 		(e) => `${e[0].toUpperCase()}${e.slice(1)}` as 'Left' | 'Right' | 'Top' | 'Bottom'
@@ -99,12 +100,12 @@ export const slideTransition = (
 		css: (t: number) => `
             overflow: hidden;
             opacity: ${Math.min(t * 20, 1) * opacity};
-			${axis === 'y' ? `maxHeight: ${primary_distance}px;` : `maxWidth: ${primary_distance}px;`}
             transform: ${primary_property}(${(1 - t) * (negativeTranslate ? -1 : 1) * primary_distance}px);
             padding-${secondary_properties[0]}: ${t * padding_start_value}px;
             padding-${secondary_properties[1]}: ${t * padding_end_value}px;
             margin-${secondary_properties[0]}: ${t * margin_start_value}px;
             margin-${secondary_properties[1]}: ${t * margin_end_value}px;
+			margin-bottom: 0px;
             border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;
             border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;
         `

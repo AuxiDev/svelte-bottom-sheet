@@ -4,6 +4,7 @@
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { slideTransition } from '$lib/utils.js';
+	import { slide } from 'svelte/transition';
 
 	let {
 		children,
@@ -25,13 +26,10 @@
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
 	}
 
-	// svelte-ignore non_reactive_update
-	let sheetElement: HTMLDivElement;
-
 	const handleClickOutside = (event: MouseEvent) => {
 		if (
-			sheetElement &&
-			!sheetElement.contains(event.target as Node) &&
+			sheetContext.sheetElement &&
+			!sheetContext.sheetElement.contains(event.target as Node) &&
 			!sheetContext.settings.disableClosing
 		) {
 			sheetContext.closeSheet();
@@ -39,8 +37,9 @@
 	};
 
 	const getFocusableElements = () => {
+		if (!sheetContext.sheetElement) return [];
 		return Array.from(
-			sheetElement.querySelectorAll<HTMLElement>(
+			sheetContext.sheetElement.querySelectorAll<HTMLElement>(
 				'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 			)
 		);
@@ -94,7 +93,7 @@
 		switch (sheetContext.settings.position) {
 			case 'bottom':
 			case 'top':
-				return `height: ${sheetContext.maxHeightPx}px;`;
+				return `height: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px;  margin-bottom: ${sheetContext.sheetHeight}px;`;
 			case 'left':
 			case 'right':
 				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
@@ -106,6 +105,51 @@
 	const preventPullToRefresh = (event: TouchEvent) => {
 		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
 			event.preventDefault();
+		}
+	};
+
+	/**
+	 * This functions finds a scrollable parent-element of the provided element within the sheet.
+	 * @param element - Element which might be inside a scrollable element within the sheet
+	 */
+	const getScrollableElement = (element: Element) => {
+		while (element && element !== document.documentElement) {
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				return element;
+			}
+			const overflowY = window.getComputedStyle(element).overflowY;
+			if (
+				overflowY !== 'visible' &&
+				overflowY !== 'hidden' &&
+				element.scrollHeight > element.clientHeight
+			) {
+				return element;
+			}
+			element = element.parentElement as HTMLElement;
+		}
+		return null;
+	};
+
+	/**
+	 * Event which allows only scrollable elements within the sheet to be scrolled. Everything inside the
+	 * content is allowed to be scrolled.
+	 * @param {WheelEvent} event - WheelEvent
+	 */
+	const stopScrollPropagationWheel = (event: WheelEvent) => {
+		const target = event.target as Element;
+		const scrollableElement = getScrollableElement(target) as HTMLElement;
+		if (!scrollableElement) {
+			return;
+		}
+		const scrollTop = scrollableElement.scrollTop;
+		const scrollHeight = scrollableElement.scrollHeight;
+		const clientHeight = scrollableElement.clientHeight;
+		const atTop = scrollTop <= 0;
+		const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+		const scrollingUp = event.deltaY < 0;
+		if ((atTop && !scrollingUp) || (atBottom && scrollingUp) || (!atTop && !atBottom)) {
+			event.stopPropagation();
+			return;
 		}
 	};
 
@@ -150,7 +194,7 @@
 				if (focusableElements.length) {
 					focusableElements[0].focus();
 				} else {
-					sheetElement?.focus();
+					sheetContext.sheetElement?.focus();
 				}
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
@@ -172,13 +216,15 @@
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		{...rest}
-		bind:this={sheetElement}
+		bind:this={sheetContext.sheetElement}
 		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
 			? 'prevent-select'
 			: ''}"
 		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'}; {rest.style}"
+			: 'transform 0.3s ease-in-out'}; overflow: {sheetContext.isMovingSheet
+			? 'hidden'
+			: 'auto'}; {rest.style}"
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={sheetIdentificationContext.headingId}
@@ -192,6 +238,7 @@
 		onmousedown={sheetContext.mouseDownEvent}
 		onmousemove={sheetContext.mouseMoveEvent}
 		onmouseup={sheetContext.moveEnd}
+		onwheel={stopScrollPropagationWheel}
 		transition:slideTransition={{
 			duration: 500,
 			easing: cubicOut,
@@ -221,13 +268,13 @@
 		align-self: flex-end;
 		width: 100%;
 		max-width: 100%;
+		height: 100%;
 		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-		overflow: hidden;
+		overflow: scroll;
 		touch-action: none;
 		border-radius: 16px 16px 0 0;
 		z-index: 50;
-		pointer-events: all;
 	}
 
 	.position-left {
