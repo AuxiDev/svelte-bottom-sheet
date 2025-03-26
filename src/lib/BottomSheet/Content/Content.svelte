@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
 
-	import { getContext, onMount, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	const sheetContext = getContext<SheetContext>('sheetContext');
@@ -27,7 +27,5 @@
 		padding: 20px;
 		max-width: 100%;
 		flex-grow: 1;
-		-ms-overflow-style: none;
-		scrollbar-width: none;
 	}
 </style>

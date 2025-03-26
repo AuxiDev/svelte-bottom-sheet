@@ -12,6 +12,7 @@ to has "height" in it's name.
 	} from '$lib/types.js';
 	import { measurementToPx } from '$lib/utils.js';
 	import { onMount, setContext, type Snippet } from 'svelte';
+	import { dev } from '$app/environment';
 
 	let {
 		isSheetOpen = $bindable(false),
@@ -50,6 +51,14 @@ to has "height" in it's name.
 
 	if (!sheetSettings.snapPoints.includes(1)) {
 		sheetSettings.snapPoints.push(1);
+	}
+
+	if (
+		dev &&
+		(sheetSettings.position === 'left' || sheetSettings.position === 'right') &&
+		sheetSettings.snapPoints.length > 1
+	) {
+		console.warn("Sheet with position `left` or `right` don't support snappoints as of right now!");
 	}
 
 	onMount(() => {
@@ -118,6 +127,30 @@ to has "height" in it's name.
 			resetStatesAfterMove();
 			return;
 		}
+	};
+
+	const getScrollableElement = (element: Element) => {
+		while (element && element !== document.documentElement) {
+			const overflowY = window.getComputedStyle(element).overflowY;
+			if (!element || element.className.split(' ').includes('bottom-sheet')) {
+				if (
+					overflowY !== 'visible' &&
+					overflowY !== 'hidden' &&
+					element.scrollHeight > element.clientHeight
+				) {
+					return element;
+				}
+			}
+			if (
+				overflowY !== 'visible' &&
+				overflowY !== 'hidden' &&
+				element.scrollHeight > element.clientHeight
+			) {
+				return element;
+			}
+			element = element.parentElement as HTMLElement;
+		}
+		return null;
 	};
 
 	/**
@@ -202,33 +235,12 @@ to has "height" in it's name.
 		isDraggingFromHandle = true;
 		let offset: number = calculateOffSet(event.clientY, event.clientX);
 
+		if (sheetHeight != 0) {
+			isMovingSheet = true;
+		}
 		sheetHeight = offset;
 		onsheetdrag?.();
 		tryAutoClose();
-	};
-
-	const getScrollableElement = (element: Element) => {
-		while (element && element !== document.documentElement) {
-			const overflowY = window.getComputedStyle(element).overflowY;
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				if (
-					overflowY !== 'visible' &&
-					overflowY !== 'hidden' &&
-					element.scrollHeight > element.clientHeight
-				) {
-					return element;
-				}
-			}
-			if (
-				overflowY !== 'visible' &&
-				overflowY !== 'hidden' &&
-				element.scrollHeight > element.clientHeight
-			) {
-				return element;
-			}
-			element = element.parentElement as HTMLElement;
-		}
-		return null;
 	};
 
 	/**

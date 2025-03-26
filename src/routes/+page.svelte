@@ -471,8 +471,7 @@
 	settings={{
 		maxHeight: 0.9,
 		snapPoints: [0.25, 0.5, 0.75],
-		startingSnapPoint: 0.5,
-		position: 'top'
+		startingSnapPoint: 0.5
 	}}
 	onsnap={(point) => logEvent(`Sheet snapped to ${point * 100}%`)}
 >
@@ -547,7 +546,7 @@
 			<button class="sheet-button" onclick={() => (isCustomRightOpen = false)}>Close Sheet</button>
 		</BottomSheet.Content>
 	</BottomSheet.Sheet>
-</BottomSheet>^
+</BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomLeftOpen} settings={{ position: 'left' }}>
 	<BottomSheet.Sheet style="max-width: 100%;">

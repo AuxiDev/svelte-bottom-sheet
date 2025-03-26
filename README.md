@@ -186,6 +186,7 @@ This is the component where your Bottom Sheet content goes into. This component 
 
 - Any value between `0` and `1` will be interpreted as a percentage (e.g., `0.7` = `70%`).
 - Any value **≥1** will be interpreted as pixels (e.g., `300` = `300px`).
+- Pixel values which go above the `maxHeight` property value won't apply!
 
 ## **Controlling the Bottom Sheet Programmatically**
 
@@ -257,6 +258,8 @@ Before version 2.0, the sheet only supported the `bottom` position, and position
 With version 2.0 introducing position options, switching to `left` or `right` while using `max-width` for controlling the sheets horizontal width, will cause issues, because the positioning direction would be horizontal.
 
 Please use the `height` and `maxHeight` style to control the sheets "width", in this case the "height".
+
+Also, snappoint Bottom Sheets are not not supported for the `left` and `right` position as of version 2.0.0 .
 
 ## Contributing
 

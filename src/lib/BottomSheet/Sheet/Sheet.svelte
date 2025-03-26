@@ -327,8 +327,8 @@
 		overflow-y: auto;
 		border-radius: 16px 16px 0 0;
 		z-index: 50;
-		/* -ms-overflow-style: none;
-		scrollbar-width: none; */
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 
 	.position-left {
