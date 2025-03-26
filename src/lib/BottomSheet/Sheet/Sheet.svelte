@@ -193,7 +193,6 @@
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}
 		onmousedown={sheetContext.mouseDownEvent}
-		onmousemove={sheetContext.mouseMoveEvent}
 		onmouseup={sheetContext.moveEnd}
 		onwheel={stopScrollPropagationWheel}
 		transition:slideTransition={{

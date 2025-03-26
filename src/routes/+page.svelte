@@ -471,8 +471,7 @@
 	settings={{
 		maxHeight: 0.9,
 		snapPoints: [0.25, 0.5, 0.75],
-		startingSnapPoint: 0.5,
-		position: 'bottom'
+		startingSnapPoint: 0.5
 	}}
 	onsnap={(point) => logEvent(`Sheet snapped to ${point * 100}%`)}
 >
@@ -503,9 +502,9 @@
 	</BottomSheet.Sheet>
 </BottomSheet>
 
-<BottomSheet bind:isSheetOpen={isLongListSheetOpen} settings={{ position: 'left' }}>
+<BottomSheet bind:isSheetOpen={isLongListSheetOpen}>
 	<BottomSheet.Overlay>
-		<BottomSheet.Sheet style="max-height: 600px;">
+		<BottomSheet.Sheet style="max-width: 600px;">
 			<BottomSheet.Handle />
 			<BottomSheet.Content>
 				<h3>Scrollable List of Items</h3>

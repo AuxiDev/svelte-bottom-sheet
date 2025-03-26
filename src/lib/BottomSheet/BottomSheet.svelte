@@ -76,7 +76,6 @@ to has "height" in it's name.
 	$effect(() => {
 		if (isSheetOpen) {
 			onopen?.();
-			document.addEventListener('mouseup', resetStatesAfterMove);
 			eventController = new AbortController();
 
 			document.addEventListener(
@@ -103,6 +102,8 @@ to has "height" in it's name.
 				}
 			);
 
+			document.addEventListener('mouseup', resetStatesAfterMove);
+			document.addEventListener('mousemove', mouseMoveEvent);
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 			document.addEventListener('keydown', handleKeyDown);
 		} else {
@@ -111,6 +112,7 @@ to has "height" in it's name.
 			document.removeEventListener('mouseup', resetStatesAfterMove);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('mousemove', mouseMoveEvent);
 			eventController.abort();
 		}
 	});

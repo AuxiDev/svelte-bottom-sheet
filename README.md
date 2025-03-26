@@ -155,11 +155,11 @@ Additionally, it is fully customizable and includes accessibility features, such
 | **End**            | Moves the Bottom Sheet to the lowest snappoint when snappoints are set.                   |
 | **Escape (Esc)**   | Closes the Bottom Sheet.                                                                  |
 
-### BottomSheet.Content (Required)
+### BottomSheet.Content (Optional)
 
 #### Description
 
-This is the component where your Bottom Sheet content goes into. This component also makes scrolling in the Bottom Sheet possible.
+This is the component where your Bottom Sheet content goes into.
 
 #### Properties
 
