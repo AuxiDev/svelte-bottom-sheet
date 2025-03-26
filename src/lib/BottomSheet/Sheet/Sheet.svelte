@@ -205,15 +205,12 @@
 		}
 	};
 
-	let wheelConroller = new AbortController();
+	let eventController = new AbortController();
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			if (navigator.userAgent.toLowerCase().includes('firefox')) {
-				document.body.style.overflow = 'hidden';
-			}
+			eventController = new AbortController();
 
-			wheelConroller = new AbortController();
 			document.addEventListener(
 				'wheel',
 				(e) => {
@@ -221,7 +218,7 @@
 				},
 				{
 					passive: false,
-					signal: wheelConroller.signal
+					signal: eventController.signal
 				}
 			);
 
@@ -234,13 +231,12 @@
 				},
 				{
 					passive: false,
-					signal: wheelConroller.signal
+					signal: eventController.signal
 				}
 			);
 
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 			document.addEventListener('keydown', handleKeyDown);
-			document.body.style.touchAction = 'none';
 
 			setTimeout(() => {
 				const focusableElements = getFocusableElements();
@@ -252,11 +248,7 @@
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
 		} else {
-			document.body.style.touchAction = 'initial';
-			if (navigator.userAgent.toLowerCase().includes('firefox')) {
-				document.body.style.overflow = 'auto';
-			}
-			wheelConroller.abort();
+			eventController.abort();
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
