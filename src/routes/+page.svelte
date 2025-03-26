@@ -471,7 +471,8 @@
 	settings={{
 		maxHeight: 0.9,
 		snapPoints: [0.25, 0.5, 0.75],
-		startingSnapPoint: 0.5
+		startingSnapPoint: 0.5,
+		position: 'top'
 	}}
 	onsnap={(point) => logEvent(`Sheet snapped to ${point * 100}%`)}
 >
@@ -566,7 +567,7 @@
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomTopOpen} settings={{ position: 'top' }}>
-	<BottomSheet.Sheet style="max-height: 100%;">
+	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
 			<h3>Custom Position Sheet</h3>

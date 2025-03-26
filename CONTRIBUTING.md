@@ -32,6 +32,7 @@ Thank you for considering contributing to **Svelte Bottom Sheet**! Your help is 
 
 - Check the [issues](https://github.com/AuxiDev/svelte-bottom-sheet/issues) to see if it has already been reported.
 - Open a new issue and provide:
+  - The title with a prefix at the start wrapped in [] (-> [FIX] Fixed bug 123)
   - A clear description of the bug.
   - Steps to reproduce the issue.
   - Expected vs. actual behavior.
@@ -41,6 +42,7 @@ Thank you for considering contributing to **Svelte Bottom Sheet**! Your help is 
 
 - Browse the existing [feature requests](https://github.com/AuxiDev/svelte-bottom-sheet/issues).
 - Open a new issue with:
+  - The title with a prefix at the start wrapped in [] (-> [FEATURE] Add ...)
   - A description of the feature and its use case.
   - Any potential implementation details.
 

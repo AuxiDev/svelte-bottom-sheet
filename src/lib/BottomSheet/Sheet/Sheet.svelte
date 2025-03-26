@@ -4,7 +4,6 @@
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { slideTransition } from '$lib/utils.js';
-	import { slide } from 'svelte/transition';
 
 	let {
 		children,
@@ -76,75 +75,23 @@
 
 	let transformStyle = () => {
 		switch (sheetContext.settings.position) {
-			case 'bottom':
-				return `translateY(${sheetContext.sheetHeight}px)`;
-			case 'top':
-				return `translateY(-${sheetContext.sheetHeight}px)`;
 			case 'left':
 				return `translateX(-${sheetContext.sheetHeight}px)`;
 			case 'right':
 				return `translateX(${sheetContext.sheetHeight}px)`;
 			default:
-				return `translateY(${sheetContext.sheetHeight}px)`;
+				return ``;
 		}
 	};
-
-	let isAnimation = $state(false);
-	let sheetScrollPosition = 0;
-
-	$effect(() => {
-		if (!sheetContext.isMovingSheet && sheetContext.sheetElement !== null) {
-			sheetScrollPosition = sheetContext.sheetElement.scrollTop as number;
-			isAnimation = true;
-
-			setTimeout(() => {
-				isAnimation = false;
-			}, 500);
-
-			setTimeout(() => {
-				if (sheetContext.sheetElement) {
-					sheetContext.sheetElement.scrollTop = sheetScrollPosition;
-				}
-			}, 100);
-		}
-	});
-
-	let heightHistory = [0, 0];
-	let sheetHeightHistory = [0, 0];
 
 	let dimensionStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'bottom':
-			case 'top': {
-				/* When you have got a sheet with snappoint, you still want to be able to scroll it when it's not at the very top, were usually the default scroll behaviour 
-				would apply (duo to max-height). Therefore, we adjust the height to be as much as the user can see. 
-				Because this ruins the animation, we have to push it up or down, and through the animation add for a short period (time of the animation, 500ms) 
-				some more content so there aren't any gaps.
-				*/
-				const isBottom = sheetContext.settings.position === 'bottom';
-
-				if (!isAnimation) {
-					heightHistory = [heightHistory[1], sheetContext.maxHeightPx - sheetContext.sheetHeight];
-					sheetHeightHistory = [sheetHeightHistory[1], sheetContext.sheetHeight];
-				}
-
-				const height =
-					isAnimation && heightHistory[1] < heightHistory[0] ? heightHistory[0] : heightHistory[1];
-				const offset =
-					isAnimation && heightHistory[1] < heightHistory[0]
-						? sheetHeightHistory[0]
-						: sheetHeightHistory[1];
-
-				return isBottom
-					? `height: ${height}px; margin-bottom: ${offset}px;`
-					: `height: ${height}px; margin-top: ${offset}px;`;
-			}
-
+			case 'top':
+				return `height: 100%;  max-height: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px;`;
 			case 'left':
 			case 'right':
 				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
-			default:
-				return `height: ${sheetContext.maxHeightPx}px;`;
 		}
 	};
 
@@ -193,14 +140,27 @@
 		if (!scrollableElement) {
 			return;
 		}
+
 		const scrollTop = scrollableElement.scrollTop;
 		const scrollHeight = scrollableElement.scrollHeight;
 		const clientHeight = scrollableElement.clientHeight;
-		const atTop = scrollTop <= 0;
+		let atTop = scrollTop <= 0;
 		const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
-		const scrollingUp = event.deltaY < 0;
-		if ((atTop && !scrollingUp) || (atBottom && scrollingUp) || (!atTop && !atBottom)) {
+		let scrollingUp = event.deltaY < 0;
+
+		if (sheetContext.settings.position === 'top') {
+			atTop = scrollTop >= 0;
+		} else {
+			atTop = scrollTop <= 0;
+			scrollingUp = !scrollingUp;
+		}
+
+		if ((atTop && scrollingUp) || (!scrollingUp && atBottom) || (!atTop && !atBottom)) {
 			event.stopPropagation();
+			return;
+		} else if (atTop && !scrollingUp) {
+			return;
+		} else if (atBottom && scrollingUp) {
 			return;
 		}
 	};
@@ -265,11 +225,9 @@
 		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
 			? 'prevent-select'
 			: ''}"
-		style="{dimensionStyle()} transform: {transformStyle()}; transition: {sheetContext.isDragging
+		style="{dimensionStyle()}; transform: {transformStyle()}; transition: {sheetContext.isDragging
 			? ''
-			: 'transform 0.3s ease-in-out'}; overflow-y: {sheetContext.isMovingSheet
-			? 'hidden'
-			: 'auto'};  {rest.style}"
+			: 'max-height 0.3s ease'};  {rest.style}"
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={sheetIdentificationContext.headingId}
@@ -319,8 +277,8 @@
 		overflow-y: auto;
 		border-radius: 16px 16px 0 0;
 		z-index: 50;
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+		/* -ms-overflow-style: none;
+		scrollbar-width: none; */
 	}
 
 	.position-left {

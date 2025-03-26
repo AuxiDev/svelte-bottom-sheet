@@ -73,6 +73,7 @@ export const slideTransition = (
 	if (sheetHeight === 0) {
 		sheetHeight = node.offsetHeight;
 	}
+
 	const negativeTranslate = position == 'top' || position == 'left';
 	const opacity = parseFloat(style.opacity);
 	const primary_property = axis === 'y' ? 'translateY' : 'translateX';
@@ -99,15 +100,12 @@ export const slideTransition = (
 		css: (t: number) => `
             overflow: hidden;
             opacity: ${Math.min(t * 20, 1) * opacity};
-			${axis === 'y' ? `max-height: ${primary_distance}px;` : `max-width: ${primary_distance}px;`}
+			${axis === 'x' ? `max-width: ${primary_distance}px;` : ``}
             transform: ${primary_property}(${(1 - t) * (negativeTranslate ? -1 : 1) * primary_distance}px);
             padding-${secondary_properties[0]}: ${t * padding_start_value}px;
             padding-${secondary_properties[1]}: ${t * padding_end_value}px;
             margin-${secondary_properties[0]}: ${t * margin_start_value}px;
             margin-${secondary_properties[1]}: ${t * margin_end_value}px;
-			${position === 'bottom' ? `margin-bottom: 0px;` : ''}
-			${position === 'left' ? `margin-left: 0px;` : ''}
-			${position === 'top' ? `margin-top: 0px;` : ''}
             border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;
             border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;
         `
