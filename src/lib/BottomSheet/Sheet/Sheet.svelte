@@ -66,13 +66,6 @@
 		}
 	};
 
-	const handleKeyDown = (event: KeyboardEvent) => {
-		if (event.key === 'Escape' && !sheetContext.settings.disableClosing) {
-			sheetContext.closeSheet();
-		}
-		handleFocusTrap(event);
-	};
-
 	let transformStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'left':
@@ -92,12 +85,6 @@
 			case 'left':
 			case 'right':
 				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
-		}
-	};
-
-	const preventPullToRefresh = (event: TouchEvent) => {
-		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
-			event.preventDefault();
 		}
 	};
 
@@ -165,39 +152,9 @@
 		}
 	};
 
-	let eventController = new AbortController();
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			eventController = new AbortController();
-
-			document.addEventListener(
-				'wheel',
-				(e) => {
-					e.preventDefault();
-				},
-				{
-					passive: false,
-					signal: eventController.signal
-				}
-			);
-
-			document.addEventListener(
-				'touchmove',
-				(e) => {
-					{
-						if (e.cancelable) e.preventDefault();
-					}
-				},
-				{
-					passive: false,
-					signal: eventController.signal
-				}
-			);
-
-			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
-			document.addEventListener('keydown', handleKeyDown);
-
 			setTimeout(() => {
 				const focusableElements = getFocusableElements();
 				if (focusableElements.length) {
@@ -208,10 +165,7 @@
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
 		} else {
-			eventController.abort();
 			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('touchmove', preventPullToRefresh);
-			document.removeEventListener('keydown', handleKeyDown);
 			previousActiveElement?.focus();
 		}
 	});

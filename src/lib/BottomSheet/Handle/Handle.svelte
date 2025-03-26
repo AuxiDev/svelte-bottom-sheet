@@ -53,6 +53,7 @@
 </script>
 
 <div
+	style="top: {sheetContext.sheetElement?.scrollTop}px;"
 	class="handle-container position-{sheetContext.settings.position}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}

@@ -48,6 +48,7 @@ to has "height" in it's name.
 	};
 
 	const sheetSettings: Required<BottomSheetSettings> = { ...defaultSheetSettings, ...settings };
+	let eventController = new AbortController();
 
 	if (!sheetSettings.snapPoints.includes(1)) {
 		sheetSettings.snapPoints.push(1);
@@ -75,9 +76,42 @@ to has "height" in it's name.
 	$effect(() => {
 		if (isSheetOpen) {
 			onopen?.();
+			document.addEventListener('mouseup', resetStatesAfterMove);
+			eventController = new AbortController();
+
+			document.addEventListener(
+				'wheel',
+				(e) => {
+					e.preventDefault();
+				},
+				{
+					passive: false,
+					signal: eventController.signal
+				}
+			);
+
+			document.addEventListener(
+				'touchmove',
+				(e) => {
+					{
+						if (e.cancelable) e.preventDefault();
+					}
+				},
+				{
+					passive: false,
+					signal: eventController.signal
+				}
+			);
+
+			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+			document.addEventListener('keydown', handleKeyDown);
 		} else {
 			onclose?.();
 			setSnapPoint(sheetSettings.startingSnapPoint, false);
+			document.removeEventListener('mouseup', resetStatesAfterMove);
+			document.removeEventListener('touchmove', preventPullToRefresh);
+			document.removeEventListener('keydown', handleKeyDown);
+			eventController.abort();
 		}
 	});
 
@@ -115,6 +149,24 @@ to has "height" in it's name.
 			return true;
 		}
 		return false;
+	};
+
+	/*
+		Prevents pull to refresh in the middle of the screen. (Except 50px at the top)
+	*/
+	const preventPullToRefresh = (event: TouchEvent) => {
+		if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+			event.preventDefault();
+		}
+	};
+
+	/*
+		When Escape is pressed, close the sheet.
+	*/
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape' && !sheetSettings.disableClosing) {
+			sheetContext.closeSheet();
+		}
 	};
 
 	/**
