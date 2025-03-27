@@ -248,6 +248,9 @@ to has "height" in it's name.
 	 * @param {number} clientX - The X position of the current touch/click.
 	 */
 	const calculateOffSet = (clientY: number, clientX: number) => {
+		// clientY - startY - normal offset
+		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
+		// startHeight - offset when we not start at the top with dragging
 		let offset: number = 0;
 		if (sheetSettings.position === 'bottom') {
 			if (isDraggingFromHandle) {
@@ -305,9 +308,6 @@ to has "height" in it's name.
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging || !sheetElement) return;
 
-		if (sheetElement?.scrollTop !== 0 && !isDraggingFromHandle) {
-			isMovingSheet = false;
-		}
 		const target = event.target as Element;
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
 
@@ -338,10 +338,6 @@ to has "height" in it's name.
 				return;
 			}
 		}
-
-		// event.touches[0].clientY - startY - normal offset
-		// noScrolledTop - because we calculate with clientY, when you scroll before through the content and then you close the sheet, the offset would have a jump in it
-		// startHeight - offset when we not start at the top with dragging
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
 		if (sheetHeight != 0) {
 			isMovingSheet = true;

@@ -20,6 +20,9 @@
 	let githubStars = $state(data.stars);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
 
+	//@ts-ignore
+	let version = __APP_VERSION__;
+
 	const logEvent = async (event: string) => {
 		await tick();
 		eventLog = [...eventLog, `${new Date().toLocaleTimeString()}: ${event}`];
@@ -37,7 +40,7 @@
 </script>
 
 <svelte:head>
-	<title>Modern Bottom Sheet Preview | SvelteKit</title>
+	<title>Modern Bottom Sheet Preview V{version} | SvelteKit</title>
 	<meta name="description" content="Interactive preview of bottom sheet components for SvelteKit" />
 </svelte:head>
 
@@ -54,6 +57,7 @@
 	<div class="container header-content">
 		<div class="logo">
 			<span class="logo-text">Svelte Bottom Sheet</span>
+			<p class="logo-version">V{version}</p>
 		</div>
 
 		<nav class="desktop-nav">
@@ -727,6 +731,16 @@
 		font-weight: 700;
 		font-size: 1.5rem;
 		background: linear-gradient(90deg, #ff1c8e, #ff6f00);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.logo-version {
+		font-size: 1rem;
+		font-weight: 500;
+		color: #ff6f00;
+		margin-left: 8px;
+		background: linear-gradient(90deg, #ff6f00, #ff1c8e);
 		-webkit-background-clip: text;
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
