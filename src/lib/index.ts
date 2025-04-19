@@ -6,3 +6,4 @@ export type TypeOfContent = typeof import('./BottomSheet/Content/Content.svelte'
 export type TypeOfHandle = typeof import('./BottomSheet/Handle/Handle.svelte').default;
 export type TypeOfOverlay = typeof import('./BottomSheet/Overlay/Overlay.svelte').default;
 export type TypeOfTrigger = typeof import('./BottomSheet/Trigger/Trigger.svelte').default;
+export type TypeOfGrip = typeof import('./BottomSheet/Grip/Grip.svelte').default;

@@ -137,7 +137,52 @@ This is the functional Bottom Sheet component, which will be shown / hidden when
 
 The handle is more than just a visual element—it provides functional support for user interactions. When dragging the handle, users can always pull down the Bottom Sheet, even if it’s not fully scrolled to the top.
 
-Additionally, it is fully customizable and includes accessibility features, such as opening, closing, and snapping to snap points using arrow keys.
+#### Customizing the Handle
+
+The `BottomSheet.Handle` is fully customizable. You can either use the default grip or provide your own content inside the handle.
+
+- **Default behavior**: If no children are passed to `BottomSheet.Handle`, it renders a default `BottomSheet.Grip`, which is a simple, accessible visual indicator.
+- **Custom styles**: You can customize the appearance of the grip by passing it explicitly as a child and applying your own styles.
+- **Custom content**: Alternatively, you can provide any custom content—text, icons, or components—as children of the handle.
+
+#### Examples
+
+Customize the grip color:
+
+````svelte
+<BottomSheet>
+	<BottomSheet.Overlay>
+		<BottomSheet.Sheet>
+			<BottomSheet.Handle style="background-color: green">
+				<BottomSheet.Grip style="background-color: red" />
+			</BottomSheet.Handle>
+		</BottomSheet.Sheet>
+	</BottomSheet.Overlay>
+</BottomSheet>
+
+Use the default handle with no custom styles: ```svelte
+<BottomSheet>
+	<BottomSheet.Overlay>
+		<BottomSheet.Sheet>
+			<BottomSheet.Handle />
+		</BottomSheet.Sheet>
+	</BottomSheet.Overlay>
+</BottomSheet>
+````
+
+Add custom content inside the handle (e.g., text or icons):
+
+```svelte
+<BottomSheet>
+	<BottomSheet.Overlay>
+		<BottomSheet.Sheet>
+			<BottomSheet.Handle>
+				<p style="margin: 0; font-weight: bold;">Drag me</p>
+			</BottomSheet.Handle>
+		</BottomSheet.Sheet>
+	</BottomSheet.Overlay>
+</BottomSheet>
+```
 
 #### Properties
 
