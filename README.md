@@ -149,7 +149,7 @@ The `BottomSheet.Handle` is fully customizable. You can either use the default g
 
 Customize the grip color:
 
-````svelte
+```svelte
 <BottomSheet>
 	<BottomSheet.Overlay>
 		<BottomSheet.Sheet>
@@ -159,8 +159,11 @@ Customize the grip color:
 		</BottomSheet.Sheet>
 	</BottomSheet.Overlay>
 </BottomSheet>
+```
 
-Use the default handle with no custom styles: ```svelte
+Use the default handle with no custom styles:
+
+```svelte
 <BottomSheet>
 	<BottomSheet.Overlay>
 		<BottomSheet.Sheet>
@@ -168,7 +171,7 @@ Use the default handle with no custom styles: ```svelte
 		</BottomSheet.Sheet>
 	</BottomSheet.Overlay>
 </BottomSheet>
-````
+```
 
 Add custom content inside the handle (e.g., text or icons):
 
@@ -313,3 +316,7 @@ Contributions are welcome! If you have any ideas, suggestions, or bug reports, p
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/AuxiDev/svelte-bottom-sheet/blob/master/LICENSE.txt) file for more details.
+
+```
+
+```
