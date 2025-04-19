@@ -4,6 +4,7 @@ import type BottomSheet from './BottomSheet/BottomSheet.svelte';
 import type SheetTrigger from './BottomSheet/Trigger/Trigger.svelte';
 import type Overlay from './BottomSheet/Overlay/Overlay.svelte';
 import type Handle from './BottomSheet/Handle/Handle.svelte';
+import type Grip from './BottomSheet/Grip/Grip.svelte';
 
 export type sheetPosition = 'bottom' | 'top' | 'left' | 'right';
 
@@ -24,6 +25,7 @@ export type BottomSheetType = typeof BottomSheet & {
 	Trigger: typeof SheetTrigger;
 	Overlay: typeof Overlay;
 	Handle: typeof Handle;
+	Grip: typeof Grip;
 };
 
 export type SheetIdentificationContext = {

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
 	import { measurementToPx } from '$lib/utils.js';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import Grip from '../Grip/Grip.svelte';
 
 	const sheetContext = getContext<SheetContext>('sheetContext');
 
@@ -10,7 +11,7 @@
 		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
 	}
 
-	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
+	let { children, ...rest }: { children?: Snippet<[]> } & HTMLAttributes<HTMLDivElement> = $props();
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (sheetContext.settings.disableDragging) return;
@@ -64,8 +65,13 @@
 	aria-valuemax="100"
 	aria-valuenow={Math.round((1 - sheetContext.sheetHeight / window.innerHeight) * 100)}
 	onkeydown={handleKeyDown}
+	{...rest}
 >
-	<div {...rest} class="bottom-sheet-handle {rest.class}" aria-hidden="true"></div>
+	{#if children}
+		{@render children?.()}
+	{:else}
+		<Grip />
+	{/if}
 </div>
 
 <style>
@@ -93,8 +99,8 @@
 		height: 100%;
 	}
 
-	.position-left .bottom-sheet-handle,
-	.position-right .bottom-sheet-handle {
+	.position-left,
+	.position-right {
 		transform: rotate(90deg);
 	}
 
