@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
 	import { measurementToPx } from '$lib/utils.js';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import Grip from '../Grip/Grip.svelte';
 
@@ -12,6 +12,16 @@
 	}
 
 	let { children, ...rest }: { children?: Snippet<[]> } & HTMLAttributes<HTMLDivElement> = $props();
+
+	let handleContainer: HTMLDivElement = $state({} as HTMLDivElement);
+	let handleWrapper: HTMLDivElement = $state({} as HTMLDivElement);
+
+	// This is a workaround to the "transform: rotate()" bounding client issues, where the parent element still uses the old width
+	onMount(() => {
+		if (sheetContext.settings.position === 'left' || sheetContext.settings.position === 'right') {
+			handleContainer.style.width = `${handleWrapper.getBoundingClientRect().width}px`;
+		}
+	});
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (sheetContext.settings.disableDragging) return;
@@ -54,7 +64,7 @@
 </script>
 
 <div
-	style="top: {sheetContext.sheetElement?.scrollTop}px;"
+	bind:this={handleContainer}
 	class="handle-container position-{sheetContext.settings.position}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
@@ -68,9 +78,13 @@
 	{...rest}
 >
 	{#if children}
-		{@render children?.()}
+		<div bind:this={handleWrapper} class="handle-grip-wrapper">
+			{@render children?.()}
+		</div>
 	{:else}
-		<Grip />
+		<div bind:this={handleWrapper} class="handle-grip-wrapper">
+			<Grip />
+		</div>
 	{/if}
 </div>
 
@@ -79,22 +93,31 @@
 		position: sticky;
 		width: 100%;
 		display: flex;
-		align-items: center;
 		flex-direction: column;
 		justify-content: center;
 		background-color: white;
 		z-index: 51;
+		padding: 8px 0px;
+	}
+
+	.handle-grip-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	.position-left,
 	.position-right {
-		width: min-content;
+		padding: 0px 8px;
+	}
+
+	.position-right .handle-grip-wrapper,
+	.position-left .handle-grip-wrapper {
 		transform: rotate(90deg);
 	}
 
-	.position-right {
+	.position-right .handle-grip-wrapper {
 		flex-direction: column-reverse;
-		left: 0;
 	}
 
 	.position-bottom {

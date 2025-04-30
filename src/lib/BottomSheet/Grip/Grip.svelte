@@ -12,6 +12,6 @@
 		height: 4px;
 		background-color: #e0e0e0;
 		border-radius: 2px;
-		margin: 16px;
+		margin: 8px;
 	}
 </style>
