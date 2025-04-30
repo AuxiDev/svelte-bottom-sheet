@@ -75,19 +75,12 @@
 </div>
 
 <style>
-	.bottom-sheet-handle {
-		width: 40px;
-		height: 4px;
-		background-color: #e0e0e0;
-		border-radius: 2px;
-		margin: 16px auto;
-	}
 	.handle-container {
 		position: sticky;
-		height: 40px;
 		width: 100%;
 		display: flex;
 		align-items: center;
+		flex-direction: column;
 		justify-content: center;
 		background-color: white;
 		z-index: 51;
@@ -95,13 +88,13 @@
 
 	.position-left,
 	.position-right {
-		width: 40px;
-		height: 100%;
+		width: min-content;
+		transform: rotate(90deg);
 	}
 
-	.position-left,
 	.position-right {
-		transform: rotate(90deg);
+		flex-direction: column-reverse;
+		left: 0;
 	}
 
 	.position-bottom {
@@ -114,10 +107,6 @@
 
 	.position-left {
 		right: 0;
-	}
-
-	.position-right {
-		left: 0;
 	}
 
 	.handle-container:focus-visible {
