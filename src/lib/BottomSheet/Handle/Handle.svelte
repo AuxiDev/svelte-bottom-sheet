@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { SheetContext } from '$lib/types.js';
 	import { measurementToPx } from '$lib/utils.js';
-	import { getContext } from 'svelte';
+	import { getContext, onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import Grip from '../Grip/Grip.svelte';
 
 	const sheetContext = getContext<SheetContext>('sheetContext');
 
@@ -10,7 +11,17 @@
 		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
 	}
 
-	let { ...rest }: HTMLAttributes<HTMLDivElement> = $props();
+	let { children, ...rest }: { children?: Snippet<[]> } & HTMLAttributes<HTMLDivElement> = $props();
+
+	let handleContainer: HTMLDivElement = $state({} as HTMLDivElement);
+	let handleWrapper: HTMLDivElement = $state({} as HTMLDivElement);
+
+	// This is a workaround to the "transform: rotate()" bounding client issues, where the parent element still uses the old width
+	onMount(() => {
+		if (sheetContext.settings.position === 'left' || sheetContext.settings.position === 'right') {
+			handleContainer.style.width = `${handleWrapper.getBoundingClientRect().width}px`;
+		}
+	});
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (sheetContext.settings.disableDragging) return;
@@ -53,7 +64,7 @@
 </script>
 
 <div
-	style="top: {sheetContext.sheetElement?.scrollTop}px;"
+	bind:this={handleContainer}
 	class="handle-container position-{sheetContext.settings.position}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
@@ -64,38 +75,49 @@
 	aria-valuemax="100"
 	aria-valuenow={Math.round((1 - sheetContext.sheetHeight / window.innerHeight) * 100)}
 	onkeydown={handleKeyDown}
+	{...rest}
 >
-	<div {...rest} class="bottom-sheet-handle {rest.class}" aria-hidden="true"></div>
+	{#if children}
+		<div bind:this={handleWrapper} class="handle-grip-wrapper">
+			{@render children?.()}
+		</div>
+	{:else}
+		<div bind:this={handleWrapper} class="handle-grip-wrapper">
+			<Grip />
+		</div>
+	{/if}
 </div>
 
 <style>
-	.bottom-sheet-handle {
-		width: 40px;
-		height: 4px;
-		background-color: #e0e0e0;
-		border-radius: 2px;
-		margin: 16px auto;
-	}
 	.handle-container {
 		position: sticky;
-		height: 40px;
 		width: 100%;
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		justify-content: center;
 		background-color: white;
 		z-index: 51;
+		padding: 8px 0px;
+	}
+
+	.handle-grip-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	.position-left,
 	.position-right {
-		width: 40px;
-		height: 100%;
+		padding: 0px 8px;
 	}
 
-	.position-left .bottom-sheet-handle,
-	.position-right .bottom-sheet-handle {
+	.position-right .handle-grip-wrapper,
+	.position-left .handle-grip-wrapper {
 		transform: rotate(90deg);
+	}
+
+	.position-right .handle-grip-wrapper {
+		flex-direction: column-reverse;
 	}
 
 	.position-bottom {
@@ -108,10 +130,6 @@
 
 	.position-left {
 		right: 0;
-	}
-
-	.position-right {
-		left: 0;
 	}
 
 	.handle-container:focus-visible {
