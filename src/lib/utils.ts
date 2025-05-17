@@ -17,16 +17,40 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
 		return maxHeightPx - measurement * maxHeightPx;
 	}
 };
-const getTranslateY = (element: Element) => {
-	const style = window.getComputedStyle(element);
-	const matrix = new DOMMatrix(style.transform);
-	return matrix.m42;
-};
 
-const getTranslateX = (element: Element) => {
-	const style = window.getComputedStyle(element);
-	const matrix = new DOMMatrix(style.transform);
-	return matrix.m41;
+/**
+ * Searches up to a element with a `bottom-sheet`-class to look up if there is any scrollable element
+ * @param {Element} element - A element in the `bottom-sheet`-class
+ * @returns {Element | null} The scrollable element, or null if not found.
+ */
+export const getScrollableElement = (element: Element): Element | null => {
+	while (element && element !== document.documentElement) {
+		const style = window.getComputedStyle(element);
+		const overflowY = style.overflowY;
+		const overflowX = style.overflowX;
+		const hasScrollableY =
+			overflowY !== 'visible' &&
+			overflowY !== 'hidden' &&
+			element.scrollHeight > element.clientHeight;
+		const hasScrollableX =
+			overflowX !== 'visible' &&
+			overflowX !== 'hidden' &&
+			element.scrollWidth > element.clientWidth;
+
+		if (
+			element.className.split(' ').includes('bottom-sheet') &&
+			(hasScrollableY || hasScrollableX)
+		) {
+			return element;
+		}
+
+		if (hasScrollableY || hasScrollableX) {
+			return element;
+		}
+
+		element = element.parentElement as HTMLElement;
+	}
+	return null;
 };
 
 /**

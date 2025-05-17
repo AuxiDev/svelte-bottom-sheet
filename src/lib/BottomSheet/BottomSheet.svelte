@@ -10,9 +10,8 @@ to has "height" in it's name.
 		type BottomSheetSettings,
 		type SheetIdentificationContext
 	} from '$lib/types.js';
-	import { measurementToPx } from '$lib/utils.js';
+	import { getScrollableElement, measurementToPx } from '$lib/utils.js';
 	import { onMount, setContext, type Snippet } from 'svelte';
-	import { dev } from '$app/environment';
 
 	let {
 		isSheetOpen = $bindable(false),
@@ -173,36 +172,6 @@ to has "height" in it's name.
 			resetStatesAfterMove();
 			return;
 		}
-	};
-
-	const getScrollableElement = (element: Element): Element | null => {
-		while (element && element !== document.documentElement) {
-			const style = window.getComputedStyle(element);
-			const overflowY = style.overflowY;
-			const overflowX = style.overflowX;
-			const hasScrollableY =
-				overflowY !== 'visible' &&
-				overflowY !== 'hidden' &&
-				element.scrollHeight > element.clientHeight;
-			const hasScrollableX =
-				overflowX !== 'visible' &&
-				overflowX !== 'hidden' &&
-				element.scrollWidth > element.clientWidth;
-
-			if (
-				element.className.split(' ').includes('bottom-sheet') &&
-				(hasScrollableY || hasScrollableX)
-			) {
-				return element;
-			}
-
-			if (hasScrollableY || hasScrollableX) {
-				return element;
-			}
-
-			element = element.parentElement as HTMLElement;
-		}
-		return null;
 	};
 
 	/**

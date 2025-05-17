@@ -3,7 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { slideTransition } from '$lib/utils.js';
+	import { getScrollableElement, slideTransition } from '$lib/utils.js';
 
 	let {
 		children,
@@ -80,40 +80,15 @@
 		}
 	};
 
+	/**
+	 * Returns a CSS transition string based on the slide axis.
+	 */
 	const transitionStyle = () => {
 		if (!sheetContext.isDragging && axisForSlide === 'x') {
 			return 'transition: max-width 0.3s ease';
 		} else if (!sheetContext.isDragging && axisForSlide === 'y') {
 			return 'transition: max-height 0.3s ease';
 		}
-	};
-
-	/**
-	 * This functions finds a scrollable parent-element of the provided element within the sheet.
-	 * @param element - Element which might be inside a scrollable element within the sheet
-	 */
-	const getScrollableElement = (element: Element) => {
-		while (element && element !== document.documentElement) {
-			const overflowY = window.getComputedStyle(element).overflowY;
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				if (
-					overflowY !== 'visible' &&
-					overflowY !== 'hidden' &&
-					element.scrollHeight > element.clientHeight
-				) {
-					return element;
-				}
-			}
-			if (
-				overflowY !== 'visible' &&
-				overflowY !== 'hidden' &&
-				element.scrollHeight > element.clientHeight
-			) {
-				return element;
-			}
-			element = element.parentElement as HTMLElement;
-		}
-		return null;
 	};
 
 	/**
@@ -124,7 +99,7 @@
 	const stopScrollPropagationWheel = (event: WheelEvent) => {
 		const target = event.target as Element;
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
-		if (!scrollableElement) {
+		if (!scrollableElement || axisForSlide === 'x') {
 			return;
 		}
 
@@ -186,6 +161,7 @@
 		id={sheetIdentificationContext.sheetId}
 		tabindex="-1"
 		aria-live="polite"
+		onkeypress={handleFocusTrap}
 		ontouchstart={sheetContext.touchStartEvent}
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}
