@@ -203,7 +203,7 @@ Add custom content inside the handle (e.g., text or icons):
 | **End**            | Moves the Bottom Sheet to the lowest snappoint when snappoints are set.                   |
 | **Escape (Esc)**   | Closes the Bottom Sheet.                                                                  |
 
-### BottomSheet.Content (Optional)
+### BottomSheet.Content (Requiered)
 
 #### Description
 
@@ -295,9 +295,9 @@ If your Bottom Sheet has defined snapPoints, you can programmatically move it to
 </BottomSheet>
 ```
 
-## Bottom Sheet Positions [EXPERIMENTAL]
+## Bottom Sheet Positions [OUT OF EXPERIMENTAL SINCE 2.2]
 
-It is possible to not only positionthe Bottom Sheet on the `bottom`, you can also position it `left`, `right` and on the `top` of the screen. Take a look on the [Bottom Sheet Settings](#settingstype) to see how you can change the positions.
+It is possible to not only position the Bottom Sheet on the `bottom`, you can also position it `left`, `right` and on the `top` of the screen. Take a look on the [Bottom Sheet Settings](#settingstype) to see how you can change the positions.
 
 ### **Note**
 
@@ -307,7 +307,7 @@ With version 2.0 introducing position options, switching to `left` or `right` wh
 
 Please use the `height` and `maxHeight` style to control the sheets "width", in this case the "height".
 
-Also, snappoint Bottom Sheets are not not supported for the `left` and `right` position as of version 2.0.0 .
+Also, snappoint Bottom Sheets **WERE NOT** supported for the `left` and `right` position **UNTIL** version 2.2.0 .
 
 ## Contributing
 

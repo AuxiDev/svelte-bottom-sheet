@@ -221,7 +221,7 @@
 		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow-y: auto;
-		border-radius: 16px 16px 0 0;
+		border-radius: 1rem 1rem 0 0;
 		z-index: 50;
 	}
 
@@ -229,26 +229,24 @@
 		display: flex;
 		flex-direction: row-reverse;
 		top: 0;
-		bottom: 0;
 		margin: auto 0;
-		border-radius: 0px 16px 16px 0px;
+		border-radius: 0 1rem 1rem 0;
 		width: 100%;
 	}
 
 	.position-right {
 		display: flex;
 		top: 0;
-		bottom: 0;
 		left: unset;
 		right: 0;
 		margin: auto 0;
-		border-radius: 16px 0px 0px 16px;
+		border-radius: 1rem 0 0 1rem;
 	}
 
 	.position-top {
 		display: flex;
 		flex-direction: column-reverse;
-		border-radius: 0 0 16px 16px;
+		border-radius: 0 0 1rem rem;
 		margin: 0 auto;
 		top: 0;
 		bottom: unset;

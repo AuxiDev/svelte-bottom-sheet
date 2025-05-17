@@ -553,10 +553,7 @@
 	</BottomSheet.Sheet>
 </BottomSheet>
 
-<BottomSheet
-	bind:isSheetOpen={isCustomLeftOpen}
-	settings={{ position: 'left', snapPoints: [0.5, 1] }}
->
+<BottomSheet bind:isSheetOpen={isCustomLeftOpen} settings={{ position: 'left' }}>
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>

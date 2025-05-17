@@ -54,14 +54,6 @@ to has "height" in it's name.
 		sheetSettings.snapPoints.push(1);
 	}
 
-	if (
-		dev &&
-		(sheetSettings.position === 'left' || sheetSettings.position === 'right') &&
-		sheetSettings.snapPoints.length > 1
-	) {
-		console.warn("Sheet with position `left` or `right` don't support snappoints as of right now!");
-	}
-
 	onMount(() => {
 		if (sheetSettings.maxHeight > 1) {
 			maxHeightPx = sheetSettings.maxHeight;
@@ -183,25 +175,31 @@ to has "height" in it's name.
 		}
 	};
 
-	const getScrollableElement = (element: Element) => {
+	const getScrollableElement = (element: Element): Element | null => {
 		while (element && element !== document.documentElement) {
-			const overflowY = window.getComputedStyle(element).overflowY;
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				if (
-					overflowY !== 'visible' &&
-					overflowY !== 'hidden' &&
-					element.scrollHeight > element.clientHeight
-				) {
-					return element;
-				}
-			}
-			if (
+			const style = window.getComputedStyle(element);
+			const overflowY = style.overflowY;
+			const overflowX = style.overflowX;
+			const hasScrollableY =
 				overflowY !== 'visible' &&
 				overflowY !== 'hidden' &&
-				element.scrollHeight > element.clientHeight
+				element.scrollHeight > element.clientHeight;
+			const hasScrollableX =
+				overflowX !== 'visible' &&
+				overflowX !== 'hidden' &&
+				element.scrollWidth > element.clientWidth;
+
+			if (
+				element.className.split(' ').includes('bottom-sheet') &&
+				(hasScrollableY || hasScrollableX)
 			) {
 				return element;
 			}
+
+			if (hasScrollableY || hasScrollableX) {
+				return element;
+			}
+
 			element = element.parentElement as HTMLElement;
 		}
 		return null;
@@ -312,20 +310,35 @@ to has "height" in it's name.
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
 
 		if (!isDraggingFromHandle && !isMovingSheet && scrollableElement) {
-			const touchMoveY = event.touches[0].clientY;
-			const scrollTop = scrollableElement.scrollTop;
-			const scrollHeight = scrollableElement.scrollHeight;
-			const clientHeight = scrollableElement.clientHeight;
+			const { clientY, clientX } = event.touches[0];
+			const { scrollTop, scrollLeft, scrollHeight, clientHeight, scrollWidth, clientWidth } =
+				scrollableElement;
 
-			let scrollingUp = touchMoveY > startY;
-			const atBottom = Math.abs(Math.round(scrollTop)) + clientHeight >= scrollHeight;
+			const isVertical = sheetSettings.position === 'top' || sheetSettings.position === 'bottom';
+			const move = isVertical ? clientY : clientX;
+			const start = isVertical ? startY : startX;
+			let scrollingUp = move > start;
+
+			const atBottom = isVertical
+				? Math.round(scrollTop) + clientHeight >= scrollHeight
+				: Math.round(scrollLeft) + clientWidth >= scrollWidth;
+
 			let atTop;
-
-			if (sheetSettings.position === 'top') {
-				atTop = scrollTop >= 0;
-			} else if (sheetSettings.position === 'bottom') {
-				atTop = scrollTop <= 0;
-				scrollingUp = !scrollingUp;
+			switch (sheetSettings.position) {
+				case 'top':
+					atTop = scrollTop >= 0;
+					break;
+				case 'bottom':
+					atTop = scrollTop <= 0;
+					scrollingUp = !scrollingUp;
+					break;
+				case 'left':
+					atTop = scrollLeft >= 0;
+					break;
+				case 'right':
+					atTop = scrollLeft <= 0;
+					scrollingUp = !scrollingUp;
+					break;
 			}
 
 			if ((atTop && scrollingUp) || (!scrollingUp && atBottom) || (!atTop && !atBottom)) {
@@ -338,6 +351,7 @@ to has "height" in it's name.
 				return;
 			}
 		}
+
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
 		if (sheetHeight != 0) {
 			isMovingSheet = true;
