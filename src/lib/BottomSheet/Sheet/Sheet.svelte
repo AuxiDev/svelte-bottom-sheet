@@ -66,25 +66,25 @@
 		}
 	};
 
-	let transformStyle = () => {
-		switch (sheetContext.settings.position) {
-			case 'left':
-				return `translateX(-${sheetContext.sheetHeight}px)`;
-			case 'right':
-				return `translateX(${sheetContext.sheetHeight}px)`;
-			default:
-				return ``;
-		}
-	};
-
-	let dimensionStyle = () => {
+	/**
+	 * Return the additional needed styles for the different positions.
+	 */
+	const dimensionStyle = () => {
 		switch (sheetContext.settings.position) {
 			case 'bottom':
 			case 'top':
-				return `height: 100%;  max-height: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px;`;
+				return `height: 100%;  max-height: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px`;
 			case 'left':
 			case 'right':
-				return `width: ${sheetContext.maxHeightPx}px; height: 100%;`;
+				return `height: 100%; width: 100%; max-width: ${sheetContext.maxHeightPx - sheetContext.sheetHeight}px`;
+		}
+	};
+
+	const transitionStyle = () => {
+		if (!sheetContext.isDragging && axisForSlide === 'x') {
+			return 'transition: max-width 0.3s ease';
+		} else if (!sheetContext.isDragging && axisForSlide === 'y') {
+			return 'transition: max-height 0.3s ease';
 		}
 	};
 
@@ -176,12 +176,9 @@
 	<div
 		{...rest}
 		bind:this={sheetContext.sheetElement}
-		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
-			? 'prevent-select'
-			: ''}"
-		style="{dimensionStyle()}; transform: {transformStyle()}; transition: {sheetContext.isDragging
-			? ''
-			: 'max-height 0.3s ease'};  {rest.style}"
+		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging &&
+			'prevent-select'} {rest.class}"
+		style="{dimensionStyle()};  {transitionStyle()}; {rest.style}"
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={sheetIdentificationContext.headingId}
@@ -200,8 +197,7 @@
 			easing: cubicOut,
 			axis: axisForSlide,
 			position: sheetContext.settings.position,
-			sheetHeight: sheetContext.sheetHeight,
-			sheetMaxHeight: sheetContext.maxHeightPx
+			sheetHeight: sheetContext.maxHeightPx
 		}}
 	>
 		{@render children?.()}
@@ -222,16 +218,11 @@
 		bottom: 0;
 		justify-content: center;
 		align-self: flex-end;
-		width: 100%;
-		max-width: 100%;
-		height: 100%;
 		margin: 0 auto;
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 		overflow-y: auto;
 		border-radius: 16px 16px 0 0;
 		z-index: 50;
-		/* -ms-overflow-style: none;
-		scrollbar-width: none; */
 	}
 
 	.position-left {
@@ -241,6 +232,7 @@
 		bottom: 0;
 		margin: auto 0;
 		border-radius: 0px 16px 16px 0px;
+		width: 100%;
 	}
 
 	.position-right {

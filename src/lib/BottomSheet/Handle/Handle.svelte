@@ -64,8 +64,9 @@
 </script>
 
 <div
+	{...rest}
 	bind:this={handleContainer}
-	class="handle-container position-{sheetContext.settings.position}"
+	class="handle-container position-{sheetContext.settings.position} {rest.class}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
 	role="slider"
@@ -75,7 +76,6 @@
 	aria-valuemax="100"
 	aria-valuenow={Math.round((1 - sheetContext.sheetHeight / window.innerHeight) * 100)}
 	onkeydown={handleKeyDown}
-	{...rest}
 >
 	{#if children}
 		<div bind:this={handleWrapper} class="handle-grip-wrapper">
@@ -97,7 +97,7 @@
 		justify-content: center;
 		background-color: white;
 		z-index: 51;
-		padding: 8px 0px;
+		padding: 0.5rem 0rem;
 	}
 
 	.handle-grip-wrapper {
@@ -108,7 +108,7 @@
 
 	.position-left,
 	.position-right {
-		padding: 0px 8px;
+		padding: 0rem 0.5rem;
 	}
 
 	.position-right .handle-grip-wrapper,
