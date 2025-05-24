@@ -14,18 +14,30 @@
 </script>
 
 <div
-	class="bottom-sheet-content {rest.class} "
-	bind:this={sheetContext.sheetContent}
-	role="document"
-	{...rest}
+	class="scroll-clip"
+	style={`${sheetContext.settings.position === 'left' && 'direction: rtl;'}`}
 >
-	{@render children?.()}
+	<div
+		{...rest}
+		class="bottom-sheet-content {rest.class}"
+		bind:this={sheetContext.sheetContent}
+		role="document"
+	>
+		{@render children?.()}
+	</div>
 </div>
 
 <style>
 	.bottom-sheet-content {
-		padding: 20px;
-		max-width: 100%;
+		padding: 1.25rem;
+		display: inline-block;
+		direction: ltr;
+	}
+
+	.scroll-clip {
+		overflow-x: auto;
+		overflow-y: hidden;
 		flex-grow: 1;
+		direction: ltr;
 	}
 </style>

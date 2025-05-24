@@ -10,9 +10,8 @@ to has "height" in it's name.
 		type BottomSheetSettings,
 		type SheetIdentificationContext
 	} from '$lib/types.js';
-	import { measurementToPx } from '$lib/utils.js';
+	import { getScrollableElement, measurementToPx } from '$lib/utils.js';
 	import { onMount, setContext, type Snippet } from 'svelte';
-	import { dev } from '$app/environment';
 
 	let {
 		isSheetOpen = $bindable(false),
@@ -52,14 +51,6 @@ to has "height" in it's name.
 
 	if (!sheetSettings.snapPoints.includes(1)) {
 		sheetSettings.snapPoints.push(1);
-	}
-
-	if (
-		dev &&
-		(sheetSettings.position === 'left' || sheetSettings.position === 'right') &&
-		sheetSettings.snapPoints.length > 1
-	) {
-		console.warn("Sheet with position `left` or `right` don't support snappoints as of right now!");
 	}
 
 	onMount(() => {
@@ -183,30 +174,6 @@ to has "height" in it's name.
 		}
 	};
 
-	const getScrollableElement = (element: Element) => {
-		while (element && element !== document.documentElement) {
-			const overflowY = window.getComputedStyle(element).overflowY;
-			if (!element || element.className.split(' ').includes('bottom-sheet')) {
-				if (
-					overflowY !== 'visible' &&
-					overflowY !== 'hidden' &&
-					element.scrollHeight > element.clientHeight
-				) {
-					return element;
-				}
-			}
-			if (
-				overflowY !== 'visible' &&
-				overflowY !== 'hidden' &&
-				element.scrollHeight > element.clientHeight
-			) {
-				return element;
-			}
-			element = element.parentElement as HTMLElement;
-		}
-		return null;
-	};
-
 	/**
 	 * Handles the touch start event, initializing the drag operation.
 	 *
@@ -312,20 +279,35 @@ to has "height" in it's name.
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
 
 		if (!isDraggingFromHandle && !isMovingSheet && scrollableElement) {
-			const touchMoveY = event.touches[0].clientY;
-			const scrollTop = scrollableElement.scrollTop;
-			const scrollHeight = scrollableElement.scrollHeight;
-			const clientHeight = scrollableElement.clientHeight;
+			const { clientY, clientX } = event.touches[0];
+			const { scrollTop, scrollLeft, scrollHeight, clientHeight, scrollWidth, clientWidth } =
+				scrollableElement;
 
-			let scrollingUp = touchMoveY > startY;
-			const atBottom = Math.abs(Math.round(scrollTop)) + clientHeight >= scrollHeight;
+			const isVertical = sheetSettings.position === 'top' || sheetSettings.position === 'bottom';
+			const move = isVertical ? clientY : clientX;
+			const start = isVertical ? startY : startX;
+			let scrollingUp = move > start;
+
+			const atBottom = isVertical
+				? Math.round(scrollTop) + clientHeight >= scrollHeight
+				: Math.round(scrollLeft) + clientWidth >= scrollWidth;
+
 			let atTop;
-
-			if (sheetSettings.position === 'top') {
-				atTop = scrollTop >= 0;
-			} else if (sheetSettings.position === 'bottom') {
-				atTop = scrollTop <= 0;
-				scrollingUp = !scrollingUp;
+			switch (sheetSettings.position) {
+				case 'top':
+					atTop = scrollTop >= 0;
+					break;
+				case 'bottom':
+					atTop = scrollTop <= 0;
+					scrollingUp = !scrollingUp;
+					break;
+				case 'left':
+					atTop = scrollLeft >= 0;
+					break;
+				case 'right':
+					atTop = scrollLeft <= 0;
+					scrollingUp = !scrollingUp;
+					break;
 			}
 
 			if ((atTop && scrollingUp) || (!scrollingUp && atBottom) || (!atTop && !atBottom)) {
@@ -338,6 +320,7 @@ to has "height" in it's name.
 				return;
 			}
 		}
+
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
 		if (sheetHeight != 0) {
 			isMovingSheet = true;

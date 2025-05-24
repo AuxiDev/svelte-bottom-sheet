@@ -536,7 +536,7 @@
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomRightOpen} settings={{ position: 'right' }}>
-	<BottomSheet.Sheet style="max-width: 100%;">
+	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
 			<h3>Custom Position Sheet</h3>
@@ -544,6 +544,7 @@
 				This sheet is positioned on the right side of the screen instead of the bottom. You can also
 				position sheets at the top or left side.
 			</p>
+
 			<div class="position-selector">
 				<h4>Try different positions:</h4>
 			</div>
@@ -553,7 +554,7 @@
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomLeftOpen} settings={{ position: 'left' }}>
-	<BottomSheet.Sheet style="max-width: 100%;">
+	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
 			<h3>Custom Position Sheet</h3>
@@ -561,6 +562,7 @@
 				This sheet is positioned on the left side of the screen instead of the bottom. You can also
 				position sheets at the top or right side.
 			</p>
+			<div style="height: 50px; background-color: orange; width: 500px"></div>
 			<div class="position-selector">
 				<h4>Try different positions:</h4>
 			</div>

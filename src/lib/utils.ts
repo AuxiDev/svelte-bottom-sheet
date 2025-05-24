@@ -17,16 +17,40 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
 		return maxHeightPx - measurement * maxHeightPx;
 	}
 };
-const getTranslateY = (element: Element) => {
-	const style = window.getComputedStyle(element);
-	const matrix = new DOMMatrix(style.transform);
-	return matrix.m42;
-};
 
-const getTranslateX = (element: Element) => {
-	const style = window.getComputedStyle(element);
-	const matrix = new DOMMatrix(style.transform);
-	return matrix.m41;
+/**
+ * Searches up to a element with a `bottom-sheet`-class to look up if there is any scrollable element
+ * @param {Element} element - A element in the `bottom-sheet`-class
+ * @returns {Element | null} The scrollable element, or null if not found.
+ */
+export const getScrollableElement = (element: Element): Element | null => {
+	while (element && element !== document.documentElement) {
+		const style = window.getComputedStyle(element);
+		const overflowY = style.overflowY;
+		const overflowX = style.overflowX;
+		const hasScrollableY =
+			overflowY !== 'visible' &&
+			overflowY !== 'hidden' &&
+			element.scrollHeight > element.clientHeight;
+		const hasScrollableX =
+			overflowX !== 'visible' &&
+			overflowX !== 'hidden' &&
+			element.scrollWidth > element.clientWidth;
+
+		if (
+			element.className.split(' ').includes('bottom-sheet') &&
+			(hasScrollableY || hasScrollableX)
+		) {
+			return element;
+		}
+
+		if (hasScrollableY || hasScrollableX) {
+			return element;
+		}
+
+		element = element.parentElement as HTMLElement;
+	}
+	return null;
 };
 
 /**
@@ -45,8 +69,7 @@ export const slideTransition = (
 		easing = cubicOut,
 		axis = 'y',
 		position = 'bottom',
-		sheetHeight = 0,
-		sheetMaxHeight = 0
+		sheetHeight = 0
 	}: {
 		delay?: number;
 		duration?: number;
@@ -54,21 +77,9 @@ export const slideTransition = (
 		axis?: 'x' | 'y';
 		position: sheetPosition;
 		sheetHeight: number;
-		sheetMaxHeight: number;
 	}
 ) => {
 	const style: any = getComputedStyle(node);
-
-	switch (position) {
-		case 'top':
-		case 'bottom':
-			sheetHeight = sheetMaxHeight - Math.abs(getTranslateY(node));
-			break;
-		case 'left':
-		case 'right':
-			sheetHeight = sheetMaxHeight - Math.abs(getTranslateX(node));
-			break;
-	}
 
 	if (sheetHeight === 0) {
 		sheetHeight = node.offsetHeight;
@@ -100,7 +111,6 @@ export const slideTransition = (
 		css: (t: number) => `
             overflow: hidden;
             opacity: ${Math.min(t * 20, 1) * opacity};
-			${axis === 'x' ? `max-width: ${primary_distance}px;` : ``}
             transform: ${primary_property}(${(1 - t) * (negativeTranslate ? -1 : 1) * primary_distance}px);
             padding-${secondary_properties[0]}: ${t * padding_start_value}px;
             padding-${secondary_properties[1]}: ${t * padding_end_value}px;
