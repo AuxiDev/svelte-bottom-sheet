@@ -20,6 +20,12 @@
 	let githubStars = $state(data.stars);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
 
+	let settings = $state({
+		autoCloseThreshold: 0.1,
+		closeThreshold: 0.8,
+		maxHeight: 0.7
+	});
+
 	//@ts-ignore
 	let version = __APP_VERSION__;
 
@@ -442,14 +448,7 @@
 </main>
 
 <!-- Bottom Sheets -->
-<BottomSheet
-	bind:isSheetOpen={isBasicSheetOpen}
-	settings={{
-		autoCloseThreshold: 0.1,
-		closeThreshold: 0.8,
-		maxHeight: 0.7
-	}}
->
+<BottomSheet bind:isSheetOpen={isBasicSheetOpen} {settings}>
 	<BottomSheet.Overlay>
 		<BottomSheet.Sheet style="max-width: 600px;">
 			<BottomSheet.Handle />
@@ -464,6 +463,20 @@
 					<li>Smooth transitions that feel natural and seamless</li>
 					<li>Perfect for displaying quick information or performing simple actions</li>
 				</ul>
+				<p>
+					You are also able to dynamically adjust the settings. For example, you can change the max.
+					height:
+				</p>
+				<button
+					class="demo-button"
+					onclick={() =>
+						settings.maxHeight === 0.7 ? (settings.maxHeight = 1) : (settings.maxHeight = 0.7)}
+					>Change max. Height</button
+				>
+				<p>
+					If you want to know more about how the Bottom Sheet can be used, try out the other
+					variants below!
+				</p>
 				<button class="sheet-button" onclick={() => (isBasicSheetOpen = false)}>Close Sheet</button>
 			</BottomSheet.Content>
 		</BottomSheet.Sheet>
@@ -535,7 +548,10 @@
 	</BottomSheet.Overlay>
 </BottomSheet>
 
-<BottomSheet bind:isSheetOpen={isCustomRightOpen} settings={{ position: 'right' }}>
+<BottomSheet
+	bind:isSheetOpen={isCustomRightOpen}
+	settings={{ position: 'right', contentAlignment: 'start-fit' }}
+>
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
@@ -553,7 +569,13 @@
 	</BottomSheet.Sheet>
 </BottomSheet>
 
-<BottomSheet bind:isSheetOpen={isCustomLeftOpen} settings={{ position: 'left' }}>
+<BottomSheet
+	bind:isSheetOpen={isCustomLeftOpen}
+	settings={{
+		position: 'left',
+		contentAlignment: 'start-fit'
+	}}
+>
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
@@ -562,7 +584,11 @@
 				This sheet is positioned on the left side of the screen instead of the bottom. You can also
 				position sheets at the top or right side.
 			</p>
-			<div style="height: 50px; background-color: orange; width: 500px"></div>
+			<p>
+				Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim hic quisquam ex numquam veniam
+				accusamus repellendus voluptas veritatis consectetur aspernatur. Laboriosam nihil, pariatur
+				eum commodi facilis voluptas asperiores modi enim!
+			</p>
 			<div class="position-selector">
 				<h4>Try different positions:</h4>
 			</div>

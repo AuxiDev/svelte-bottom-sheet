@@ -219,16 +219,28 @@ This is the component where your Bottom Sheet content goes into.
 
 ### **Properties**
 
-| Name                 | Type                                  | Description                                                                                                                                                            | Default Value |
-| -------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `maxHeight`          | `number`                              | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels.          | `0.7`         |
-| `snapPoints`         | `number[]`                            | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                             | `[1]`         |
-| `closeThreshold`     | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                                   | `0.1`         |
-| `autoCloseThreshold` | `number`                              | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                          | `0`           |
-| `startingSnappoint`  | `number`                              | The snappoint the Bottom Sheet will start at when opened.                                                                                                              | `1`           |
-| `disableDragging`    | `boolean`                             | Disable dragging of the sheet.                                                                                                                                         | `false`       |
-| `position`           | `"top"` `"bottom"` `"left"` `"right"` | Set the position where the sheet is positioned and moved to.                                                                                                           | `bottom`      |
-| `disableClosing`     | `boolean`                             | Whether the sheet should be closable by keybinds or not. Includes: ESC-Keybind and outside-click-action. Closing by binding the isSheetOpen-Property is still allowed! | `false`       |
+| Name                 | Type                          | Description                                                                                                                                                            | Default Value |
+| -------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `maxHeight`          | `number`                      | Sets the maximum height of the Bottom Sheet. Values between `0` and `1` are treated as percentages (e.g., `0.7` = `70%`). Anything `≥1` is treated as pixels.          | `0.7`         |
+| `snapPoints`         | `number[]`                    | An array of snap points for the Bottom Sheet. Values follow the same percentage and pixel rules. (`[0.25, 0.5, 0.75]` = `[25%, 50%, 75%]`)                             | `[1]`         |
+| `closeThreshold`     | `number`                      | The percentage of the Bottom Sheet's height that the user must drag for it to close.                                                                                   | `0.1`         |
+| `autoCloseThreshold` | `number`                      | The percentage of the Bottom Sheet's height that the user must drag for it to auto-close. Use `0` to disable.                                                          | `0`           |
+| `startingSnappoint`  | `number`                      | The snappoint the Bottom Sheet will start at when opened.                                                                                                              | `1`           |
+| `disableDragging`    | `boolean`                     | Disable dragging of the sheet.                                                                                                                                         | `false`       |
+| `position`           | `top` `bottom` `left` `right` | Set the position where the sheet is positioned and moved to.                                                                                                           | `bottom`      |
+| `disableClosing`     | `boolean`                     | Whether the sheet should be closable by keybinds or not. Includes: ESC-Keybind and outside-click-action. Closing by binding the isSheetOpen-Property is still allowed! | `false`       |
+| `contentAlignment`   | `ContentAlignmentType`        | **For `left` and `right` positioned sheets!** More details below.                                                                                                      | `flex`        |
+
+### ContentAlignmentType [EXPERIMENTAL] (Added with 2.2)
+
+This type was added with 2.2, to allow more complex content alignment for `left` and `right` positioned sheets. These types affect the `BottomSheet.Content` component and might involve calculations.
+
+More options will be added if the feature is doing good.
+
+| Name        | Description                                                                                                                                                                                                      |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flex`      | The content shrinks and grows like a normal flex. No calculations are involved. You can adjust styling and behaviours like you want.                                                                             |
+| `start-fit` | Calculates the best fit for the contentupon the sheets opening. This means, it won't adjust by dragging or snapping to a snap point and stay in it's width. (You might use even padding and margin on the sides) |
 
 ### Notes
 
