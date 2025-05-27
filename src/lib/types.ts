@@ -17,7 +17,26 @@ export type BottomSheetSettings = {
 	disableDragging?: boolean;
 	disableClosing?: boolean;
 	position?: sheetPosition;
+	contentAlignment?: ContentAlignmentType;
 };
+
+/**
+ * ContentAlignmentType
+ *
+ * Defines how content is aligned relative to snap points or layout rules.
+ *
+ * Format: [position]-behavior
+ *
+ * Positions:
+ * - start: Aligned to the starting snap point
+ * - dynamic: Automatically adjusts to layout context ALSO WHILE DRAGGING
+ * - end: Aligned to the last snap point (NOT WHILE DRAGGING - is allowed to adjust after snapping because there is a new "last")
+ *
+ * Behaviors:
+ * - fit: Sized to fit its content
+ * - flex: Flexible and fills available space (default)
+ */
+export type ContentAlignmentType = 'start-fit' | 'flex';
 
 export type BottomSheetType = typeof BottomSheet & {
 	Content: typeof BottomSheetContent;
