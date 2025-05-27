@@ -233,14 +233,14 @@ This is the component where your Bottom Sheet content goes into.
 
 ### ContentAlignmentType [EXPERIMENTAL] (Added with 2.2)
 
-This type was added with 2.2, to allow more complex content alignment for `left` and `right` positioned sheets. These types affect the `BottomSheet.Content` component and might involve calculations.
+This type was added with 2.2, to allow more complex content alignment for `left` and `right` positioned sheets. The setting affects the `BottomSheet.Content` component and might involve calculations.
 
 More options will be added if the feature is doing good.
 
-| Name        | Description                                                                                                                                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `flex`      | The content shrinks and grows like a normal flex. No calculations are involved. You can adjust styling and behaviours like you want.                                                                             |
-| `start-fit` | Calculates the best fit for the contentupon the sheets opening. This means, it won't adjust by dragging or snapping to a snap point and stay in it's width. (You might use even padding and margin on the sides) |
+| Name        | Description                                                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flex`      | The content shrinks and grows like a normal flex. No calculations are involved. You can adjust styling and behaviours like you want. This is the default behaviour.                                             |
+| `start-fit` | Calculates the best fit for the content upon the sheets opening. This means, it won't adjust by dragging or snapping to a snap point and stay in it's width. (You may use even padding and margin on the sides) |
 
 ### Notes
 
