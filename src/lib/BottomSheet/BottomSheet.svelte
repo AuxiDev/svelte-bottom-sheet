@@ -70,6 +70,9 @@ to has "height" in it's name.
 		if (isSheetOpen) {
 			onopen?.();
 			eventController = new AbortController();
+			resizeObserver = new ResizeObserver(() => {
+				adjustSnappointAfterResize();
+			});
 
 			document.addEventListener(
 				'wheel',
@@ -107,7 +110,7 @@ to has "height" in it's name.
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('mousemove', mouseMoveEvent);
-			resizeObserver.disconnect();
+			if (resizeObserver != null) resizeObserver.disconnect();
 			eventController.abort();
 		}
 	});
@@ -135,9 +138,7 @@ to has "height" in it's name.
 	let startX: number = 0;
 	// svelte-ignore state_referenced_locally
 	let currentSnappoint = settings.startingSnapPoint;
-	const resizeObserver = new ResizeObserver((entries) => {
-		adjustSnappointAfterResize();
-	});
+	let resizeObserver: ResizeObserver;
 
 	// A11Y related IDs
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
