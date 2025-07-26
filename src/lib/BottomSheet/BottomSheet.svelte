@@ -11,7 +11,8 @@ to has "height" in it's name.
 		type SheetIdentificationContext
 	} from '$lib/types.js';
 	import { getScrollableElement, measurementToPx } from '$lib/utils.js';
-	import { onMount, setContext, type Snippet } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
+	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
 
 	let {
 		isSheetOpen = $bindable(false),
@@ -60,19 +61,18 @@ to has "height" in it's name.
 	if (!propSettings.snapPoints?.includes(1)) {
 		propSettings.snapPoints?.push(1);
 	}
+
 	const settings: Required<BottomSheetSettings> = $derived({ ...defaultsettings, ...propSettings });
 
 	let eventController = new AbortController();
-
-	onMount(() => {
-		currentWindowWidth = window.innerWidth;
-		currentWindowHeight = window.innerHeight;
-	});
 
 	$effect(() => {
 		if (isSheetOpen) {
 			onopen?.();
 			eventController = new AbortController();
+			resizeObserver = new ResizeObserver(() => {
+				adjustSnappointAfterResize();
+			});
 
 			document.addEventListener(
 				'wheel',
@@ -102,6 +102,7 @@ to has "height" in it's name.
 			document.addEventListener('mousemove', mouseMoveEvent);
 			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 			document.addEventListener('keydown', handleKeyDown);
+			resizeObserver.observe(document.documentElement);
 		} else {
 			onclose?.();
 			setSnapPoint(settings.startingSnapPoint, false);
@@ -109,13 +110,10 @@ to has "height" in it's name.
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('mousemove', mouseMoveEvent);
+			if (resizeObserver != null) resizeObserver.disconnect();
 			eventController.abort();
 		}
 	});
-
-	// Needed for the maxHeightPx derived so it can
-	let currentWindowWidth = $state(0);
-	let currentWindowHeight = $state(0);
 
 	// States & Vars needed for sheet-positon calculation.
 	let sheetHeight = $state(0);
@@ -125,9 +123,8 @@ to has "height" in it's name.
 		if (maxHeight > 1) {
 			return maxHeight;
 		}
-
 		const isSidePosition = position === 'left' || position === 'right';
-		const dimension = isSidePosition ? currentWindowWidth : currentWindowHeight;
+		const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
 
 		return dimension * maxHeight;
 	});
@@ -139,6 +136,9 @@ to has "height" in it's name.
 	let startHeight: number;
 	let noScrolledTop: number = 0;
 	let startX: number = 0;
+	// svelte-ignore state_referenced_locally
+	let currentSnappoint = settings.startingSnapPoint;
+	let resizeObserver: ResizeObserver;
 
 	// A11Y related IDs
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
@@ -158,9 +158,19 @@ to has "height" in it's name.
 			if (throwEvent) {
 				onsnap?.(point);
 			}
+			currentSnappoint = point;
 			return true;
 		}
 		return false;
+	};
+
+	/*
+		If a resize happens on a snappoint Bottom Sheet, adjust the point
+	*/
+	const adjustSnappointAfterResize = () => {
+		if (settings.snapPoints.length > 1) {
+			setSnapPoint(currentSnappoint, false);
+		}
 	};
 
 	/*
@@ -411,6 +421,7 @@ to has "height" in it's name.
 						: prev
 			);
 			onsnap?.(closest.original);
+			currentSnappoint = closest.original;
 			sheetHeight = closest.converted;
 		}
 
