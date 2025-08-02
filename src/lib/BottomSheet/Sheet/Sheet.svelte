@@ -187,6 +187,7 @@
 		user-select: none;
 	}
 	.bottom-sheet {
+		overscroll-behavior: contain;
 		background-color: #fff;
 		position: fixed;
 		left: 0;

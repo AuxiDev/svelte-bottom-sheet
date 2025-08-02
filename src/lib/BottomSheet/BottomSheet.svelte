@@ -228,13 +228,12 @@ to has "height" in it's name.
 	 * @param {number} clientStartX - The X position of the initial touch/click.
 	 */
 	const initializeMove = (clientStartY: number, clientStartX: number) => {
-		if (settings.disableDragging) return;
 		startY = clientStartY;
 		startX = clientStartX;
 		startHeight = sheetHeight;
 		isDragging = true;
 		noScrolledTop = sheetElement?.scrollTop ?? 0;
-		onsheetdragstart?.();
+		if (!settings.disableDragging) onsheetdragstart?.();
 	};
 
 	/**
@@ -283,7 +282,7 @@ to has "height" in it's name.
 	 * @param {MouseEvent} event - The mouse event.
 	 */
 	const mouseMoveEvent = (event: MouseEvent) => {
-		if (!isDragging) return;
+		if (!isDragging || settings.disableDragging) return;
 		// Setting isDraggingFromHandle to true, because when dragging with the mouse, you should be able to drag it down no matter if scrolled to the top
 		isDraggingFromHandle = true;
 		let offset: number = calculateOffSet(event.clientY, event.clientX);
@@ -303,6 +302,13 @@ to has "height" in it's name.
 	 */
 	const touchMoveEvent = (event: TouchEvent) => {
 		if (!isDragging || !sheetElement) return;
+		// If you are at the top of the sheet and try to drag the sheet down, isMovingSheet will be set to true, expecting the sheet to move.
+		// But when disableDragging is true, this won't happen, so set it back to false
+		// Also set isDraggingFromHandle to false because else it wouldn't let you scroll and it can't reset because there is no drag-end event.
+		if (settings.disableDragging) {
+			isMovingSheet = false;
+			isDraggingFromHandle = false;
+		}
 
 		const target = event.target as Element;
 		const scrollableElement = getScrollableElement(target) as HTMLElement;
@@ -348,6 +354,10 @@ to has "height" in it's name.
 			} else if (atBottom && scrollingUp) {
 				return;
 			}
+		}
+
+		if (settings.disableDragging) {
+			return;
 		}
 
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
@@ -514,6 +524,6 @@ to has "height" in it's name.
 	setContext<SheetIdentificationContext>('sheetIdentificationContext', sheetIdentifcationContext);
 </script>
 
-<div>
+<div style="overscroll-behavior: contain; ">
 	{@render children?.()}
 </div>
