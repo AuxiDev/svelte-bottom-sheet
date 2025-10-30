@@ -64,55 +64,48 @@ to has "height" in it's name.
 
 	const settings: Required<BottomSheetSettings> = $derived({ ...defaultsettings, ...propSettings });
 
-	let eventController = new AbortController();
-
 	$effect(() => {
-		if (isSheetOpen) {
-			onopen?.();
-			eventController = new AbortController();
-			resizeObserver = new ResizeObserver(() => {
-				adjustSnappointAfterResize();
-			});
-
-			document.addEventListener(
-				'wheel',
-				(e) => {
-					e.preventDefault();
-				},
-				{
-					passive: false,
-					signal: eventController.signal
-				}
-			);
-
-			document.addEventListener(
-				'touchmove',
-				(e) => {
-					{
-						if (e.cancelable) e.preventDefault();
-					}
-				},
-				{
-					passive: false,
-					signal: eventController.signal
-				}
-			);
-
-			document.addEventListener('mouseup', resetStatesAfterMove);
-			document.addEventListener('mousemove', mouseMoveEvent);
-			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
-			document.addEventListener('keydown', handleKeyDown);
-			resizeObserver.observe(document.documentElement);
-		} else {
+		if (!isSheetOpen) {
 			onclose?.();
 			setSnapPoint(settings.startingSnapPoint, false);
+			return;
+		}
+
+		onopen?.();
+
+		const controller = new AbortController();
+		const resizeObserver = new ResizeObserver(adjustSnappointAfterResize);
+
+		const preventWheel = (e: any) => e.preventDefault();
+		const preventTouchMove = (e: any) => {
+			if (e.cancelable) e.preventDefault();
+		};
+
+		document.addEventListener('wheel', preventWheel, {
+			passive: false,
+			signal: controller.signal
+		});
+
+		document.addEventListener('touchmove', preventTouchMove, {
+			passive: false,
+			signal: controller.signal
+		});
+
+		document.addEventListener('mouseup', resetStatesAfterMove);
+		document.addEventListener('mousemove', mouseMoveEvent);
+		document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+		document.addEventListener('keydown', handleKeyDown);
+
+		resizeObserver.observe(document.documentElement);
+
+		return () => {
 			document.removeEventListener('mouseup', resetStatesAfterMove);
+			document.removeEventListener('mousemove', mouseMoveEvent);
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
-			document.removeEventListener('mousemove', mouseMoveEvent);
-			if (resizeObserver != null) resizeObserver.disconnect();
-			eventController.abort();
-		}
+			resizeObserver.disconnect();
+			controller.abort();
+		};
 	});
 
 	// States & Vars needed for sheet-positon calculation.
