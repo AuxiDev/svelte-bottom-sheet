@@ -132,7 +132,12 @@
 			previousActiveElement = document.activeElement as HTMLElement;
 			setTimeout(() => {
 				const focusableElements = getFocusableElements();
-				if (focusableElements.length) {
+				const autofocusedElement = focusableElements.find((element) =>
+					element.matches('[autofocus], [data-autofocus]')
+				);
+				if (autofocusedElement) {
+					autofocusedElement.focus();
+				} else if (focusableElements.length) {
 					focusableElements[0].focus();
 				} else {
 					sheetContext.sheetElement?.focus();
