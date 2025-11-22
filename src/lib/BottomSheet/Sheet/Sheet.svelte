@@ -45,24 +45,20 @@
 	};
 
 	const handleFocusTrap = (event: KeyboardEvent) => {
-		if (event.key === 'Tab') {
-			const focusableElements = getFocusableElements();
-			if (!focusableElements.length) return;
+		if (event.key !== 'Tab') return;
 
-			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
-			const isTabPressed = !event.shiftKey;
-			const isShiftTabPressed = event.shiftKey;
+		const focusableElements = getFocusableElements();
+		if (!focusableElements.length) return;
 
-			if (isShiftTabPressed && document.activeElement === firstElement) {
-				lastElement.focus();
-				event.preventDefault();
-			}
+		const first = focusableElements[0];
+		const last = focusableElements[focusableElements.length - 1];
 
-			if (isTabPressed && document.activeElement === lastElement) {
-				firstElement.focus();
-				event.preventDefault();
-			}
+		if (event.shiftKey && document.activeElement === first) {
+			last.focus();
+			event.preventDefault();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			first.focus();
+			event.preventDefault();
 		}
 	};
 
@@ -132,7 +128,12 @@
 			previousActiveElement = document.activeElement as HTMLElement;
 			setTimeout(() => {
 				const focusableElements = getFocusableElements();
-				if (focusableElements.length) {
+				const autofocusedElement = focusableElements.find((element) =>
+					element.matches('[autofocus], [data-autofocus]')
+				);
+				if (autofocusedElement) {
+					autofocusedElement.focus();
+				} else if (focusableElements.length) {
 					focusableElements[0].focus();
 				} else {
 					sheetContext.sheetElement?.focus();
@@ -161,7 +162,7 @@
 		id={sheetIdentificationContext.sheetId}
 		tabindex="-1"
 		aria-live="polite"
-		onkeypress={handleFocusTrap}
+		onkeydown={handleFocusTrap}
 		ontouchstart={sheetContext.touchStartEvent}
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}
