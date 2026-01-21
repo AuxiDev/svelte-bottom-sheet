@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount, type Snippet } from 'svelte';
+	import { getContext, onMount, onDestroy type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -123,28 +123,23 @@
 		}
 	};
 
-	$effect(() => {
-		if (sheetContext.isSheetOpen) {
-			previousActiveElement = document.activeElement as HTMLElement;
-			setTimeout(() => {
-				const focusableElements = getFocusableElements();
-				const autofocusedElement = focusableElements.find((element) =>
-					element.matches('[autofocus], [data-autofocus]')
-				);
-				if (autofocusedElement) {
-					autofocusedElement.focus();
-				} else if (focusableElements.length) {
-					focusableElements[0].focus();
-				} else {
-					sheetContext.sheetElement?.focus();
-				}
-				document.addEventListener('click', handleClickOutside);
-			}, 100);
-		} else {
-			document.removeEventListener('click', handleClickOutside);
-			previousActiveElement?.focus();
-		}
-	});
+  onMount(() => {
+    previousActiveElement = document.activeElement as HTMLElement;
+    setTimeout(() => {
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length) {
+        focusableElements[0].focus();
+      } else {
+        sheetContext.sheetElement?.focus();
+      }
+      document.addEventListener('click', handleClickOutside);
+    }, 100);
+  })
+
+  onDestroy(() => {
+    document.removeEventListener('click', handleClickOutside);
+    previousActiveElement?.focus();
+  });
 </script>
 
 {#if sheetContext.isSheetOpen}
