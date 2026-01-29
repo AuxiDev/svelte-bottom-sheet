@@ -38,9 +38,9 @@ You can use the BottomSheet component in any SvelteKit project.
 
 3. **Import the component and use it**
 
-   ```javascript
+   ```typescript
     <script lang="ts">
-   	  import BottomSheet from 'svelte-bottom-sheet';
+   	  import { BottomSheet } from 'svelte-bottom-sheet';
     </script>
 
     <BottomSheet settings={{maxHeight: 0.7}}>
