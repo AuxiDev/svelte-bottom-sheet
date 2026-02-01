@@ -31,7 +31,8 @@ to has "height" in it's name.
 			disableDragging: false,
 			position: 'bottom',
 			disableClosing: false,
-			contentAlignment: 'flex'
+			contentAlignment: 'flex',
+			maxDragPoint: 0
 		},
 		children
 	}: {
@@ -55,7 +56,8 @@ to has "height" in it's name.
 		disableDragging: false,
 		position: 'bottom',
 		disableClosing: false,
-		contentAlignment: 'flex'
+		contentAlignment: 'flex',
+		maxDragPoint: 0
 	};
 
 	if (!propSettings.snapPoints?.includes(1)) {
@@ -280,9 +282,16 @@ to has "height" in it's name.
 		isDraggingFromHandle = true;
 		let offset: number = calculateOffSet(event.clientY, event.clientX);
 
+		// Check whether we are at the next drag point & the drag direction is down. If it's up it's okay
+		if (sheetHeight > measurementToPx(settings.maxDragPoint, maxHeightPx) && sheetHeight < offset) {
+			isMovingSheet = false;
+			return;
+		}
+
 		if (sheetHeight != 0) {
 			isMovingSheet = true;
 		}
+
 		sheetHeight = offset;
 		onsheetdrag?.();
 		tryAutoClose();
@@ -354,6 +363,13 @@ to has "height" in it's name.
 		}
 
 		let offset: number = calculateOffSet(event.touches[0].clientY, event.touches[0].clientX);
+
+		// Check whether we are at the next drag point & the drag direction is down. If it's up it's okay
+		if (sheetHeight > measurementToPx(settings.maxDragPoint, maxHeightPx) && sheetHeight < offset) {
+			isMovingSheet = false;
+			return;
+		}
+
 		if (sheetHeight != 0) {
 			isMovingSheet = true;
 		}
@@ -369,7 +385,6 @@ to has "height" in it's name.
 	const moveEnd = () => {
 		if (settings.disableDragging) return;
 		onsheetdragend?.();
-
 		// If there is only one snap point (1), apply a larger buffer for closing behavior
 		if (settings.snapPoints.length === 1) {
 			if (sheetHeight > measurementToPx(settings.closeThreshold, maxHeightPx)) {
@@ -386,9 +401,14 @@ to has "height" in it's name.
 
 		// Check if the current height is above the lowest snap point; otherwise, close it
 		const lowestSnapPointPx = Math.max(...snapPointsInPx);
+
 		if (sheetHeight > lowestSnapPointPx) {
-			sheetHeight = 0;
-			sheetContext.closeSheet();
+			if (sheetHeight > measurementToPx(settings.closeThreshold, maxHeightPx)) {
+				sheetHeight = 0;
+				sheetContext.closeSheet();
+			} else {
+				sheetHeight = lowestSnapPointPx;
+			}
 			resetStatesAfterMove();
 			return;
 		}
@@ -407,14 +427,32 @@ to has "height" in it's name.
 			return;
 		}
 
-		// Find valid snap points based on the movement direction
-		const validPoints = settings.snapPoints
-			.map((point) => ({ original: point, converted: measurementToPx(point, maxHeightPx) }))
-			.filter((item) => (isMovingUp ? item.converted < sheetHeight : item.converted > sheetHeight));
+		const maxDragPx = measurementToPx(settings.maxDragPoint, maxHeightPx);
 
-		// Find the closest snap point
-		if (validPoints.length > 0) {
-			const closest = validPoints.reduce((prev, curr) =>
+		const points = settings.snapPoints
+			.map((point) => ({
+				original: point,
+				converted: measurementToPx(point, maxHeightPx)
+			}))
+			.sort((a, b) => a.converted - b.converted);
+
+		let candidates = points.filter((item) =>
+			isMovingUp
+				? item.converted < sheetHeight
+				: item.converted > sheetHeight && item.converted <= maxDragPx
+		);
+
+		// If we get below maxDragPoint we need to fallback to the one before, because we shouldn't go down
+		if (!isMovingUp && candidates.length === 0) {
+			const prevIndex = points.findLastIndex((item) => item.converted < sheetHeight);
+
+			if (prevIndex !== -1) {
+				candidates = [points[prevIndex]];
+			}
+		}
+
+		if (candidates.length > 0) {
+			const closest = candidates.reduce((prev, curr) =>
 				isMovingUp
 					? curr.converted > prev.converted
 						? curr
@@ -423,6 +461,7 @@ to has "height" in it's name.
 						? curr
 						: prev
 			);
+
 			onsnap?.(closest.original);
 			currentSnappoint = closest.original;
 			sheetHeight = closest.converted;
