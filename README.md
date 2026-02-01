@@ -230,6 +230,7 @@ This is the component where your Bottom Sheet content goes into.
 | `position`           | `top` `bottom` `left` `right` | Set the position where the sheet is positioned and moved to.                                                                                                           | `bottom`      |
 | `disableClosing`     | `boolean`                     | Whether the sheet should be closable by keybinds or not. Includes: ESC-Keybind and outside-click-action. Closing by binding the isSheetOpen-Property is still allowed! | `false`       |
 | `contentAlignment`   | `ContentAlignmentType`        | **For `left` and `right` positioned sheets!** More details below.                                                                                                      | `flex`        |
+| `maxDragPoint`       | `number`                      |  The percentage of the Bottom Sheet's height to which the user can drag before it stops                                                                                | `flex`        |
 
 ### ContentAlignmentType [EXPERIMENTAL] (Added with 2.2)
 
