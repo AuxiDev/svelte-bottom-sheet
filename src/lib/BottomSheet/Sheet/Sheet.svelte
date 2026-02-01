@@ -3,7 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { getScrollableElement, slideTransition } from '$lib/utils.js';
+	import { getScrollableElement, measurementToPx, slideTransition } from '$lib/utils.js';
 
 	let {
 		children,
@@ -25,7 +25,60 @@
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
 	}
 
+	let didDrag = false;
+	let suppressNextClick = false;
+	let startX = 0;
+	let startY = 0;
+
+	const DRAG_THRESHOLD = 5;
+
+	// Added these events so we know when you drag out of the window and release (for example taskbar)
+	const handleMouseDown = (event: MouseEvent) => {
+		startX = event.clientX;
+		startY = event.clientY;
+		didDrag = false;
+
+		sheetContext.mouseDownEvent(event);
+
+		window.addEventListener('mousemove', handleMouseMove, true);
+		window.addEventListener('mouseup', handleMouseUp, true);
+	};
+
+	const handleMouseMove = (event: MouseEvent) => {
+		if (
+			Math.abs(event.clientX - startX) > DRAG_THRESHOLD ||
+			Math.abs(event.clientY - startY) > DRAG_THRESHOLD
+		) {
+			didDrag = true;
+		}
+	};
+
+	const handleMouseUp = (event: MouseEvent) => {
+		window.removeEventListener('mousemove', handleMouseMove, true);
+		window.removeEventListener('mouseup', handleMouseUp, true);
+
+		if (didDrag) {
+			suppressNextClick = true;
+		}
+
+		sheetContext.moveEnd();
+	};
+
 	const handleClickOutside = (event: MouseEvent) => {
+		// Suppress click caused by drag-outside
+		if (suppressNextClick) {
+			suppressNextClick = false;
+			return;
+		}
+
+		if (
+			sheetContext.sheetHeight >
+			measurementToPx(sheetContext.settings.maxDragPoint, sheetContext.maxHeightPx)
+		) {
+			sheetContext.moveEnd();
+			return;
+		}
+
 		if (
 			sheetContext.sheetElement &&
 			!sheetContext.sheetElement.contains(event.target as Node) &&
@@ -166,8 +219,7 @@
 		ontouchstart={sheetContext.touchStartEvent}
 		ontouchmove={sheetContext.touchMoveEvent}
 		ontouchend={sheetContext.moveEnd}
-		onmousedown={sheetContext.mouseDownEvent}
-		onmouseup={sheetContext.moveEnd}
+		onmousedown={handleMouseDown}
 		onwheel={stopScrollPropagationWheel}
 		transition:slideTransition={{
 			duration: 500,

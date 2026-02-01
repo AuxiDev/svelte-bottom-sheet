@@ -18,6 +18,7 @@ export type BottomSheetSettings = {
 	disableClosing?: boolean;
 	position?: sheetPosition;
 	contentAlignment?: ContentAlignmentType;
+	maxDragPoint?: number;
 };
 
 /**
