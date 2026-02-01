@@ -38,7 +38,7 @@ export const getScrollableElement = (element: Element): Element | null => {
 			element.scrollWidth > element.clientWidth;
 
 		if (
-			element.className.split(' ').includes('bottom-sheet') &&
+			element.className.split?.(' ').includes('bottom-sheet') &&
 			(hasScrollableY || hasScrollableX)
 		) {
 			return element;
