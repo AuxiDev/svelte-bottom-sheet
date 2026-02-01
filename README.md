@@ -8,6 +8,12 @@ The **BottomSheet** component is a sleek, interactive UI element for mobile-firs
 
 [Bottom Sheet Preview](https://bottomsheet.auxi.studio/)
 
+### CAUTION
+
+**Experimental Feature**: Nested Sheets
+Support for nested Bottom Sheets is currently in experimental mode. While functional, you may encounter edge cases with focus management or complex layout nesting.
+Please report any bugs or unexpected behavior by opening an [Issue on GitHub](https://github.com/AUXIDev/svelte-bottom-sheet/issues).
+
 ## Features
 
 - **Customizable**: Control the style, maximum height and snap points of the sheet.
@@ -16,6 +22,7 @@ The **BottomSheet** component is a sleek, interactive UI element for mobile-firs
 - **Lightweight & Easy to Integrate**: Just add the component and configure the settings.
 - **Event Handling**: Built-in events such as `onopen` and `onclose` to track user interactions.
 - **Different Position**: Position the sheet not only on the `bottom` but also on the `sides` and on the `top`
+- **Nested Sheets [EXPERIMENTAL]**: Support for opening a Bottom Sheet from within another Bottom Sheet.
 
 ## Installation
 
@@ -230,7 +237,7 @@ This is the component where your Bottom Sheet content goes into.
 | `position`           | `top` `bottom` `left` `right` | Set the position where the sheet is positioned and moved to.                                                                                                           | `bottom`      |
 | `disableClosing`     | `boolean`                     | Whether the sheet should be closable by keybinds or not. Includes: ESC-Keybind and outside-click-action. Closing by binding the isSheetOpen-Property is still allowed! | `false`       |
 | `contentAlignment`   | `ContentAlignmentType`        | **For `left` and `right` positioned sheets!** More details below.                                                                                                      | `flex`        |
-| `maxDragPoint`       | `number`                      |  The percentage of the Bottom Sheet's height to which the user can drag before it stops                                                                                | `flex`        |
+| `maxDragPoint`       | `number`                      | The percentage of the Bottom Sheet's height to which the user can drag before it stops                                                                                 | `flex`        |
 
 ### ContentAlignmentType [EXPERIMENTAL] (Added with 2.2)
 
@@ -308,6 +315,47 @@ If your Bottom Sheet has defined snapPoints, you can programmatically move it to
 </BottomSheet>
 ```
 
+## Nested Sheets [EXPERIMENTAL]
+
+You can now nest Bottom Sheets. The component uses an internal stack to manage which sheet is "active." This prevents background sheets from being dragged or closed accidentally while a foreground sheet is open.
+
+### Example: Nested Implementation
+
+```Svelte
+<script lang="ts">
+   import { BottomSheet } from 'svelte-bottom-sheet';
+   let primaryOpen = $state(false);
+   let secondaryOpen = $state(false);
+</script>
+
+<!-- Primary Sheet -->
+<BottomSheet bind:isSheetOpen={primaryOpen}>
+   <button onclick={() => primaryOpen = true}>Open Sheet</button>
+
+   <BottomSheet.Overlay>
+      <BottomSheet.Sheet>
+         <BottomSheet.Content>
+            <h3>Primary Sheet</h3>
+            <button onclick={() => secondaryOpen = true}>Open Nested Sheet</button>
+         </BottomSheet.Content>
+      </BottomSheet.Sheet>
+   </BottomSheet.Overlay>
+</BottomSheet>
+
+<!-- Secondary (Nested) Sheet -->
+<BottomSheet bind:isSheetOpen={secondaryOpen}>
+   <BottomSheet.Overlay>
+      <BottomSheet.Sheet>
+         <BottomSheet.Content>
+            <h3>Secondary Sheet</h3>
+            <p>I am on top!</p>
+            <button onclick={() => secondaryOpen = false}>Close Me</button>
+         </BottomSheet.Content>
+      </BottomSheet.Sheet>
+   </BottomSheet.Overlay>
+</BottomSheet>
+```
+
 ## Bottom Sheet Positions [OUT OF EXPERIMENTAL SINCE 2.2]
 
 It is possible to not only position the Bottom Sheet on the `bottom`, you can also position it `left`, `right` and on the `top` of the screen. Take a look on the [Bottom Sheet Settings](#settingstype) to see how you can change the positions.
@@ -329,7 +377,3 @@ Contributions are welcome! If you have any ideas, suggestions, or bug reports, p
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/AuxiDev/svelte-bottom-sheet/blob/master/LICENSE.txt) file for more details.
-
-```
-
-```
