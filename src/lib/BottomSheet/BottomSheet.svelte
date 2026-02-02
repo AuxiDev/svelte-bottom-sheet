@@ -4,6 +4,15 @@ For an easier usage and because the sheet can only be at one position, it's ever
 to has "height" in it's name.  
 -->
 
+<script lang="ts" module>
+	// Shared state accross all instances
+	let activeSheets = $state<string[]>([]);
+	// Global flag to suppress clicks following a drag operation
+	// Important for mouse-dragged sheets
+	// -> Reason: When letting go, a click is issued which closes the sheet behind
+	let isSuppressingGlobalClick = { value: false };
+</script>
+
 <script lang="ts">
 	import {
 		type SheetContext,
@@ -11,7 +20,7 @@ to has "height" in it's name.
 		type SheetIdentificationContext
 	} from '$lib/types.js';
 	import { getScrollableElement, measurementToPx } from '$lib/utils.js';
-	import { setContext, type Snippet } from 'svelte';
+	import { setContext, type Snippet, untrack } from 'svelte';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
 
 	let {
@@ -66,12 +75,28 @@ to has "height" in it's name.
 
 	const settings: Required<BottomSheetSettings> = $derived({ ...defaultsettings, ...propSettings });
 
+	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
+	const headingId = `${sheetId}-heading`;
+	const descriptionId = `${sheetId}-description`;
+
 	$effect(() => {
 		if (!isSheetOpen) {
+			untrack(() => {
+				// Delay removal to prevent underlying sheets from capturing the current event tick
+				setTimeout(() => {
+					activeSheets = activeSheets.filter((id) => id !== sheetId);
+				}, 0);
+			});
 			onclose?.();
 			setSnapPoint(settings.startingSnapPoint, false);
 			return;
 		}
+
+		untrack(() => {
+			if (!activeSheets.includes(sheetId)) {
+				activeSheets.push(sheetId);
+			}
+		});
 
 		onopen?.();
 
@@ -93,16 +118,17 @@ to has "height" in it's name.
 			signal: controller.signal
 		});
 
-		document.addEventListener('mouseup', resetStatesAfterMove);
-		document.addEventListener('mousemove', mouseMoveEvent);
 		document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 		document.addEventListener('keydown', handleKeyDown);
 
 		resizeObserver.observe(document.documentElement);
 
 		return () => {
-			document.removeEventListener('mouseup', resetStatesAfterMove);
-			document.removeEventListener('mousemove', mouseMoveEvent);
+			untrack(() => {
+				setTimeout(() => {
+					activeSheets = activeSheets.filter((id) => id !== sheetId);
+				}, 0);
+			});
 			document.removeEventListener('touchmove', preventPullToRefresh);
 			document.removeEventListener('keydown', handleKeyDown);
 			resizeObserver.disconnect();
@@ -134,11 +160,6 @@ to has "height" in it's name.
 	// svelte-ignore state_referenced_locally
 	let currentSnappoint = settings.startingSnapPoint;
 	let resizeObserver: ResizeObserver;
-
-	// A11Y related IDs
-	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
-	const headingId = `${sheetId}-heading`;
-	const descriptionId = `${sheetId}-description`;
 
 	/**
 	 * Allows you to change the snap-point a snap-able sheet is snapped to.
@@ -182,7 +203,9 @@ to has "height" in it's name.
 	*/
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Escape' && !settings.disableClosing) {
-			sheetContext.closeSheet();
+			if (activeSheets.at(-1) === sheetId) {
+				sheetContext.closeSheet();
+			}
 		}
 	};
 
@@ -228,7 +251,27 @@ to has "height" in it's name.
 		startHeight = sheetHeight;
 		isDragging = true;
 		noScrolledTop = sheetElement?.scrollTop ?? 0;
-		if (!settings.disableDragging) onsheetdragstart?.();
+		if (!settings.disableDragging) {
+			onsheetdragstart?.();
+			document.addEventListener('mousemove', mouseMoveEvent);
+			document.addEventListener('mouseup', handleGlobalMouseUp);
+		}
+	};
+
+	/**
+	 * Removes mouse listeners
+	 */
+	const handleGlobalMouseUp = () => {
+		document.removeEventListener('mousemove', mouseMoveEvent);
+		document.removeEventListener('mouseup', handleGlobalMouseUp);
+
+		// If a drag occurred, signal the global suppressor
+		if (isMovingSheet) {
+			isSuppressingGlobalClick.value = true;
+			setTimeout(() => {
+				isSuppressingGlobalClick.value = false;
+			}, 50);
+		}
 	};
 
 	/**
@@ -541,7 +584,11 @@ to has "height" in it's name.
 		},
 		toggleSheet: () => {
 			isSheetOpen = !isSheetOpen;
-		}
+		},
+		get isSuppressingGlobalClick() {
+			return isSuppressingGlobalClick.value;
+		},
+		isTopSheet: () => activeSheets.at(-1) === sheetId
 	};
 
 	let sheetIdentifcationContext: SheetIdentificationContext = {
@@ -550,7 +597,7 @@ to has "height" in it's name.
 		descriptionId: descriptionId
 	};
 
-	// svelte-ignore state_referenced_locally
+	//svelte-ignore state_referenced_locally
 	setSnapPoint(settings.startingSnapPoint, false);
 	setContext<SheetContext>('sheetContext', sheetContext);
 	setContext<SheetIdentificationContext>('sheetIdentificationContext', sheetIdentifcationContext);

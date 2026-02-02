@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -32,7 +32,9 @@
 
 	const DRAG_THRESHOLD = 5;
 
-	// Added these events so we know when you drag out of the window and release (for example taskbar)
+	/**
+	 * Added these events so we know when you drag out of the window and release (for example taskbar)
+	 */
 	const handleMouseDown = (event: MouseEvent) => {
 		startX = event.clientX;
 		startY = event.clientY;
@@ -44,6 +46,9 @@
 		window.addEventListener('mouseup', handleMouseUp, true);
 	};
 
+	/**
+	 * Tracks movement to determine if click should be suppressed
+	 */
 	const handleMouseMove = (event: MouseEvent) => {
 		if (
 			Math.abs(event.clientX - startX) > DRAG_THRESHOLD ||
@@ -53,6 +58,9 @@
 		}
 	};
 
+	/**
+	 * Cleans up global listeners
+	 */
 	const handleMouseUp = (event: MouseEvent) => {
 		window.removeEventListener('mousemove', handleMouseMove, true);
 		window.removeEventListener('mouseup', handleMouseUp, true);
@@ -64,10 +72,23 @@
 		sheetContext.moveEnd();
 	};
 
+	/**
+	 * Logic for closing when clicking outside the sheet
+	 */
 	const handleClickOutside = (event: MouseEvent) => {
 		// Suppress click caused by drag-outside
+		if (sheetContext.isSuppressingGlobalClick) {
+			event.stopImmediatePropagation();
+			return;
+		}
+
+		// If we are not the top sheet, we must not react to this click
+		if (!sheetContext.isTopSheet()) return;
+
+		// Handle local drag suppression
 		if (suppressNextClick) {
 			suppressNextClick = false;
+			event.stopImmediatePropagation();
 			return;
 		}
 
@@ -85,9 +106,13 @@
 			!sheetContext.settings.disableClosing
 		) {
 			sheetContext.closeSheet();
+			event.stopImmediatePropagation();
 		}
 	};
 
+	/**
+	 * Returns all focusable elements within the sheet
+	 */
 	const getFocusableElements = () => {
 		if (!sheetContext.sheetElement) return [];
 		return Array.from(
@@ -97,6 +122,9 @@
 		);
 	};
 
+	/**
+	 * Simple focus trap for a11y
+	 */
 	const handleFocusTrap = (event: KeyboardEvent) => {
 		if (event.key !== 'Tab') return;
 

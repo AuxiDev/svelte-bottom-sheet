@@ -72,4 +72,6 @@ export type SheetContext = {
 	openSheet: () => void;
 	closeSheet: () => void;
 	toggleSheet: () => void;
+	isTopSheet: () => boolean;
+	isSuppressingGlobalClick: boolean;
 };
