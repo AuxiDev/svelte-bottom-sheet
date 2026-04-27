@@ -319,6 +319,8 @@ If your Bottom Sheet has defined snapPoints, you can programmatically move it to
 
 You can now nest Bottom Sheets. The component uses an internal stack to manage which sheet is "active." This prevents background sheets from being dragged or closed accidentally while a foreground sheet is open.
 
+The inner bottom sheet needs to be declared afterwards in the DOM, otherwise it'll be hidden behind its parent sheet.
+
 ### Example: Nested Implementation
 
 ```Svelte
