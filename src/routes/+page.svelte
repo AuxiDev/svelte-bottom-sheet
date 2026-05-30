@@ -205,7 +205,7 @@
 					</BottomSheetV3.Content>
 				</BottomSheetV3.Sheet>
 			</BottomSheetV3.Root>
-			<BottomSheetV3.Root>
+			<BottomSheetV3.Root enableScrollDragTakeover={true}>
 				<BottomSheetV3.Trigger>Open V3</BottomSheetV3.Trigger>
 				<BottomSheetV3.Sheet>
 					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />

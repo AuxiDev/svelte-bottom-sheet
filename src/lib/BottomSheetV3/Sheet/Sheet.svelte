@@ -498,7 +498,6 @@
 		}
 
 		// Check if we would below maxDragPoint and if yes, stop
-
 		if (currentHeight < sheetContext.maxDragPoint) {
 			nextTranslateY = sheetContext.maxHeight - sheetContext.maxDragPoint;
 		}
@@ -572,9 +571,7 @@
 				style: {
 					position: 'fixed',
 					height: `${sheetContext.maxHeight}px`,
-					left: 0,
-					bottom: 0,
-					right: 0,
+					...positionStyle,
 					margin: '0 auto',
 					'z-index': 100,
 					'overscroll-behavior': 'contain',
@@ -587,7 +584,7 @@
 		)
 	);
 
-	// Direct performance-optimized DOM mutation side effect
+	// Keep it here so it doesn't trigger mergeProps rerender, which triggers portal to unmount/mount
 	$effect(() => {
 		if (!ref) return;
 

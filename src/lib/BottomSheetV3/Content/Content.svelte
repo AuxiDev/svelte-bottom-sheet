@@ -30,9 +30,7 @@
 					padding: '1.25rem',
 					'overscroll-behavior-y': 'contain',
 					'-webkit-overflow-scrolling': 'touch',
-					// FIX: Disable native touch manipulation while dragging,
-					// so our JS injection can safely mutate scrollTop!
-					'touch-action': sheetContext.isDragging ? 'none' : 'pan-y',
+					'touch-action': 'pan-y',
 					'background-color': 'white'
 				}
 			},
