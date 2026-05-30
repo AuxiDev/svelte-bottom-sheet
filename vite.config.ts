@@ -6,5 +6,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	define: {
 		__APP_VERSION__: JSON.stringify(packageJson.version)
+	},
+	server: {
+		host: true
 	}
 });

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import BottomSheet from '$lib/BottomSheet/index.js';
+	//import BottomSheet from '$lib/BottomSheet/index.js';
 	import { tick } from 'svelte';
 	import type { PageData } from './$types.js';
-
+	import * as BottomSheetV3 from '$lib/index.js';
+	import { BottomSheet } from '$lib/index.js';
 	const { data }: { data: PageData } = $props();
 
+	let maxHeight = $state(0.7);
 	let darkMode = $state(false);
 	let isBasicSheetOpen = $state(false);
 	let isSnapPointsSheetOpen = $state(false);
@@ -19,12 +21,6 @@
 	let mobileMenuOpen = $state(false);
 	let githubStars = $state(data.stars);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
-
-	let settings = $state({
-		autoCloseThreshold: 0.1,
-		closeThreshold: 0.8,
-		maxHeight: 0.7
-	});
 
 	//@ts-ignore
 	let version = __APP_VERSION__;
@@ -199,7 +195,32 @@
 				<h2>Basic Bottom Sheet</h2>
 				<div class="section-line"></div>
 			</div>
-
+			<BottomSheetV3.Root>
+				<BottomSheetV3.Trigger>Open Normal</BottomSheetV3.Trigger>
+				<BottomSheetV3.Overlay />
+				<BottomSheetV3.Sheet>
+					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
+					<BottomSheetV3.Content>
+						<h1>hi</h1>
+					</BottomSheetV3.Content>
+				</BottomSheetV3.Sheet>
+			</BottomSheetV3.Root>
+			<BottomSheetV3.Root>
+				<BottomSheetV3.Trigger>Open V3</BottomSheetV3.Trigger>
+				<BottomSheetV3.Sheet>
+					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
+					<BottomSheetV3.Content>
+						{#each items as item}
+							<li class="item">
+								<div class="item-header">
+									<h4>{item.title}</h4>
+								</div>
+								<p>{item.description}</p>
+							</li>
+						{/each}
+					</BottomSheetV3.Content>
+				</BottomSheetV3.Sheet>
+			</BottomSheetV3.Root>
 			<div class="showcase-content">
 				<div class="showcase-text">
 					<p>
@@ -448,7 +469,12 @@
 </main>
 
 <!-- Bottom Sheets -->
-<BottomSheet bind:isSheetOpen={isBasicSheetOpen} {settings}>
+<BottomSheet
+	bind:isSheetOpen={isBasicSheetOpen}
+	autoCloseThreshold={0.1}
+	closeThreshold={0.8}
+	{maxHeight}
+>
 	<BottomSheet.Overlay>
 		<BottomSheet.Sheet style="max-width: 600px;">
 			<BottomSheet.Handle />
@@ -469,8 +495,7 @@
 				</p>
 				<button
 					class="demo-button"
-					onclick={() =>
-						settings.maxHeight === 0.7 ? (settings.maxHeight = 1) : (settings.maxHeight = 0.7)}
+					onclick={() => (maxHeight === 0.7 ? (maxHeight = 1) : (maxHeight = 0.7))}
 					>Change max. Height</button
 				>
 				<p>
@@ -485,11 +510,9 @@
 
 <BottomSheet
 	bind:isSheetOpen={isSnapPointsSheetOpen}
-	settings={{
-		maxHeight: 0.9,
-		snapPoints: [0.25, 0.5, 0.75],
-		startingSnapPoint: 0.5
-	}}
+	maxHeight={0.9}
+	snapPoints={[0.25, 0.5, 0.75, 1]}
+	startingSnapPoint={0.5}
 	onsnap={(point) => logEvent(`Sheet snapped to ${point * 100}%`)}
 >
 	<BottomSheet.Sheet style="max-width: 600px;">
@@ -548,10 +571,7 @@
 	</BottomSheet.Overlay>
 </BottomSheet>
 
-<BottomSheet
-	bind:isSheetOpen={isCustomRightOpen}
-	settings={{ position: 'right', contentAlignment: 'start-fit' }}
->
+<BottomSheet bind:isSheetOpen={isCustomRightOpen} position="right">
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
@@ -569,13 +589,7 @@
 	</BottomSheet.Sheet>
 </BottomSheet>
 
-<BottomSheet
-	bind:isSheetOpen={isCustomLeftOpen}
-	settings={{
-		position: 'left',
-		contentAlignment: 'start-fit'
-	}}
->
+<BottomSheet bind:isSheetOpen={isCustomLeftOpen} position="left">
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
@@ -597,7 +611,7 @@
 	</BottomSheet.Sheet>
 </BottomSheet>
 
-<BottomSheet bind:isSheetOpen={isCustomTopOpen} settings={{ position: 'top' }}>
+<BottomSheet bind:isSheetOpen={isCustomTopOpen} position="top">
 	<BottomSheet.Sheet>
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
