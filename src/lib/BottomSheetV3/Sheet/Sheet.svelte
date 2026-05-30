@@ -570,8 +570,7 @@
 				ontransitionend: handleTransitionEnd,
 				style: {
 					position: 'fixed',
-					height: `${sheetContext.maxHeight}px`,
-					...positionStyle,
+					...positionStyle(),
 					margin: '0 auto',
 					'z-index': 100,
 					'overscroll-behavior': 'contain',
