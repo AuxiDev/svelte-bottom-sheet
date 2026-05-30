@@ -62,7 +62,6 @@
 		mergeProps(
 			{
 				role: 'button',
-
 				'data-bottomsheet-handle': '',
 				tabindex: 0,
 				'aria-label': 'Drag to resize or close sheet',
@@ -70,7 +69,6 @@
 				'data-state': sheetContext.isSheetOpen ? 'open' : 'closed',
 				'data-dragging': sheetContext.isDragging ? '' : undefined,
 				style: {
-					'overflow-y': 'auto',
 					'overscroll-behavior-y': 'contain',
 					'-webkit-overflow-scrolling': 'touch',
 					'touch-action': 'pan-y',

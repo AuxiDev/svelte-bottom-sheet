@@ -209,6 +209,7 @@
 				<BottomSheetV3.Trigger>Open V3</BottomSheetV3.Trigger>
 				<BottomSheetV3.Sheet>
 					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
+
 					<BottomSheetV3.Content>
 						{#each items as item}
 							<li class="item">

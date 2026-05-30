@@ -63,7 +63,9 @@
 	let translateY = $state(0);
 	let isDragging = $state(false);
 
-	const startHeight = $derived(measurementToPx(startingSnapPoint ?? maxHeight, maxHeightPx));
+	const startHeight = $derived(
+		startingSnapPoint ? measurementToPx(startingSnapPoint, maxHeightPx) : maxHeightPx
+	);
 	const convertedSnappoints = $derived(snapPoints.map((p) => measurementToPx(p, maxHeightPx)));
 	const convertedCloseTreshold = $derived(measurementToPx(closeThreshold, maxHeightPx));
 	const convertedAutoCloseTreshold = $derived(measurementToPx(autoCloseThreshold, maxHeightPx));
@@ -75,24 +77,20 @@
 	$effect(() => {
 		if (maxHeight > 1) {
 			maxHeightPx = maxHeight;
-		}
-		const isSidePosition = position === 'left' || position === 'right';
-		const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
+		} else {
+			const isSidePosition = position === 'left' || position === 'right';
+			const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
 
-		maxHeightPx = dimension * maxHeight;
+			maxHeightPx = dimension * maxHeight;
+		}
 
 		if (isSheetOpen) {
-			// We use requestAnimationFrame to ensure the browser has a chance
-			// to render the "bottom" position before we tell it to slide to 0.
 			onopen?.();
-			const frame = requestAnimationFrame(() => {
-				translateY = maxHeightPx - startHeight;
-			});
-			return () => cancelAnimationFrame(frame);
+			translateY = maxHeightPx - startHeight;
 		} else {
 			onclose?.();
 			// Reset for next time
-			translateY = startHeight;
+			translateY = maxHeightPx;
 		}
 	});
 

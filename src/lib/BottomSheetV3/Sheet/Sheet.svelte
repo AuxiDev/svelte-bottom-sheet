@@ -227,22 +227,7 @@
 			}
 		}
 
-		const contentEl = sheetContext.contentElement;
-		const cancelScroll = (e: TouchEvent) => {
-			if (gestureMode === 'drag' && e.cancelable) {
-				e.preventDefault();
-				e.stopPropagation();
-			}
-		};
-
-		if (contentEl) {
-			contentEl.addEventListener('touchmove', cancelScroll, { passive: false, capture: true });
-		}
-
 		return () => {
-			if (contentEl) {
-				contentEl.removeEventListener('touchmove', cancelScroll, true);
-			}
 			document.removeEventListener('keydown', handleGlobalKeyDown);
 			ref?.removeEventListener('touchmove', touchMove);
 			stopGlobalTouchMoveBlock?.();
@@ -459,9 +444,6 @@
 				// It is used in mergeProps, which causes it to rerender / remount removing the active scroll
 				rerenderTrigger = true;
 				rerenderTrigger = false;
-				if (scrollTarget) {
-					lockScrollTop = scrollTarget.scrollTop;
-				}
 				startY = activeTouch.clientY;
 
 				startTranslateY = sheetContext.translateY;
@@ -572,9 +554,13 @@
 					position: 'fixed',
 					...positionStyle(),
 					margin: '0 auto',
+					display: 'flex',
+					'flex-direction': 'column',
+					'box-sizing': 'border-box',
 					'z-index': 100,
 					'overscroll-behavior': 'contain',
-					'overscroll-behavior-y': 'contain'
+					'overscroll-behavior-y': 'contain',
+					'touch-action': 'pan-y'
 				}
 			},
 			rest,

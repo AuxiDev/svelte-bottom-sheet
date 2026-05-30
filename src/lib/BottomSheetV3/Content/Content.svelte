@@ -25,13 +25,21 @@
 				'data-state': sheetContext.isSheetOpen ? 'open' : 'closed',
 				style: {
 					'overflow-y': 'auto',
-					'max-height': '100%',
-					height: '100%',
 					padding: '1.25rem',
 					'overscroll-behavior-y': 'contain',
-					'-webkit-overflow-scrolling': 'touch',
-					'touch-action': 'pan-y',
-					'background-color': 'white'
+					'touch-action': sheetContext.isDragging ? 'none' : 'pan-y',
+					'background-color': 'white',
+					'box-sizing': 'border-box',
+					flex: '1',
+					'min-height': '0',
+					height: '100%',
+					// Scale down so you can still scroll to bottom
+					// Use animation to not cut off - should be the same as translate
+					// -> unified setting
+					'max-height': `calc(${sheetContext.maxHeight}px - ${sheetContext.translateY}px - 36px)`,
+					transition: sheetContext.isDragging
+						? 'none'
+						: 'max-height 0.3s cubic-bezier(0.215, 0.61, 0.355, 1)'
 				}
 			},
 			rest,
