@@ -304,7 +304,7 @@
 	.position-top {
 		display: flex;
 		flex-direction: column-reverse;
-		border-radius: 0 0 1rem rem;
+		border-radius: 0 0 1rem 1rem;
 		margin: 0 auto;
 		top: 0;
 		bottom: unset;
