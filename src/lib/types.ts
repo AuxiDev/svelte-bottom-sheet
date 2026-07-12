@@ -69,6 +69,7 @@ export type SheetContext = {
 	mouseMoveEvent: (event: MouseEvent) => void;
 	touchMoveEvent: (event: TouchEvent) => void;
 	moveEnd: () => void;
+	setSnapPoint: (point: number, throwEvent?: boolean) => boolean;
 	openSheet: () => void;
 	closeSheet: () => void;
 	toggleSheet: () => void;

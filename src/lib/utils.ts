@@ -1,5 +1,28 @@
 import { cubicOut } from 'svelte/easing';
-import type { sheetPosition } from './types.js';
+import type { BottomSheetSettings, sheetPosition } from './types.js';
+
+export const DEFAULT_SETTINGS: Readonly<Required<BottomSheetSettings>> = Object.freeze({
+	closeThreshold: 0.9,
+	autoCloseThreshold: 0,
+	maxHeight: 0.7,
+	snapPoints: [1],
+	startingSnapPoint: 1,
+	disableDragging: false,
+	position: 'bottom',
+	disableClosing: false,
+	contentAlignment: 'flex',
+	maxDragPoint: 0
+});
+
+/** Resolves partial settings without mutating objects or arrays owned by the consumer. */
+export const resolveSettings = (
+	settings: BottomSheetSettings = {}
+): Required<BottomSheetSettings> => {
+	const snapPoints = [...(settings.snapPoints ?? DEFAULT_SETTINGS.snapPoints)];
+	if (!snapPoints.includes(1)) snapPoints.push(1);
+
+	return { ...DEFAULT_SETTINGS, ...settings, snapPoints };
+};
 
 /**
  * Converts a measurement value into pixels relative to the `maxHeight`.
@@ -23,7 +46,7 @@ export const measurementToPx = (measurement: number, maxHeightPx: number) => {
  * @param {Element} element - A element in the `bottom-sheet`-class
  * @returns {Element | null} The scrollable element, or null if not found.
  */
-export const getScrollableElement = (element: Element): Element | null => {
+export const getScrollableElement = (element: Element | null): Element | null => {
 	while (element && element !== document.documentElement) {
 		const style = window.getComputedStyle(element);
 		const overflowY = style.overflowY;
@@ -37,10 +60,7 @@ export const getScrollableElement = (element: Element): Element | null => {
 			overflowX !== 'hidden' &&
 			element.scrollWidth > element.clientWidth;
 
-		if (
-			element.className.split?.(' ').includes('bottom-sheet') &&
-			(hasScrollableY || hasScrollableX)
-		) {
+		if (element.classList.contains('bottom-sheet') && (hasScrollableY || hasScrollableX)) {
 			return element;
 		}
 

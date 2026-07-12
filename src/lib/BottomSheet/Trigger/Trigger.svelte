@@ -31,7 +31,10 @@
 	aria-expanded={sheetContext.isSheetOpen ? 'true' : 'false'}
 	onclick={handleClick}
 	onkeydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') handleClick();
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleClick();
+		}
 	}}
 >
 	{@render children?.()}

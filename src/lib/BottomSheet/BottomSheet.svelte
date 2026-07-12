@@ -19,7 +19,7 @@ to has "height" in it's name.
 		type BottomSheetSettings,
 		type SheetIdentificationContext
 	} from '$lib/types.js';
-	import { getScrollableElement, measurementToPx } from '$lib/utils.js';
+	import { getScrollableElement, measurementToPx, resolveSettings } from '$lib/utils.js';
 	import { setContext, type Snippet, untrack } from 'svelte';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
 
@@ -31,18 +31,7 @@ to has "height" in it's name.
 		onsheetdragstart,
 		onsheetdragend,
 		onsnap,
-		settings: propSettings = {
-			closeThreshold: 0.9,
-			autoCloseThreshold: 0,
-			maxHeight: 0.7,
-			snapPoints: [1],
-			startingSnapPoint: 1,
-			disableDragging: false,
-			position: 'bottom',
-			disableClosing: false,
-			contentAlignment: 'flex',
-			maxDragPoint: 0
-		},
+		settings: propSettings = {},
 		children
 	}: {
 		isSheetOpen?: boolean;
@@ -56,84 +45,72 @@ to has "height" in it's name.
 		onsnap?: (point: number) => void;
 	} = $props();
 
-	const defaultsettings: Required<BottomSheetSettings> = {
-		closeThreshold: 0.9,
-		autoCloseThreshold: 0,
-		maxHeight: 0.7,
-		snapPoints: [1],
-		startingSnapPoint: 1,
-		disableDragging: false,
-		position: 'bottom',
-		disableClosing: false,
-		contentAlignment: 'flex',
-		maxDragPoint: 0
-	};
-
-	if (!propSettings.snapPoints?.includes(1)) {
-		propSettings.snapPoints?.push(1);
-	}
-
-	const settings: Required<BottomSheetSettings> = $derived({ ...defaultsettings, ...propSettings });
+	const settings: Required<BottomSheetSettings> = $derived(resolveSettings(propSettings));
 
 	const sheetId = `bottom-sheet-${Math.random().toString(36).substr(2, 9)}`;
 	const headingId = `${sheetId}-heading`;
 	const descriptionId = `${sheetId}-description`;
+	let hasOpened = false;
+	let activeSheetRemovalTimer: ReturnType<typeof setTimeout> | undefined;
 
 	$effect(() => {
-		if (!isSheetOpen) {
-			untrack(() => {
+		const open = isSheetOpen;
+
+		return untrack(() => {
+			if (!open) {
 				// Delay removal to prevent underlying sheets from capturing the current event tick
-				setTimeout(() => {
+				activeSheetRemovalTimer = setTimeout(() => {
 					activeSheets = activeSheets.filter((id) => id !== sheetId);
 				}, 0);
-			});
-			onclose?.();
-			setSnapPoint(settings.startingSnapPoint, false);
-			return;
-		}
-
-		untrack(() => {
-			if (!activeSheets.includes(sheetId)) {
-				activeSheets.push(sheetId);
+				if (hasOpened) onclose?.();
+				hasOpened = false;
+				setSnapPoint(settings.startingSnapPoint, false);
+				return;
 			}
-		});
 
-		onopen?.();
+			if (activeSheetRemovalTimer) clearTimeout(activeSheetRemovalTimer);
+			if (!activeSheets.includes(sheetId)) {
+				activeSheets = [...activeSheets, sheetId];
+			}
 
-		const controller = new AbortController();
-		const resizeObserver = new ResizeObserver(adjustSnappointAfterResize);
+			hasOpened = true;
+			onopen?.();
 
-		const preventWheel = (e: any) => e.preventDefault();
-		const preventTouchMove = (e: any) => {
-			if (e.cancelable) e.preventDefault();
-		};
+			const controller = new AbortController();
+			const resizeObserver = new ResizeObserver(adjustSnappointAfterResize);
 
-		document.addEventListener('wheel', preventWheel, {
-			passive: false,
-			signal: controller.signal
-		});
+			const preventWheel = (e: any) => e.preventDefault();
+			const preventTouchMove = (e: any) => {
+				if (e.cancelable) e.preventDefault();
+			};
 
-		document.addEventListener('touchmove', preventTouchMove, {
-			passive: false,
-			signal: controller.signal
-		});
+			document.addEventListener('wheel', preventWheel, {
+				passive: false,
+				signal: controller.signal
+			});
 
-		document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
-		document.addEventListener('keydown', handleKeyDown);
+			document.addEventListener('touchmove', preventTouchMove, {
+				passive: false,
+				signal: controller.signal
+			});
 
-		resizeObserver.observe(document.documentElement);
+			document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+			document.addEventListener('keydown', handleKeyDown);
 
-		return () => {
-			untrack(() => {
-				setTimeout(() => {
+			resizeObserver.observe(document.documentElement);
+
+			return () => {
+				activeSheetRemovalTimer = setTimeout(() => {
 					activeSheets = activeSheets.filter((id) => id !== sheetId);
 				}, 0);
-			});
-			document.removeEventListener('touchmove', preventPullToRefresh);
-			document.removeEventListener('keydown', handleKeyDown);
-			resizeObserver.disconnect();
-			controller.abort();
-		};
+				document.removeEventListener('mousemove', mouseMoveEvent);
+				document.removeEventListener('mouseup', handleGlobalMouseUp);
+				document.removeEventListener('touchmove', preventPullToRefresh);
+				document.removeEventListener('keydown', handleKeyDown);
+				resizeObserver.disconnect();
+				controller.abort();
+			};
+		});
 	});
 
 	// States & Vars needed for sheet-positon calculation.
@@ -159,7 +136,6 @@ to has "height" in it's name.
 	let startX: number = 0;
 	// svelte-ignore state_referenced_locally
 	let currentSnappoint = settings.startingSnapPoint;
-	let resizeObserver: ResizeObserver;
 
 	/**
 	 * Allows you to change the snap-point a snap-able sheet is snapped to.
@@ -246,16 +222,16 @@ to has "height" in it's name.
 	 * @param {number} clientStartX - The X position of the initial touch/click.
 	 */
 	const initializeMove = (clientStartY: number, clientStartX: number) => {
+		if (settings.disableDragging) return;
+
 		startY = clientStartY;
 		startX = clientStartX;
 		startHeight = sheetHeight;
 		isDragging = true;
 		noScrolledTop = sheetElement?.scrollTop ?? 0;
-		if (!settings.disableDragging) {
-			onsheetdragstart?.();
-			document.addEventListener('mousemove', mouseMoveEvent);
-			document.addEventListener('mouseup', handleGlobalMouseUp);
-		}
+		onsheetdragstart?.();
+		document.addEventListener('mousemove', mouseMoveEvent);
+		document.addEventListener('mouseup', handleGlobalMouseUp);
 	};
 
 	/**
@@ -426,7 +402,10 @@ to has "height" in it's name.
 	 * Handles the end of a drag movement, determining whether to close or snap to a point.
 	 */
 	const moveEnd = () => {
-		if (settings.disableDragging) return;
+		if (settings.disableDragging) {
+			resetStatesAfterMove();
+			return;
+		}
 		onsheetdragend?.();
 		// If there is only one snap point (1), apply a larger buffer for closing behavior
 		if (settings.snapPoints.length === 1) {
@@ -576,6 +555,7 @@ to has "height" in it's name.
 		mouseMoveEvent: mouseMoveEvent,
 		touchMoveEvent: touchMoveEvent,
 		moveEnd: moveEnd,
+		setSnapPoint,
 		openSheet: () => {
 			isSheetOpen = true;
 		},

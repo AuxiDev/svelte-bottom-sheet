@@ -17,7 +17,7 @@
 	let isCustomTopOpen = $state(false);
 	let eventLog = $state<string[]>([]);
 	let mobileMenuOpen = $state(false);
-	let githubStars = $state(data.stars);
+	let githubStars = $derived(data.stars);
 	let currentPosition = $state<'left' | 'right' | 'bottom' | 'top'>('bottom');
 
 	let settings = $state({
@@ -716,7 +716,8 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+		background-image:
+			linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
 			linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 		background-size: 20px 20px;
 		opacity: 0.5;

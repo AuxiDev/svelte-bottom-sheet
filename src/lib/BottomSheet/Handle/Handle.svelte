@@ -8,7 +8,7 @@
 	const sheetContext = getContext<SheetContext>('sheetContext');
 
 	if (!sheetContext) {
-		throw new Error('BottomSheet.Overlay must be inside a BottomSheet component');
+		throw new Error('BottomSheet.Handle must be inside a BottomSheet component');
 	}
 
 	let { children, ...rest }: { children?: Snippet<[]> } & HTMLAttributes<HTMLDivElement> = $props();
@@ -26,38 +26,42 @@
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (sheetContext.settings.disableDragging) return;
 		const maxHeightPx = sheetContext.maxHeightPx;
-		const snapPoints = sheetContext.settings.snapPoints;
+		const snapPoints = [...sheetContext.settings.snapPoints].sort(
+			(a, b) => measurementToPx(b, maxHeightPx) - measurementToPx(a, maxHeightPx)
+		);
 
-		let snapPointsInPx = snapPoints
-			.map((point) => measurementToPx(point, maxHeightPx))
-			.sort((a, b) => b - a);
+		const snapPointsInPx = snapPoints.map((point) => measurementToPx(point, maxHeightPx));
 
 		const currentIndex = snapPointsInPx.findIndex(
 			(point) => Math.abs(point - sheetContext.sheetHeight) < 10
 		);
+		const snapToIndex = (index: number) => {
+			const point = snapPoints[index];
+			if (point !== undefined) sheetContext.setSnapPoint(point);
+		};
 
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
 				if (currentIndex < snapPointsInPx.length - 1) {
-					sheetContext.sheetHeight = snapPointsInPx[currentIndex + 1];
+					snapToIndex(currentIndex + 1);
 				}
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
 				if (currentIndex > 0) {
-					sheetContext.sheetHeight = snapPointsInPx[currentIndex - 1];
+					snapToIndex(currentIndex - 1);
 				} else if (!sheetContext.settings.disableClosing) {
 					sheetContext.closeSheet();
 				}
 				break;
 			case 'Home':
 				event.preventDefault();
-				sheetContext.sheetHeight = snapPointsInPx[snapPointsInPx.length - 1];
+				snapToIndex(snapPointsInPx.length - 1);
 				break;
 			case 'End':
 				event.preventDefault();
-				sheetContext.sheetHeight = snapPointsInPx[0];
+				snapToIndex(0);
 				break;
 		}
 	};
@@ -66,7 +70,7 @@
 <div
 	{...rest}
 	bind:this={handleContainer}
-	class="handle-container position-{sheetContext.settings.position} {rest.class}"
+	class="handle-container position-{sheetContext.settings.position} {rest.class ?? ''}"
 	onmousemove={() => (sheetContext.isDraggingFromHandle = true)}
 	ontouchmove={() => (sheetContext.isDraggingFromHandle = true)}
 	role="slider"
@@ -74,7 +78,11 @@
 	aria-label="Sheet height control"
 	aria-valuemin="0"
 	aria-valuemax="100"
-	aria-valuenow={Math.round((1 - sheetContext.sheetHeight / window.innerHeight) * 100)}
+	aria-valuenow={Math.round(
+		sheetContext.maxHeightPx > 0
+			? (1 - sheetContext.sheetHeight / sheetContext.maxHeightPx) * 100
+			: 0
+	)}
 	onkeydown={handleKeyDown}
 >
 	{#if children}

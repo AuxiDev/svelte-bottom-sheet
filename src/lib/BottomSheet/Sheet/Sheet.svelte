@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, onDestroy, type Snippet } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import type { SheetContext, SheetIdentificationContext } from '$lib/types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -16,10 +16,11 @@
 	);
 
 	let previousActiveElement: HTMLElement | null;
-	let axisForSlide: 'x' | 'y' =
+	let axisForSlide: 'x' | 'y' = $derived(
 		sheetContext.settings.position === 'left' || sheetContext.settings.position === 'right'
 			? 'x'
-			: 'y';
+			: 'y'
+	);
 
 	if (!sheetContext) {
 		throw new Error('BottomSheet.Sheet must be inside a BottomSheet component');
@@ -36,6 +37,8 @@
 	 * Added these events so we know when you drag out of the window and release (for example taskbar)
 	 */
 	const handleMouseDown = (event: MouseEvent) => {
+		if (sheetContext.settings.disableDragging) return;
+
 		startX = event.clientX;
 		startY = event.clientY;
 		didDrag = false;
@@ -71,6 +74,14 @@
 
 		sheetContext.moveEnd();
 	};
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('mousemove', handleMouseMove, true);
+			window.removeEventListener('mouseup', handleMouseUp, true);
+			document.removeEventListener('click', handleClickOutside);
+		}
+	});
 
 	/**
 	 * Logic for closing when clicking outside the sheet
@@ -207,7 +218,7 @@
 	$effect(() => {
 		if (sheetContext.isSheetOpen) {
 			previousActiveElement = document.activeElement as HTMLElement;
-			setTimeout(() => {
+			const focusTimer = setTimeout(() => {
 				const focusableElements = getFocusableElements();
 				const autofocusedElement = focusableElements.find((element) =>
 					element.matches('[autofocus], [data-autofocus]')
@@ -221,6 +232,11 @@
 				}
 				document.addEventListener('click', handleClickOutside);
 			}, 100);
+
+			return () => {
+				clearTimeout(focusTimer);
+				document.removeEventListener('click', handleClickOutside);
+			};
 		} else {
 			document.removeEventListener('click', handleClickOutside);
 			previousActiveElement?.focus();
@@ -233,13 +249,13 @@
 	<div
 		{...rest}
 		bind:this={sheetContext.sheetElement}
-		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging &&
-			'prevent-select'} {rest.class}"
+		class="bottom-sheet position-{sheetContext.settings.position} {sheetContext.isDragging
+			? 'prevent-select'
+			: ''} {rest.class ?? ''}"
 		style="{dimensionStyle()};  {transitionStyle()}; {rest.style}"
 		role="dialog"
 		aria-modal="true"
-		aria-labelledby={sheetIdentificationContext.headingId}
-		aria-describedby={sheetIdentificationContext.descriptionId}
+		aria-label={rest['aria-label'] ?? 'Bottom sheet'}
 		id={sheetIdentificationContext.sheetId}
 		tabindex="-1"
 		aria-live="polite"
