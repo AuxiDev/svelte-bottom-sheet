@@ -18,6 +18,18 @@
 
 	const sheetContext = getSheetContext();
 
+	const positionStyles = () => {
+		switch (sheetContext.position) {
+			case 'left':
+			case 'right':
+				return '';
+			case 'bottom':
+				return {
+					'max-height': `calc(${sheetContext.maxHeight}px - ${sheetContext.translateY}px - 36px)`
+				};
+		}
+	};
+
 	let mergedProps = $derived(
 		mergeProps(
 			{
@@ -27,19 +39,18 @@
 					'overflow-y': 'auto',
 					padding: '1.25rem',
 					'overscroll-behavior-y': 'contain',
-					'touch-action': sheetContext.isDragging ? 'none' : 'pan-y',
 					'background-color': 'white',
 					'box-sizing': 'border-box',
 					flex: '1',
 					'min-height': '0',
 					height: '100%',
+					...positionStyles(),
 					// Scale down so you can still scroll to bottom
-					// Use animation to not cut off - should be the same as translate
+					// Use animation to not cut off - should be the same as transform at Sheet.svelte
 					// -> unified setting
-					'max-height': `calc(${sheetContext.maxHeight}px - ${sheetContext.translateY}px - 36px)`,
 					transition: sheetContext.isDragging
 						? 'none'
-						: 'max-height 0.3s cubic-bezier(0.215, 0.61, 0.355, 1)'
+						: `max-height ${sheetContext.sheetAnimation?.duration}ms ${sheetContext.sheetAnimation?.easing}`
 				}
 			},
 			rest,

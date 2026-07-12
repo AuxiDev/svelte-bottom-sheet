@@ -8,6 +8,7 @@
 	import { BottomSheet } from '$lib/index.js';
 	const { data }: { data: PageData } = $props();
 
+	let nested = $state(false);
 	let maxHeight = $state(0.7);
 	let darkMode = $state(false);
 	let isBasicSheetOpen = $state(false);
@@ -195,17 +196,42 @@
 				<h2>Basic Bottom Sheet</h2>
 				<div class="section-line"></div>
 			</div>
-			<BottomSheetV3.Root>
+			<BottomSheetV3.Root
+				sheetAnimation={{ duration: 300, easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)' }}
+			>
 				<BottomSheetV3.Trigger>Open Normal</BottomSheetV3.Trigger>
 				<BottomSheetV3.Overlay />
 				<BottomSheetV3.Sheet>
 					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
 					<BottomSheetV3.Content>
 						<h1>hi</h1>
+						<button onclick={() => (nested = true)}>Nested</button>
 					</BottomSheetV3.Content>
 				</BottomSheetV3.Sheet>
 			</BottomSheetV3.Root>
-			<BottomSheetV3.Root enableScrollDragTakeover={true}>
+
+			<BottomSheetV3.Root
+				sheetAnimation={{ duration: 500, easing: 'cubic-bezier(0.915, 0.61, 0.355, 1)' }}
+			>
+				<BottomSheetV3.Trigger>Snippet</BottomSheetV3.Trigger>
+				<BottomSheetV3.Overlay />
+				<BottomSheet.Sheet>
+					{#snippet child({ props })}
+						<div {...props}>
+							<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
+							<BottomSheetV3.Content>
+								<h1>hi</h1>
+								<button onclick={() => (nested = true)}>Nested</button>
+							</BottomSheetV3.Content>
+						</div>
+					{/snippet}
+				</BottomSheet.Sheet>
+			</BottomSheetV3.Root>
+
+			<BottomSheetV3.Root
+				position="left"
+				bind:isSheetOpen={nested}
+			>
 				<BottomSheetV3.Trigger>Open V3</BottomSheetV3.Trigger>
 				<BottomSheetV3.Sheet>
 					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
@@ -222,6 +248,7 @@
 					</BottomSheetV3.Content>
 				</BottomSheetV3.Sheet>
 			</BottomSheetV3.Root>
+
 			<div class="showcase-content">
 				<div class="showcase-text">
 					<p>
@@ -574,6 +601,7 @@
 
 <BottomSheet bind:isSheetOpen={isCustomRightOpen} position="right">
 	<BottomSheet.Sheet>
+		<div style="display: flex; height: 100%">
 		<BottomSheet.Handle />
 		<BottomSheet.Content>
 			<h3>Custom Position Sheet</h3>
@@ -587,34 +615,36 @@
 			</div>
 			<button class="sheet-button" onclick={() => (isCustomRightOpen = false)}>Close Sheet</button>
 		</BottomSheet.Content>
+		</div>
 	</BottomSheet.Sheet>
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomLeftOpen} position="left">
 	<BottomSheet.Sheet>
-		<BottomSheet.Handle />
-		<BottomSheet.Content>
-			<h3>Custom Position Sheet</h3>
-			<p>
-				This sheet is positioned on the left side of the screen instead of the bottom. You can also
-				position sheets at the top or right side.
-			</p>
-			<p>
-				Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim hic quisquam ex numquam veniam
-				accusamus repellendus voluptas veritatis consectetur aspernatur. Laboriosam nihil, pariatur
-				eum commodi facilis voluptas asperiores modi enim!
-			</p>
-			<div class="position-selector">
-				<h4>Try different positions:</h4>
-			</div>
-			<button class="sheet-button" onclick={() => (isCustomLeftOpen = false)}>Close Sheet</button>
-		</BottomSheet.Content>
+		<div style="display: flex; height: 100%">
+			<BottomSheet.Content>
+				<h3>Custom Position Sheet</h3>
+				<p>
+					This sheet is positioned on the left side of the screen instead of the bottom. You can
+					also position sheets at the top or right side.
+				</p>
+				<p>
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim hic quisquam ex numquam
+					veniam accusamus repellendus voluptas veritatis consectetur aspernatur. Laboriosam nihil,
+					pariatur eum commodi facilis voluptas asperiores modi enim!
+				</p>
+				<div class="position-selector">
+					<h4>Try different positions:</h4>
+				</div>
+				<button class="sheet-button" onclick={() => (isCustomLeftOpen = false)}>Close Sheet</button>
+			</BottomSheet.Content>
+			<BottomSheet.Handle />
+		</div>
 	</BottomSheet.Sheet>
 </BottomSheet>
 
 <BottomSheet bind:isSheetOpen={isCustomTopOpen} position="top">
 	<BottomSheet.Sheet>
-		<BottomSheet.Handle />
 		<BottomSheet.Content>
 			<h3>Custom Position Sheet</h3>
 			<p>
@@ -626,6 +656,7 @@
 			</div>
 			<button class="sheet-button" onclick={() => (isCustomTopOpen = false)}>Close Sheet</button>
 		</BottomSheet.Content>
+		<BottomSheet.Handle />
 	</BottomSheet.Sheet>
 </BottomSheet>
 

@@ -1,5 +1,6 @@
 import { createAttachmentKey, type Attachment } from 'svelte/attachments';
 
+let host = $state<HTMLElement | null>();
 export const PORTAL_KEY = createAttachmentKey();
 
 /**
@@ -8,7 +9,7 @@ export const PORTAL_KEY = createAttachmentKey();
 export const withPortal = () => {
 	return {
 		[PORTAL_KEY]: ((node: HTMLElement) => {
-			let host = document.getElementById('svelte-portal-host');
+			host = document.getElementById('svelte-portal-host');
 
 			if (!host) {
 				host = document.createElement('div');

@@ -6,6 +6,10 @@ import Handle from './Handle/Handle.svelte';
 import Overlay from './Overlay/Overlay.svelte';
 
 export type SheetPositions = 'bottom' | 'top' | 'left' | 'right';
+export type AnimationProps = {
+  duration?: number;
+  easing?: string;
+}
 
 export { Root, Sheet, Trigger, Content, Handle, Overlay };
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
-	import { withPortal } from '$lib/utils/portal.js';
+	import { withPortal } from '$lib/utils/portal.svelte.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
 	import { type Snippet, untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { getSheetContext } from '../context.js';
+	import { getSheetContext, isTopSheet, topSheetId } from '../context.js';
 	import { preventScroll } from '$lib/utils/preventOusideInteraction.js';
 	import { measurementToPx } from '$lib/utils/other.js';
 	import { clickOutside } from '$lib/utils/click-outside.js';
@@ -22,6 +22,7 @@
 	} & HTMLAttributes<HTMLDivElement> = $props();
 
 	const sheetContext = getSheetContext();
+	const isFrontSheet = $derived($topSheetId === sheetContext.contentId);
 
 	type GestureMode = 'idle' | 'pending' | 'scroll' | 'drag';
 
@@ -33,10 +34,14 @@
 	let gestureMode: GestureMode = 'idle';
 	let startY = 0;
 	let lastY = 0;
+	let startX = 0;
+	let lastX = 0;
+
 	let startTranslateY = 0;
 	let activeScrollTarget: HTMLElement | null = null;
 	let activeTouchId: number | null = null;
 	let stopGlobalTouchMoveBlock: (() => void) | null = null;
+	let lockedToScroll: boolean | null = false;
 
 	const isVerticallyScrollable = (element: HTMLElement) => {
 		const { overflowY } = window.getComputedStyle(element);
@@ -84,7 +89,6 @@
 
 		const atTop = scrollTop <= SCROLL_EDGE_EPSILON;
 		const atBottom = scrollHeight - elementHeight - scrollTop <= SCROLL_EDGE_EPSILON;
-
 		if (deltaY > 0) {
 			return !atTop;
 		}
@@ -238,6 +242,7 @@
 
 	const handleGlobalKeyDown = (event: KeyboardEvent) => {
 		if (sheetContext.disableClosing || sheetContext.disableEscape) return;
+		if (!isTopSheet(sheetContext.contentId)) return;
 
 		if (event.key === 'Escape') {
 			event.preventDefault();
@@ -255,7 +260,13 @@
 		};
 	});
 
-	const handleOutsideClick = () => {
+	const handleOutsideClick = (event: MouseEvent) => {
+		if (!isTopSheet(sheetContext.contentId)) return;
+
+		const target = event.target as HTMLElement | null;
+		const isInsideAnySheet = target?.closest?.('[data-bottomsheet-sheet]');
+		if (isInsideAnySheet) return;
+
 		if (sheetContext.isSheetOpen && !sheetContext.disableClosing) {
 			// Trigger close animation, ontransition end will handle unmount
 			sheetContext.translateY = sheetContext.maxHeight;
@@ -264,6 +275,7 @@
 
 	const mouseStart = (e: MouseEvent) => {
 		if (sheetContext.disableDragging) return;
+		if (sheetContext.onlyTopSheetInteractive && !isTopSheet(sheetContext.contentId)) return;
 		// Only track left click
 		if (e.button !== 0) return;
 
@@ -360,28 +372,70 @@
 
 	const touchStart = (e: TouchEvent) => {
 		if (sheetContext.disableDragging) return;
+		if (sheetContext.onlyTopSheetInteractive && !isTopSheet(sheetContext.contentId)) return;
 		if (e.touches.length === 0) return;
 
 		const activeTouch = e.touches[0];
+
 		activeTouchId = activeTouch.identifier;
 
-		switch (sheetContext.position) {
-			case 'bottom':
-			case 'top':
-				startY = activeTouch.clientY;
-				lastY = activeTouch.clientY;
-				break;
-			case 'left':
-			case 'right':
-				startY = activeTouch.clientX;
-				lastY = activeTouch.clientX;
-				break;
-		}
+		startY = activeTouch.clientY;
+		lastY = activeTouch.clientY;
+
+		startX = activeTouch.clientX;
+		lastX = activeTouch.clientX;
 
 		startTranslateY = sheetContext.translateY;
+
 		gestureMode = 'pending';
 		activeScrollTarget = null;
+
 		sheetContext.isDragging = false;
+		lockedToScroll = null;
+	};
+
+	const isScrollableInOppositeAxis = (element: HTMLElement | null) => {
+		if (!element) return false;
+
+		switch (sheetContext.position) {
+			case 'top':
+			case 'bottom':
+				return element.scrollWidth > element.clientWidth;
+
+			case 'left':
+			case 'right':
+				return element.scrollHeight > element.clientHeight;
+		}
+	};
+
+	const getSheetDragAngle = (deltaX: number, deltaY: number) => {
+		const absX = Math.abs(deltaX);
+		const absY = Math.abs(deltaY);
+
+		const sheetAxis =
+			sheetContext.position === 'left' || sheetContext.position === 'right'
+				? 'horizontal'
+				: 'vertical';
+
+		const dragDistance = sheetAxis === 'horizontal' ? absX : absY;
+
+		const crossDistance = sheetAxis === 'horizontal' ? absY : absX;
+
+		if (dragDistance === 0 && crossDistance === 0) {
+			return 90;
+		}
+
+		return Math.atan2(crossDistance, dragDistance) * (180 / Math.PI);
+	};
+
+	const isSheetAxisGesture = (deltaX: number, deltaY: number) => {
+		if (!activeScrollTarget) return null;
+		if (activeScrollTarget && !isScrollableInOppositeAxis(activeScrollTarget)) {
+			return true;
+		}
+
+		const angle = getSheetDragAngle(deltaX, deltaY);
+		return angle <= 45;
 	};
 
 	const touchMove = (e: TouchEvent) => {
@@ -393,58 +447,69 @@
 		if (!contentEl) return;
 
 		let currentActiveTouch = 0;
+		let deltaDrag = 0;
+		let stepDeltaDrag = 0;
+
+		const moveDeltaX = activeTouch.clientX - lastX;
+		const moveDeltaY = activeTouch.clientY - lastY;
+		const canTakeOver = isSheetAxisGesture(moveDeltaX, moveDeltaY);
+		if (lockedToScroll === null) lockedToScroll = !canTakeOver;
+		if (canTakeOver === null) lockedToScroll = null;
 
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'top':
 				currentActiveTouch = activeTouch.clientY;
+				deltaDrag = currentActiveTouch - startY;
+				stepDeltaDrag = currentActiveTouch - lastY;
+			    lastY = currentActiveTouch;
 				break;
+
 			case 'left':
 			case 'right':
 				currentActiveTouch = activeTouch.clientX;
+				deltaDrag = currentActiveTouch - startX;
+				stepDeltaDrag = currentActiveTouch - lastX;
+			    lastX = currentActiveTouch;
 				break;
 		}
 
-		const deltaY = currentActiveTouch - startY;
-		const stepDeltaY = currentActiveTouch - lastY;
-		lastY = currentActiveTouch;
+		lastY = activeTouch.clientY;
+		lastX = activeTouch.clientX;
+		const scrollTarget = getScrollableTarget(e.target, contentEl);
+		activeScrollTarget = scrollTarget;
 
-		if (gestureMode === 'pending' && Math.abs(deltaY) < DRAG_START_THRESHOLD) {
+		if (gestureMode === 'pending' && Math.abs(deltaDrag) < DRAG_START_THRESHOLD) {
 			return;
 		}
 
 		if (gestureMode === 'pending') {
-			const scrollTarget = getScrollableTarget(e.target, contentEl);
-
 			let startsInsideContent = e.target instanceof Node && contentEl.contains(e.target);
 
 			const shouldStartDraggingSheet =
-				!startsInsideContent || (deltaY > 0 && !canScrollForDelta(scrollTarget, deltaY));
+				!startsInsideContent ||
+				(Math.abs(deltaDrag) > 0 && !canScrollForDelta(scrollTarget, deltaDrag));
 
-			if (shouldStartDraggingSheet) {
+			if (shouldStartDraggingSheet && !lockedToScroll) {
 				startDragGesture();
 			} else {
 				gestureMode = 'scroll';
-
-				activeScrollTarget = scrollTarget;
 			}
 		}
 
 		// Scrolltakeover lets you go from scrolling to dragging
 		if (gestureMode === 'scroll' && sheetContext.enableScrollDragTakeover) {
-			let scrollTarget = activeScrollTarget ?? getScrollableTarget(e.target, contentEl);
-
-			activeScrollTarget = scrollTarget;
-
-			const shouldTakeOverForDrag = stepDeltaY > 0 && !canScrollForDelta(scrollTarget, stepDeltaY);
-
-			if (shouldTakeOverForDrag) {
+			const shouldTakeOverForDrag =
+				stepDeltaDrag > 0 && !canScrollForDelta(scrollTarget, stepDeltaDrag);
+			console.log(stepDeltaDrag )
+			if (shouldTakeOverForDrag && !lockedToScroll) {
 				startDragGesture();
 				// Trigger a rerender
 				// It is used in mergeProps, which causes it to rerender / remount removing the active scroll
 				rerenderTrigger = true;
 				rerenderTrigger = false;
 				startY = activeTouch.clientY;
+				startX = activeTouch.clientX;
 
 				startTranslateY = sheetContext.translateY;
 			}
@@ -463,11 +528,14 @@
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'right':
-				nextTranslateY = Math.max(0, Math.min(startTranslateY + deltaY, sheetContext.maxHeight));
+				nextTranslateY = Math.max(0, Math.min(startTranslateY + deltaDrag + stepDeltaDrag, sheetContext.maxHeight));
 				break;
 			case 'top':
 			case 'left':
-				nextTranslateY = -Math.min(0, Math.min(-startTranslateY + deltaY, sheetContext.maxHeight));
+				nextTranslateY = -Math.min(
+					0,
+					Math.min(-startTranslateY + deltaDrag + stepDeltaDrag, sheetContext.maxHeight)
+				);
 				break;
 		}
 
@@ -540,7 +608,8 @@
 			{
 				id: sheetContext.contentId,
 				role: 'dialog',
-				'aria-modal': 'true',
+				'aria-modal': isFrontSheet ? 'true' : 'false',
+				'aria-hidden': isFrontSheet ? 'false' : 'true',
 				'data-state': sheetContext.isSheetOpen ? 'open' : 'closed',
 				'data-position': sheetContext.position,
 				'data-bottomsheet-sheet': '',
@@ -576,7 +645,7 @@
 		ref.style.transform = transformStyle();
 		ref.style.transition = sheetContext.isDragging
 			? 'none'
-			: 'transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1)';
+			: `transform ${sheetContext.sheetAnimation?.duration}ms ${sheetContext.sheetAnimation?.easing}`;
 		ref.style.userSelect = sheetContext.isDragging ? 'none' : '';
 	});
 

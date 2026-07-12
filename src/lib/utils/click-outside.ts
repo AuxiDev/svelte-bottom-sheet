@@ -1,5 +1,5 @@
 // Check if the mouseDown happened inside the sheet, because else if you drag and release outside of the sheet it would trigger
-export const clickOutside = (node: HTMLElement, callback: () => void) => {
+export const clickOutside = (node: HTMLElement, callback: (event: MouseEvent) => void) => {
 	let startedInside = false;
 	let endedInside = false;
 
@@ -17,7 +17,7 @@ export const clickOutside = (node: HTMLElement, callback: () => void) => {
 		}
 
 		if (node && !node.contains(event.target as Node) && !event.defaultPrevented) {
-			callback();
+			callback(event);
 		}
 	};
 

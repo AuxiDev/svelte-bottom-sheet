@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import type { Snippet } from 'svelte';
-	import { setSheetContext } from './context.js';
+	import { registerOpenSheet, setSheetContext, unregisterOpenSheet } from './context.js';
 	import { measurementToPx } from '$lib/utils/other.js';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
-	import type { SheetPositions } from './index.js';
+	import type { AnimationProps, SheetPositions } from './index.js';
 
 	let {
 		onopen,
@@ -24,10 +24,19 @@
 		snapPoints = [1],
 		startingSnapPoint,
 		disableDragging = false,
+		onlyTopSheetInteractive = true,
 		position = 'bottom',
 		disableClosing = false,
 		maxDragPoint = -0.1,
 		enableScrollDragTakeover = true,
+		sheetAnimation = {
+			duration: 300,
+			easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+		},
+		overlayAnimation = {
+			duration: 300,
+			easing: 'ease-in-out',
+		},
 		child,
 		children,
 		...rest
@@ -46,6 +55,7 @@
 		snapPoints?: number[];
 		startingSnapPoint?: number;
 		disableDragging?: boolean;
+		onlyTopSheetInteractive?: boolean;
 		position?: SheetPositions;
 		disableClosing?: boolean;
 		maxDragPoint?: number;
@@ -55,7 +65,9 @@
 		disableEscape?: boolean;
 		child?: Snippet<[{ props: Record<string, any> }]>;
 		children?: Snippet<[]>;
-	} = $props();
+		sheetAnimation?: AnimationProps;
+		overlayAnimation?: AnimationProps;
+} = $props();
 
 	let maxHeightPx = $state(0);
 
@@ -75,6 +87,18 @@
 	const triggerId = `bottomsheet-trigger-${Math.random().toString(36).substring(2, 9)}`;
 
 	$effect(() => {
+		if (!isSheetOpen) {
+			unregisterOpenSheet(contentId);
+			return;
+		}
+
+		registerOpenSheet(contentId);
+		return () => {
+			unregisterOpenSheet(contentId);
+		};
+	});
+
+	$effect(() => {
 		if (maxHeight > 1) {
 			maxHeightPx = maxHeight;
 		} else {
@@ -86,11 +110,16 @@
 
 		if (isSheetOpen) {
 			onopen?.();
-			translateY = maxHeightPx - startHeight;
+			// Use animation frame so there is a split second where it's at bottom at opening before it starts to slide up
+			requestAnimationFrame(() => {
+				translateY = maxHeightPx - startHeight;
+			});
 		} else {
 			onclose?.();
 			// Reset for next time
-			translateY = maxHeightPx;
+			requestAnimationFrame(() => {
+				translateY = maxHeightPx;
+			});
 		}
 	});
 
@@ -167,6 +196,9 @@
 		get disableDragging() {
 			return disableDragging;
 		},
+		get onlyTopSheetInteractive() {
+			return onlyTopSheetInteractive;
+		},
 		get disableClosing() {
 			return disableClosing;
 		},
@@ -196,7 +228,13 @@
 		},
 		get disableFocusTrap() {
 			return disableFocusTrap;
-		}
+		},
+		get sheetAnimation() {
+			return sheetAnimation;
+		},
+		get overlayAnimation() {
+			return overlayAnimation;
+		},
 	});
 
 	const mergedProps = $derived(mergeProps(rest, {}));
