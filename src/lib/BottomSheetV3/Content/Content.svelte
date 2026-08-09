@@ -1,20 +1,10 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { ContentPropsWithChild } from '../index.js';
 	import { getSheetContext } from '../context.js';
 
-	let {
-		ref = $bindable(),
-		children,
-		child,
-		...rest
-	}: {
-		ref?: HTMLDivElement;
-		children?: Snippet<[]>;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	let { ref = $bindable(), children, child, ...rest }: ContentPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
 

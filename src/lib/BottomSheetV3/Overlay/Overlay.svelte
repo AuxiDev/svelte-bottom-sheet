@@ -1,18 +1,10 @@
 <script lang="ts">
-	import { getContext, tick, type Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
 	import { getSheetContext } from '../context.js';
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import { withPortal } from '$lib/utils/portal.svelte.js';
+	import type { OverlayPropsWithChild } from '../index.js';
 
-	let {
-		children,
-		child,
-		...rest
-	}: {
-		children?: Snippet<[]>;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	let { children, child, ...rest }: OverlayPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
 

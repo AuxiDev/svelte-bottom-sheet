@@ -5,8 +5,6 @@ import Content from './BottomSheetV3/Content/Content.svelte';
 import Handle from './BottomSheetV3/Handle/Handle.svelte';
 import Overlay from './BottomSheetV3/Overlay/Overlay.svelte';
 
-export type SheetPositions = 'bottom' | 'top' | 'left' | 'right';
-
 export { Root, Sheet, Trigger, Content, Handle, Overlay };
 
 export const BottomSheet = Root as typeof Root & {
@@ -18,6 +16,24 @@ export const BottomSheet = Root as typeof Root & {
 };
 
 export type { SheetContext } from './BottomSheetV3/context.js';
+export type {
+	AnimationProps,
+	BottomSheetProps,
+	BottomSheetPropsWithChild,
+	ContentProps,
+	ContentPropsWithChild,
+	GripProps,
+	GripPropsWithChild,
+	HandleProps,
+	HandlePropsWithChild,
+	OverlayProps,
+	OverlayPropsWithChild,
+	SheetProps,
+	SheetPropsWithChild,
+	SheetPositions,
+	TriggerProps,
+	TriggerPropsWithChild
+} from './BottomSheetV3/index.js';
 
 BottomSheet.Sheet = Sheet;
 BottomSheet.Trigger = Trigger;

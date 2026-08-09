@@ -1,22 +1,10 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
-	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { TriggerPropsWithChild } from '../index.js';
 	import { getSheetContext } from '../context.js';
 
-	let {
-		ref = $bindable(),
-		disabled,
-		child,
-		children,
-		...rest
-	}: {
-		disabled?: boolean;
-		ref?: HTMLButtonElement;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-		children?: Snippet<[]>;
-	} & HTMLButtonAttributes = $props();
+	let { ref = $bindable(), disabled, child, children, ...rest }: TriggerPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
 

@@ -21,7 +21,7 @@ export const withPortal = () => {
 
 			return () => {
 				if (node.parentNode === host) {
-					host.removeChild(node);
+					host?.removeChild(node);
 				}
 
 				if (host && host.childNodes.length === 0) {

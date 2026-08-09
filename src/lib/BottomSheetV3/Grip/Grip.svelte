@@ -1,19 +1,9 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { GripPropsWithChild } from '../index.js';
 
-	let {
-		ref = $bindable(),
-		child,
-		children,
-		...rest
-	}: {
-		ref?: HTMLDivElement | null;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-		children?: Snippet<[]>;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	let { ref = $bindable(), child, children, ...rest }: GripPropsWithChild = $props();
 
 	const mergedProps = $derived(
 		mergeProps(

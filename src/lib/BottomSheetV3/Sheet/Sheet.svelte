@@ -2,24 +2,14 @@
 	import { mergeProps } from '$lib/utils/merge-props.js';
 	import { withPortal } from '$lib/utils/portal.svelte.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
-	import { type Snippet, untrack } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
 	import { getSheetContext, isTopSheet, topSheetId } from '../context.js';
 	import { preventScroll } from '$lib/utils/preventOusideInteraction.js';
 	import { measurementToPx } from '$lib/utils/other.js';
 	import { clickOutside } from '$lib/utils/click-outside.js';
 	import { focusUtils } from '$lib/utils/focus.js';
+	import type { SheetPropsWithChild } from '../index.js';
 
-	let {
-		ref = $bindable(),
-		children,
-		child,
-		...rest
-	}: {
-		ref?: HTMLDivElement;
-		children?: Snippet<[]>;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	let { ref = $bindable(), children, child, ...rest }: SheetPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
 	const isFrontSheet = $derived($topSheetId === sheetContext.contentId);
@@ -462,7 +452,7 @@
 				currentActiveTouch = activeTouch.clientY;
 				deltaDrag = currentActiveTouch - startY;
 				stepDeltaDrag = currentActiveTouch - lastY;
-			    lastY = currentActiveTouch;
+				lastY = currentActiveTouch;
 				break;
 
 			case 'left':
@@ -470,7 +460,7 @@
 				currentActiveTouch = activeTouch.clientX;
 				deltaDrag = currentActiveTouch - startX;
 				stepDeltaDrag = currentActiveTouch - lastX;
-			    lastX = currentActiveTouch;
+				lastX = currentActiveTouch;
 				break;
 		}
 
@@ -501,7 +491,7 @@
 		if (gestureMode === 'scroll' && sheetContext.enableScrollDragTakeover) {
 			const shouldTakeOverForDrag =
 				stepDeltaDrag > 0 && !canScrollForDelta(scrollTarget, stepDeltaDrag);
-			console.log(stepDeltaDrag )
+			console.log(stepDeltaDrag);
 			if (shouldTakeOverForDrag && !lockedToScroll) {
 				startDragGesture();
 				// Trigger a rerender
@@ -528,7 +518,10 @@
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'right':
-				nextTranslateY = Math.max(0, Math.min(startTranslateY + deltaDrag + stepDeltaDrag, sheetContext.maxHeight));
+				nextTranslateY = Math.max(
+					0,
+					Math.min(startTranslateY + deltaDrag + stepDeltaDrag, sheetContext.maxHeight)
+				);
 				break;
 			case 'top':
 			case 'left':
@@ -626,7 +619,6 @@
 					display: 'flex',
 					'flex-direction': 'column',
 					'box-sizing': 'border-box',
-					'z-index': 100,
 					'overscroll-behavior': 'contain',
 					'overscroll-behavior-y': 'contain',
 					'touch-action': 'pan-y'

@@ -1,21 +1,11 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { HandlePropsWithChild } from '../index.js';
 	import { getSheetContext } from '../context.js';
 	import { withRef } from '$lib/utils/ref-attachment.js';
 	import Grip from '../Grip/Grip.svelte';
 
-	let {
-		ref,
-		child,
-		children,
-		...rest
-	}: {
-		ref?: HTMLDivElement | null;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-		children?: Snippet<[]>;
-	} & HTMLAttributes<HTMLDivElement> = $props();
+	let { ref, child, children, ...rest }: HandlePropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
 

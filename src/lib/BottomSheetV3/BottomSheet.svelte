@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { mergeProps } from '$lib/utils/merge-props.js';
-	import type { Snippet } from 'svelte';
 	import { registerOpenSheet, setSheetContext, unregisterOpenSheet } from './context.js';
 	import { measurementToPx } from '$lib/utils/other.js';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
-	import type { AnimationProps, SheetPositions } from './index.js';
+	import type { BottomSheetPropsWithChild } from './index.js';
 
 	let {
 		onopen,
@@ -31,43 +30,16 @@
 		enableScrollDragTakeover = true,
 		sheetAnimation = {
 			duration: 300,
-			easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+			easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
 		},
 		overlayAnimation = {
 			duration: 300,
-			easing: 'ease-in-out',
+			easing: 'ease-in-out'
 		},
 		child,
 		children,
 		...rest
-	}: {
-		onopen?: () => void;
-		onclose?: () => void;
-		onsheetdrag?: () => void;
-		onsheetdragstart?: () => void;
-		onsheetdragend?: () => void;
-		onsnap?: (point: number) => void;
-		isSheetOpen?: boolean;
-		closeThreshold?: number;
-		disableBackgroundInteraction?: boolean;
-		autoCloseThreshold?: number;
-		maxHeight?: number;
-		snapPoints?: number[];
-		startingSnapPoint?: number;
-		disableDragging?: boolean;
-		onlyTopSheetInteractive?: boolean;
-		position?: SheetPositions;
-		disableClosing?: boolean;
-		maxDragPoint?: number;
-		enableScrollDragTakeover?: boolean;
-		disableClickOutside?: boolean;
-		disableFocusTrap?: boolean;
-		disableEscape?: boolean;
-		child?: Snippet<[{ props: Record<string, any> }]>;
-		children?: Snippet<[]>;
-		sheetAnimation?: AnimationProps;
-		overlayAnimation?: AnimationProps;
-} = $props();
+	}: BottomSheetPropsWithChild = $props();
 
 	let maxHeightPx = $state(0);
 
@@ -234,7 +206,7 @@
 		},
 		get overlayAnimation() {
 			return overlayAnimation;
-		},
+		}
 	});
 
 	const mergedProps = $derived(mergeProps(rest, {}));

@@ -5,7 +5,7 @@
 	import { tick } from 'svelte';
 	import type { PageData } from './$types.js';
 	import * as BottomSheetV3 from '$lib/index.js';
-	import { BottomSheet } from '$lib/index.js';
+	import { BottomSheet, type AnimationProps } from '$lib/index.js';
 	const { data }: { data: PageData } = $props();
 
 	let nested = $state(false);
@@ -228,10 +228,7 @@
 				</BottomSheet.Sheet>
 			</BottomSheetV3.Root>
 
-			<BottomSheetV3.Root
-				position="left"
-				bind:isSheetOpen={nested}
-			>
+			<BottomSheetV3.Root position="left" bind:isSheetOpen={nested}>
 				<BottomSheetV3.Trigger>Open V3</BottomSheetV3.Trigger>
 				<BottomSheetV3.Sheet>
 					<BottomSheetV3.Handle style="height: 40px; background-color: red;" />
@@ -602,19 +599,20 @@
 <BottomSheet bind:isSheetOpen={isCustomRightOpen} position="right">
 	<BottomSheet.Sheet>
 		<div style="display: flex; height: 100%">
-		<BottomSheet.Handle />
-		<BottomSheet.Content>
-			<h3>Custom Position Sheet</h3>
-			<p>
-				This sheet is positioned on the right side of the screen instead of the bottom. You can also
-				position sheets at the top or left side.
-			</p>
+			<BottomSheet.Handle />
+			<BottomSheet.Content>
+				<h3>Custom Position Sheet</h3>
+				<p>
+					This sheet is positioned on the right side of the screen instead of the bottom. You can
+					also position sheets at the top or left side.
+				</p>
 
-			<div class="position-selector">
-				<h4>Try different positions:</h4>
-			</div>
-			<button class="sheet-button" onclick={() => (isCustomRightOpen = false)}>Close Sheet</button>
-		</BottomSheet.Content>
+				<div class="position-selector">
+					<h4>Try different positions:</h4>
+				</div>
+				<button class="sheet-button" onclick={() => (isCustomRightOpen = false)}>Close Sheet</button
+				>
+			</BottomSheet.Content>
 		</div>
 	</BottomSheet.Sheet>
 </BottomSheet>
@@ -775,9 +773,9 @@
 		top: 0;
 		left: 0;
 		max-width: 100%;
-		z-index: 30;
 		overflow: hidden;
 		width: 100dvw;
+
 		transition:
 			background-color 0.3s ease,
 			border-color 0.3s ease;
@@ -995,6 +993,7 @@
 		overflow: hidden;
 		box-shadow: 0 4px 15px rgba(255, 28, 142, 0.2);
 		margin: 0px auto 40px auto;
+		z-index: -1;
 	}
 
 	.star-button:hover {
