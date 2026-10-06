@@ -8,23 +8,11 @@
 
 	const sheetContext = getSheetContext();
 
-	const positionStyles = () => {
-		switch (sheetContext.position) {
-			case 'left':
-			case 'right':
-				return '';
-			case 'bottom':
-				return {
-					'max-height': `calc(${sheetContext.maxHeight}px - ${sheetContext.translateY}px - 36px)`
-				};
-		}
-	};
-
 	let mergedProps = $derived(
 		mergeProps(
 			{
 				'data-bottomsheet-content': '',
-				'data-state': sheetContext.isSheetOpen ? 'open' : 'closed',
+				'data-state': sheetContext.isPresent ? 'open' : 'closed',
 				style: {
 					'overflow-y': 'auto',
 					padding: '1.25rem',
@@ -34,7 +22,6 @@
 					flex: '1',
 					'min-height': '0',
 					height: '100%',
-					...positionStyles(),
 					// Scale down so you can still scroll to bottom
 					// Use animation to not cut off - should be the same as transform at Sheet.svelte
 					// -> unified setting

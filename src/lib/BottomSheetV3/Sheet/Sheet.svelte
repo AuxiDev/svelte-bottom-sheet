@@ -12,7 +12,9 @@
 	let { ref = $bindable(), children, child, ...rest }: SheetPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
-	const isFrontSheet = $derived($topSheetId === sheetContext.contentId);
+	const isFrontSheet = $derived(sheetContext.isSheetOpen && $topSheetId === sheetContext.contentId);
+	const isClosing = $derived(sheetContext.isPresent && !sheetContext.isSheetOpen);
+	const isAriaHidden = $derived(!isFrontSheet && !isClosing);
 
 	type GestureMode = 'idle' | 'pending' | 'scroll' | 'drag';
 
@@ -236,7 +238,7 @@
 
 		if (event.key === 'Escape') {
 			event.preventDefault();
-			sheetContext.translateY = sheetContext.maxHeight;
+			sheetContext.close();
 		}
 	};
 
@@ -259,7 +261,7 @@
 
 		if (sheetContext.isSheetOpen && !sheetContext.disableClosing) {
 			// Trigger close animation, ontransition end will handle unmount
-			sheetContext.translateY = sheetContext.maxHeight;
+			sheetContext.close();
 		}
 	};
 
@@ -557,10 +559,7 @@
 	};
 
 	const handleTransitionEnd = (e: TransitionEvent) => {
-		// When the close transition finishes, toggle it to off
-		if (e.propertyName === 'transform' && sheetContext.translateY >= sheetContext.maxHeight) {
-			sheetContext.toggleSheet();
-		}
+		sheetContext.finishExit();
 	};
 
 	const transformStyle = () => {
@@ -602,8 +601,10 @@
 				id: sheetContext.contentId,
 				role: 'dialog',
 				'aria-modal': isFrontSheet ? 'true' : 'false',
-				'aria-hidden': isFrontSheet ? 'false' : 'true',
-				'data-state': sheetContext.isSheetOpen ? 'open' : 'closed',
+
+				'aria-hidden': isAriaHidden ? 'true' : 'false',
+
+				'data-state': sheetContext.isPresent ? 'open' : 'closed',
 				'data-position': sheetContext.position,
 				'data-bottomsheet-sheet': '',
 				'data-rerender-active': rerenderTrigger ? '' : undefined,
@@ -649,7 +650,7 @@
 	});
 </script>
 
-{#if sheetContext.isSheetOpen}
+{#if sheetContext.isPresent}
 	{#if child}
 		{@render child?.({ props: mergedProps })}
 	{:else}

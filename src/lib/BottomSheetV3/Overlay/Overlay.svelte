@@ -49,7 +49,7 @@
 	);
 </script>
 
-{#if sheetContext.isSheetOpen}
+{#if sheetContext.isPresent}
 	{#if child}
 		{@render child({ props: mergedProps })}
 	{:else}

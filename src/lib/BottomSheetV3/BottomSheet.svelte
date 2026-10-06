@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mergeProps } from '$lib/utils/merge-props.js';
+	import { untrack } from 'svelte';
 	import { registerOpenSheet, setSheetContext, unregisterOpenSheet } from './context.js';
 	import { measurementToPx } from '$lib/utils/other.js';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
@@ -41,11 +41,19 @@
 		...rest
 	}: BottomSheetPropsWithChild = $props();
 
-	let maxHeightPx = $state(0);
+	const maxHeightPx = $derived.by(() => {
+		if (maxHeight > 1) return maxHeight;
+		const isSidePosition = position === 'left' || position === 'right';
+		const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
+		return dimension * maxHeight;
+	});
 
 	let contentElement: HTMLDivElement | null = $state(null);
-	let translateY = $state(0);
 	let isDragging = $state(false);
+	let translateY = $state(0);
+
+	// isPresent is used to keep the sheet in the DOM until the exit animation is done, so that it can animate out.
+	let isPresent = $state(untrack(() => isSheetOpen));
 
 	const startHeight = $derived(
 		startingSnapPoint ? measurementToPx(startingSnapPoint, maxHeightPx) : maxHeightPx
@@ -70,29 +78,22 @@
 		};
 	});
 
-	$effect(() => {
-		if (maxHeight > 1) {
-			maxHeightPx = maxHeight;
-		} else {
-			const isSidePosition = position === 'left' || position === 'right';
-			const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
+	$effect.pre(() => {
+		const open = isSheetOpen;
 
-			maxHeightPx = dimension * maxHeight;
-		}
+		untrack(() => {
+			if (open) {
+				isPresent = true;
 
-		if (isSheetOpen) {
-			onopen?.();
-			// Use animation frame so there is a split second where it's at bottom at opening before it starts to slide up
-			requestAnimationFrame(() => {
-				translateY = maxHeightPx - startHeight;
-			});
-		} else {
-			onclose?.();
-			// Reset for next time
-			requestAnimationFrame(() => {
 				translateY = maxHeightPx;
-			});
-		}
+				requestAnimationFrame(() => {
+					translateY = maxHeightPx - startHeight;
+				});
+			} else {
+				// Triggers the exit animation, and then finishExit() will be called on transitionend to set isPresent to false.
+				translateY = maxHeightPx;
+			}
+		});
 	});
 
 	/**
@@ -123,8 +124,19 @@
 		get isSheetOpen() {
 			return isSheetOpen;
 		},
+		get isPresent() {
+			return isPresent;
+		},
 		toggleSheet: () => {
 			isSheetOpen = !isSheetOpen;
+		},
+		close: () => {
+			isSheetOpen = false;
+		},
+		finishExit: () => {
+			if (!isSheetOpen) {
+				isPresent = false;
+			}
 		},
 		get contentElement() {
 			return contentElement;
@@ -208,8 +220,6 @@
 			return overlayAnimation;
 		}
 	});
-
-	const mergedProps = $derived(mergeProps(rest, {}));
 </script>
 
 {@render children?.()}

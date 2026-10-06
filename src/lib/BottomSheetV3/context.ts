@@ -28,9 +28,12 @@ export interface SheetContext {
 	contentId: string;
 	triggerId: string;
 	disableFocusTrap: boolean;
-  disableEscape: boolean;
+	disableEscape: boolean;
 	sheetAnimation?: AnimationProps;
 	overlayAnimation?: AnimationProps;
+	isPresent: boolean;
+	close: () => void;
+	finishExit: () => void;
 }
 
 export const [getSheetContext, setSheetContext] = createContext<SheetContext>();

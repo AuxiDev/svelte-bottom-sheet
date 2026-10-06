@@ -1,6 +1,6 @@
 import { createAttachmentKey, type Attachment } from 'svelte/attachments';
 
-let host = $state<HTMLElement | null>();
+let host: HTMLElement | null = null;
 export const PORTAL_KEY = createAttachmentKey();
 
 /**
@@ -23,7 +23,6 @@ export const withPortal = () => {
 				if (node.parentNode === host) {
 					host?.removeChild(node);
 				}
-
 				if (host && host.childNodes.length === 0) {
 					host.remove();
 				}
