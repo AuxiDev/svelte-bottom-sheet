@@ -1,20 +1,17 @@
 <script lang="ts">
-	import { mergeProps } from '$lib/utils/merge-props.js';
-	import { withPortal } from '$lib/utils/portal.svelte.js';
-	import { withRef } from '$lib/utils/ref-attachment.js';
+	import { mergeProps } from '#lib/utils/merge-props.js';
+	import { withPortal } from '#lib/utils/portal.svelte.js';
+	import { withRef } from '#lib/utils/ref-attachment.js';
 	import { getSheetContext, isTopSheet, topSheetId } from '../context.js';
-	import { preventScroll } from '$lib/utils/preventOusideInteraction.js';
-	import { measurementToPx } from '$lib/utils/other.js';
-	import { clickOutside } from '$lib/utils/click-outside.js';
-	import { focusUtils } from '$lib/utils/focus.js';
+	import { preventScroll } from '#lib/utils/preventOusideInteraction.js';
+	import { measurementToPx } from '#lib/utils/other.js';
+	import { clickOutside } from '#lib/utils/click-outside.js';
+	import { focusUtils } from '#lib/utils/focus.js';
 	import type { SheetPropsWithChild } from '../index.js';
 
 	let { ref = $bindable(), children, child, ...rest }: SheetPropsWithChild = $props();
 
 	const sheetContext = getSheetContext();
-	const isFrontSheet = $derived(sheetContext.isSheetOpen && $topSheetId === sheetContext.contentId);
-	const isClosing = $derived(sheetContext.isPresent && !sheetContext.isSheetOpen);
-	const isAriaHidden = $derived(!isFrontSheet && !isClosing);
 
 	type GestureMode = 'idle' | 'pending' | 'scroll' | 'drag';
 
@@ -138,7 +135,7 @@
 
 			if (sheetContext.snapPoints.length > 0) {
 				const snapPoints = sheetContext.snapPoints;
-				// Close if we are below the lowest snappoint
+
 				const lowestSnappoint = Math.min(...snapPoints);
 
 				if (currentHeight < lowestSnappoint && !sheetContext.disableClosing) {
@@ -205,6 +202,7 @@
 	$effect(() => {
 		let unblock: () => void;
 		let trapCleanup: () => void;
+
 		if (ref) {
 			if (!sheetContext.disableFocusTrap) {
 				focusUtils
@@ -216,8 +214,10 @@
 						trapCleanup = cleanup;
 					});
 			}
+
 			ref.addEventListener('touchmove', touchMove, { passive: false });
 			document.addEventListener('keydown', handleGlobalKeyDown);
+
 			if (sheetContext.disableBackgroundInteraction) {
 				unblock = preventScroll(ref);
 			}
@@ -247,6 +247,7 @@
 		if (!ref) return;
 
 		const { destroy } = clickOutside(ref, handleOutsideClick);
+
 		return () => {
 			destroy();
 		};
@@ -257,6 +258,7 @@
 
 		const target = event.target as HTMLElement | null;
 		const isInsideAnySheet = target?.closest?.('[data-bottomsheet-sheet]');
+
 		if (isInsideAnySheet) return;
 
 		if (sheetContext.isSheetOpen && !sheetContext.disableClosing) {
@@ -265,8 +267,13 @@
 		}
 	};
 
+	const isSheetNoDragTarget = (target: EventTarget | null) => {
+		return target instanceof Element && target.closest('[data-sheet-nodrag]') !== null;
+	};
+
 	const mouseStart = (e: MouseEvent) => {
 		if (sheetContext.disableDragging) return;
+		if (isSheetNoDragTarget(e.target)) return;
 		if (sheetContext.onlyTopSheetInteractive && !isTopSheet(sheetContext.contentId)) return;
 		// Only track left click
 		if (e.button !== 0) return;
@@ -298,6 +305,7 @@
 		if (!contentEl) return;
 
 		let currentActiveMouse = 0;
+
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'top':
@@ -310,7 +318,6 @@
 		}
 
 		const deltaY = currentActiveMouse - startY;
-		const stepDeltaY = currentActiveMouse - lastY;
 		lastY = currentActiveMouse;
 
 		if (gestureMode === 'pending' && Math.abs(deltaY) < DRAG_START_THRESHOLD) {
@@ -329,6 +336,7 @@
 		e.stopPropagation();
 
 		let nextTranslateY = 0;
+
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'right':
@@ -341,10 +349,13 @@
 		}
 
 		const currentHeight = sheetContext.maxHeight - nextTranslateY;
+
 		if (currentHeight < sheetContext.autoCloseTreshold && !sheetContext.disableClosing) {
 			sheetContext.translateY = sheetContext.maxHeight;
+
 			window.removeEventListener('mousemove', mouseMove);
 			window.removeEventListener('mouseup', mouseEnd);
+
 			cleanUpStates();
 			return;
 		}
@@ -352,6 +363,7 @@
 		if (currentHeight < sheetContext.maxDragPoint) {
 			nextTranslateY = sheetContext.maxHeight - sheetContext.maxDragPoint;
 		}
+
 		sheetContext.onSheetDrag();
 		sheetContext.translateY = nextTranslateY;
 	};
@@ -364,6 +376,7 @@
 
 	const touchStart = (e: TouchEvent) => {
 		if (sheetContext.disableDragging) return;
+		if (isSheetNoDragTarget(e.target)) return;
 		if (sheetContext.onlyTopSheetInteractive && !isTopSheet(sheetContext.contentId)) return;
 		if (e.touches.length === 0) return;
 
@@ -410,7 +423,6 @@
 				: 'vertical';
 
 		const dragDistance = sheetAxis === 'horizontal' ? absX : absY;
-
 		const crossDistance = sheetAxis === 'horizontal' ? absY : absX;
 
 		if (dragDistance === 0 && crossDistance === 0) {
@@ -422,12 +434,12 @@
 
 	const isSheetAxisGesture = (deltaX: number, deltaY: number) => {
 		if (!activeScrollTarget) return null;
-		if (activeScrollTarget && !isScrollableInOppositeAxis(activeScrollTarget)) {
-			return true;
+
+		if (getSheetDragAngle(deltaX, deltaY) > 45) {
+			return false;
 		}
 
-		const angle = getSheetDragAngle(deltaX, deltaY);
-		return angle <= 45;
+		return !isScrollableInOppositeAxis(activeScrollTarget);
 	};
 
 	const touchMove = (e: TouchEvent) => {
@@ -435,7 +447,6 @@
 		if (!activeTouch) return;
 
 		const contentEl = sheetContext.contentElement;
-
 		if (!contentEl) return;
 
 		let currentActiveTouch = 0;
@@ -445,6 +456,7 @@
 		const moveDeltaX = activeTouch.clientX - lastX;
 		const moveDeltaY = activeTouch.clientY - lastY;
 		const canTakeOver = isSheetAxisGesture(moveDeltaX, moveDeltaY);
+
 		if (lockedToScroll === null) lockedToScroll = !canTakeOver;
 		if (canTakeOver === null) lockedToScroll = null;
 
@@ -468,6 +480,7 @@
 
 		lastY = activeTouch.clientY;
 		lastX = activeTouch.clientX;
+
 		const scrollTarget = getScrollableTarget(e.target, contentEl);
 		activeScrollTarget = scrollTarget;
 
@@ -476,7 +489,7 @@
 		}
 
 		if (gestureMode === 'pending') {
-			let startsInsideContent = e.target instanceof Node && contentEl.contains(e.target);
+			const startsInsideContent = e.target instanceof Node && contentEl.contains(e.target);
 
 			const shouldStartDraggingSheet =
 				!startsInsideContent ||
@@ -493,7 +506,7 @@
 		if (gestureMode === 'scroll' && sheetContext.enableScrollDragTakeover) {
 			const shouldTakeOverForDrag =
 				stepDeltaDrag > 0 && !canScrollForDelta(scrollTarget, stepDeltaDrag);
-			console.log(stepDeltaDrag);
+
 			if (shouldTakeOverForDrag && !lockedToScroll) {
 				startDragGesture();
 				// Trigger a rerender
@@ -514,9 +527,10 @@
 		if (e.cancelable) {
 			e.preventDefault();
 		}
-		e.stopPropagation();
 
+		e.stopPropagation();
 		let nextTranslateY = 0;
+
 		switch (sheetContext.position) {
 			case 'bottom':
 			case 'right':
@@ -546,6 +560,7 @@
 		if (currentHeight < sheetContext.maxDragPoint) {
 			nextTranslateY = sheetContext.maxHeight - sheetContext.maxDragPoint;
 		}
+
 		sheetContext.onSheetDrag();
 		sheetContext.translateY = nextTranslateY;
 	};
@@ -559,6 +574,10 @@
 	};
 
 	const handleTransitionEnd = (e: TransitionEvent) => {
+		// Fallback: when closing through drag or other sorts with sheetContext.maxHeight turn sheet isSheetOpen to false
+		if (sheetContext.isSheetOpen && sheetContext.maxHeight === sheetContext.translateY) {
+			sheetContext.toggleSheet();
+		}
 		sheetContext.finishExit();
 	};
 
@@ -576,21 +595,41 @@
 	};
 
 	const positionStyle = () => {
+		const widthHeightValue = sheetContext.fitContent ? 'fit-content' : '100%';
 		switch (sheetContext.position) {
 			case 'bottom':
-				return { left: 0, bottom: 0, right: 0, height: `${sheetContext.maxHeight}px` };
+				return {
+					left: 0,
+					bottom: 0,
+					right: 0,
+					height: widthHeightValue,
+					maxHeight: `${sheetContext.maxHeight}px`
+				};
 			case 'top':
-				return { top: 0, left: 0, right: 0, height: `${sheetContext.maxHeight}px` };
+				return {
+					top: 0,
+					left: 0,
+					right: 0,
+					height: widthHeightValue,
+					maxHeight: `${sheetContext.maxHeight}px`
+				};
 			case 'left': {
 				return {
 					top: 0,
 					left: 0,
-					width: `${sheetContext.maxHeight}px`,
+					width: widthHeightValue,
+					maxWidth: `${sheetContext.maxHeight}px`,
 					height: `100%`
 				};
 			}
 			case 'right': {
-				return { top: 0, right: 0, width: `${sheetContext.maxHeight}px`, height: `100%` };
+				return {
+					top: 0,
+					right: 0,
+					width: widthHeightValue,
+					maxWidth: `${sheetContext.maxHeight}px`,
+					height: `100%`
+				};
 			}
 		}
 	};
@@ -600,10 +639,6 @@
 			{
 				id: sheetContext.contentId,
 				role: 'dialog',
-				'aria-modal': isFrontSheet ? 'true' : 'false',
-
-				'aria-hidden': isAriaHidden ? 'true' : 'false',
-
 				'data-state': sheetContext.isPresent ? 'open' : 'closed',
 				'data-position': sheetContext.position,
 				'data-bottomsheet-sheet': '',

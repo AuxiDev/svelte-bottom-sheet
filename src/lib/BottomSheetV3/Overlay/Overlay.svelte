@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getSheetContext } from '../context.js';
-	import { mergeProps } from '$lib/utils/merge-props.js';
-	import { withPortal } from '$lib/utils/portal.svelte.js';
+	import { mergeProps } from '#lib/utils/merge-props.js';
+	import { withPortal } from '#lib/utils/portal.svelte.js';
 	import type { OverlayPropsWithChild } from '../index.js';
 
 	let { children, child, ...rest }: OverlayPropsWithChild = $props();

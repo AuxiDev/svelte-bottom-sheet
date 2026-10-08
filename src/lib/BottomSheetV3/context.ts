@@ -34,6 +34,7 @@ export interface SheetContext {
 	isPresent: boolean;
 	close: () => void;
 	finishExit: () => void;
+	fitContent: boolean;
 }
 
 export const [getSheetContext, setSheetContext] = createContext<SheetContext>();

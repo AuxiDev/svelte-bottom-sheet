@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	//import BottomSheet from '$lib/BottomSheet/index.js';
+	//import BottomSheet from '#lib/BottomSheet/index.js';
 	import { tick } from 'svelte';
 	import type { PageData } from './$types.js';
-	import * as BottomSheetV3 from '$lib/index.js';
-	import { BottomSheet, type AnimationProps } from '$lib/index.js';
+	import * as BottomSheetV3 from '#lib/index.js';
+	import { BottomSheet, type AnimationProps } from '#lib/index.js';
 	const { data }: { data: PageData } = $props();
 
 	let nested = $state(false);
@@ -197,6 +197,7 @@
 				<div class="section-line"></div>
 			</div>
 			<BottomSheetV3.Root
+				maxHeight={1}
 				sheetAnimation={{ duration: 300, easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)' }}
 			>
 				<BottomSheetV3.Trigger>Open Normal</BottomSheetV3.Trigger>
@@ -673,7 +674,7 @@
 				This sheet provides a log of every interaction, including when the sheet is opened and
 				closed. You can use this feature to track how users are engaging with the sheet.
 			</p>
-			<div class="event-log">
+			<div class="event-log" data-sheet-nodrag>
 				<h4>Event Log:</h4>
 				{#each eventLog as event}
 					<p transition:fly={{ y: 20, duration: 300 }}>{event}</p>

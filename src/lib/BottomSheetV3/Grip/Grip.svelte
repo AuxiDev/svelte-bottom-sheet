@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { mergeProps } from '$lib/utils/merge-props.js';
-	import { withRef } from '$lib/utils/ref-attachment.js';
+	import { mergeProps } from '#lib/utils/merge-props.js';
+	import { withRef } from '#lib/utils/ref-attachment.js';
 	import type { GripPropsWithChild } from '../index.js';
 
 	let { ref = $bindable(), child, children, ...rest }: GripPropsWithChild = $props();

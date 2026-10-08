@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { registerOpenSheet, setSheetContext, unregisterOpenSheet } from './context.js';
-	import { measurementToPx } from '$lib/utils/other.js';
+	import { measurementToPx } from '#lib/utils/other.js';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
 	import type { BottomSheetPropsWithChild } from './index.js';
 
@@ -28,6 +28,7 @@
 		disableClosing = false,
 		maxDragPoint = -0.1,
 		enableScrollDragTakeover = true,
+		fitContent = false,
 		sheetAnimation = {
 			duration: 300,
 			easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
@@ -41,12 +42,7 @@
 		...rest
 	}: BottomSheetPropsWithChild = $props();
 
-	const maxHeightPx = $derived.by(() => {
-		if (maxHeight > 1) return maxHeight;
-		const isSidePosition = position === 'left' || position === 'right';
-		const dimension = isSidePosition ? (innerWidth.current ?? 0) : (innerHeight.current ?? 0);
-		return dimension * maxHeight;
-	});
+	let maxHeightPx = $state(0);
 
 	let contentElement: HTMLDivElement | null = $state(null);
 	let isDragging = $state(false);
@@ -83,14 +79,21 @@
 
 		untrack(() => {
 			if (open) {
+				maxHeightPx =
+					maxHeight > 1
+						? maxHeight
+						: (position === 'left' || position === 'right'
+								? (innerWidth.current ?? 0)
+								: (innerHeight.current ?? 0)) * maxHeight;
+
 				isPresent = true;
 
 				translateY = maxHeightPx;
+
 				requestAnimationFrame(() => {
 					translateY = maxHeightPx - startHeight;
 				});
 			} else {
-				// Triggers the exit animation, and then finishExit() will be called on transitionend to set isPresent to false.
 				translateY = maxHeightPx;
 			}
 		});
@@ -218,6 +221,9 @@
 		},
 		get overlayAnimation() {
 			return overlayAnimation;
+		},
+		get fitContent() {
+			return fitContent;
 		}
 	});
 </script>

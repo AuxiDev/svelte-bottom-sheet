@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { mergeProps } from '$lib/utils/merge-props.js';
+	import { mergeProps } from '#lib/utils/merge-props.js';
 	import type { HandlePropsWithChild } from '../index.js';
 	import { getSheetContext } from '../context.js';
-	import { withRef } from '$lib/utils/ref-attachment.js';
+	import { withRef } from '#lib/utils/ref-attachment.js';
 	import Grip from '../Grip/Grip.svelte';
 
 	let { ref, child, children, ...rest }: HandlePropsWithChild = $props();

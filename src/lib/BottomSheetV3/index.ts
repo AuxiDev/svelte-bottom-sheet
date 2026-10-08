@@ -37,6 +37,7 @@ export type BottomSheetProps = {
 	children?: Snippet<[]>;
 	sheetAnimation?: AnimationProps;
 	overlayAnimation?: AnimationProps;
+	fitContent?: boolean;
 };
 
 export type BottomSheetPropsWithChild = WithChild<BottomSheetProps>;

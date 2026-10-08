@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { GITHUB_TOKEN } from '$env/static/private';
+import { GITHUB_TOKEN } from '$app/env/private';
 
 const CACHE_TTL = 20 * 1000;
 let cachedData: { stars: number; timestamp: number } | null = null;
