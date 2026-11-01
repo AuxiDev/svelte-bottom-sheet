@@ -7,7 +7,7 @@
 		Open left sheet
 	</BottomSheet.Trigger>
 
-	<BottomSheet.Sheet class="flex-row! rounded-r-2xl bg-white shadow-sheet-top">
+	<BottomSheet.Sheet class="h-full rounded-r-2xl bg-white shadow-sheet-top">
 		<BottomSheet.Content class="flex justify-center py-6 pb-6">
 			<div class="prose prose-sm max-w-125">
 				<h2>Make room for more</h2>

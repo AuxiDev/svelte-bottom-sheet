@@ -7,7 +7,7 @@
 		Discover right sheet
 	</BottomSheet.Trigger>
 
-	<BottomSheet.Sheet class="flex-row! rounded-l-2xl bg-white shadow-sheet-top">
+	<BottomSheet.Sheet class="h-full rounded-l-2xl bg-white shadow-sheet-top">
 		<BottomSheet.Handle class="flex items-center px-3">
 			<span class="h-12 w-1 rounded-full bg-gray-200"></span>
 		</BottomSheet.Handle>
