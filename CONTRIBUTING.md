@@ -10,7 +10,7 @@ Thank you for considering contributing to **Svelte Bottom Sheet**! Your help is 
 2. **Clone Your Fork**
    ```bash
    git clone https://github.com/YOUR_USERNAME/svelte-bottom-sheet.git
-   cd svelte-bottom-sheet
+   cd svelte-bottom-sheet/package
    ```
 3. **Install Dependencies**  
    Ensure you have Node.js installed, then run:
@@ -22,9 +22,12 @@ Thank you for considering contributing to **Svelte Bottom Sheet**! Your help is 
 4. **Run local develeopment server**  
    Start a local development server:
 
-   ```bash
-   npm run dev
-   ```
+Depending if you want to work on the documentation or package go into the correct directory.
+
+```bash
+cd package
+npm run dev
+```
 
 ## How to Contribute
 
